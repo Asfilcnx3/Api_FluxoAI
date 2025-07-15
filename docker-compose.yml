@@ -1,0 +1,9 @@
+services:
+  fastapi:
+    image: image-fastapi
+    build: .
+    container_name: fastapi-fluxo
+    ports: 
+      - "8000:8000"
+    volumes:
+      - ./:/app
