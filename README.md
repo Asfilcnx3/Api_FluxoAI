@@ -3,6 +3,12 @@
 
 Arquitectura y código de la API usada en el proyecto de Fluxo para el análisis de texto que viene de PDF's no escaneados.
 
+## Actualización 7-16
+
+Esta actualización permite que la API tenga una busqueda más robusta, siguiendo los requerimientos que se dieron previamente.
+
+Tambien permite la posibilidad de que haya "palabras comunes" que se van a buscar de misma forma que las especificas.
+
 ## Referencias de la API
 
 #### Home
