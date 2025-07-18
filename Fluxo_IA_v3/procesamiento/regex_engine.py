@@ -80,7 +80,7 @@ def procesar_regex_generico(banco: str, texto:str) -> Dict[str, Any]:
 
     resultados = {"banco": banco}
 
-    # Extraemos las coinsidencias únicas
+    # Extraemos las coincidencias únicas
     resultados["rfc"] = extraer_unico(datos_crudos, "rfc")
     resultados["nombre_cliente"] = extraer_unico(datos_crudos, "nombre_cliente")
     resultados["clabe_inter"] = extraer_unico(datos_crudos, "clabe_inter")
