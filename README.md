@@ -9,6 +9,10 @@ Esta actualización permite que la API tenga una busqueda más robusta, siguiend
 
 Tambien permite la posibilidad de que haya "palabras comunes" que se van a buscar de misma forma que las especificas.
 
+## Actualización 7-17
+
+Esta actualización permite que la API tenga una busqueda del RFC, Cuenta Clabe y Nombre del negocio o dueño, siguiendo los requerimientos que se dieron previamente.
+
 ## Referencias de la API
 
 #### Home
