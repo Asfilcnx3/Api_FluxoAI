@@ -61,6 +61,9 @@ def construir_regex_descripcion(banco_id: str):
 # Mejoramos el diccionario de expresiones
 EXPRESIONES_REGEX = {
     "BanBajío": {
+        "nombre_cliente": r"(.*?)\s+banco del bajio",
+        "clabe_inter": r"clabe interbancaria1\s+(\d{18})\s+gat",
+        "rfc": r"r\.f\.c\.\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo:\s*(\d{1,2} de [a-z]+)\s+al\s+(\d{1,2} de [a-z]+)\s+de\s+(\d{4})',
         "descripcion": (
             r"(\d{1,2} [a-z]{3})\s*"  # Grupo 1: Fecha (ej: "15 jul")
@@ -74,6 +77,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r"del periodo en el año\s*\n\$\s*([\d,]+\.\d{2})",
     },
     "Banorte": {
+        "nombre_cliente": r"estado de cuenta / enlace negocios (?:avanzada|basica)\s*\n\s*(.*)",
+        "clabe_inter": r"(\d{3}\s+\d{3}\s+\d{11}\s+\d{1})",
+        "rfc": r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo del\s*(\d{2}/[a-z]+/\d{4})\s+al\s+(\d{2}/[a-z]+/\d{4})',
         "descripcion": (
             r"(\d{2}-[a-z]{3}-\d{2})\s*" # Grupo 1: Fecha ("ej: ")
@@ -82,15 +88,12 @@ EXPRESIONES_REGEX = {
         ), # r'(\d{2}-[a-z]{3}-\d{2})([a-zA-Z][a-zA-Z ]*?)\s+(\d{8}[cd])\s+([\d,]+\.\d{2})',
         "descripcion_clip_multilinea": (
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2}).*?\n(?:.*\n){1}.*?ganancias clip(?:.*\n){1}.*))'
-        #   r'(((\d{2}-[a-z]{3}-\d{2}).*?spei recibido.*?([\d,]+\.\d{2}).*?\n(?:.*\n){1}.*?ganancias clip(?:.*\n){1}.*))'
         ),
         "descripcion_clip_traspaso": (
             r'(\d{2}-[a-z]{3}-\d{2}).*?((traspaso de cta.*?([\d,]+\.\d{2}).*\n.*?clip.*))'
-        #   r'(((\d{2}-[a-z]{3}-\d{2}).*?traspaso de cta.*?([\d,]+\.\d{2}).*\n.*?clip.*))'
         ),
         "descripcion_amex_multilinea": (
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
-        #   r'(((\d{2}-[a-z]{3}-\d{2}).*?spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
         ),
         "comisiones": r"total de comisiones cobradas / pagadas\s*\$\s*([\d,]+\.\d{2})",
         "depositos": r"total de depósitos\s*\$\s*([\d,]+\.\d{2})",
@@ -98,6 +101,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r"en el periodo.*:\s*\$\s*([\d,]+\.\d{2})",
     },
     "Afirme": {
+        "nombre_cliente": r"fecha de emision\s+(.*?)\s+\d{20}\s+\d{4}-\d{2}-\d{2}",
+        "clabe_inter": r"se indica:?\s+(\d{18})\s+clave bancaria",
+        "rfc": r"r\.f\.c\.\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo\s+de\s+(\d{2}[a-z]{3}\d{4})\s*al\s*(\d{2}[a-z]{3}\d{4})',
         "descripcion": (
             r"(\d{2})" # Grupo 1: Fecha
@@ -110,7 +116,11 @@ EXPRESIONES_REGEX = {
         "cargos": r'retiros\s+\$\s*([\d,]+\.\d{2})',
         "saldo_promedio": r'saldo promedio diario\s+\$\s*([\d,]+\.\d{2})',
     },
+    # Es documento escaneado
     "Hsbc": {
+        "nombre_cliente": r"\n\s*€.*?\n\s*([\w\s.,&áéíóúüñÁÉÍÓÚÜÑ\-]+s\.?a\.? de c\.?v\.?)\s*\n\s*-?\d{2}",
+        "clabe_inter": r"(\d{18})\s+>\s+saldo final",
+        "rfc": r"rfc.*?\n\s*([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3}).*?d[ií]as transcurridos",
         "periodo": r'per[ií]odo del (\d{2}/\d{2}/\d{4}) al (\d{2}/\d{2}/\d{4})',
         "descripcion": (
             r"(\d{2})\.?\s*" # Grupo 1: Fecha
@@ -123,7 +133,11 @@ EXPRESIONES_REGEX = {
         "cargos": r'retiros/cargos \$ ([\d,]+\.\d{2})',
         "saldo_promedio": r'referencia/\s*\n(?:.*\n){3}\s*\$\s*([\d,]+\.\d{2})',
     },
+    # Es multilinea -- Pendiente
     "Mifel": {
+        "nombre_cliente": r"p[áa]gina\s+\{c:p\}\s+de\s+\{t:p\}\s*\n\s*.*?\s*\n\s*(.*?)\s+n[úu]mero de cliente",
+        "clabe_inter": r"clabe\s+(\d{18})",
+        "rfc": r"rfc\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo del (\d{2}/\d{2}/\d{4}) al (\d{2}/\d{2}/\d{4})',
         "descripcion": (
             r"(\d{2}/\d{2}/\d{4})\s*" # Grupo 1: Fecha
@@ -137,7 +151,11 @@ EXPRESIONES_REGEX = {
         "cargos": r'otros retiros\s+\$?([\d,]+(?:\.\d{2})?)',
         "saldo_promedio": r'saldo promedio diario\s+([\d,]+\.\d{2})',
     },
+    # Scotiabank tiene un formato diferente -- multilinea pendiente
     "Scotiabank": {
+        "nombre_cliente": r"(?:estado\s+de\s+cuenta|estadodecuenta).*\n(.*)",
+        "clabe_inter": r"clabe\s+(\d{18})",
+        "rfc": r"r\.f\.c\.cliente\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo\s+(\d{2}-[a-z]{3}-\d{2})/(\d{2}-[a-z]{3}-\d{2})',
         "descripcion": (
             r"(\d{2}\s+[a-z]{3})\s*" # Grupo 1: Fecha que estamos buscando
@@ -151,6 +169,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r'sdo\.?\s*prom\.\s*\(1\)\s*de la cta\. diciembre\s*\$([\d,]+\.\d{2})',
     },
     "Banregio": {
+        "nombre_cliente": r"\*\d{15,}\*\s*\n\s*(.+)",
+        "clabe_inter": r"clabe\s+(\d{18})",
+        "rfc": r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'del\s+(\d{2})\s+al\s+(\d{2})\s+de\s+([a-z]+)\s+(\d{4})',
         "descripcion": (
             r"(\d{2})" # Grupo 1: Fecha
@@ -163,7 +184,11 @@ EXPRESIONES_REGEX = {
         # banregio no tiene saldo promedio
         "saldo_promedio": r'sdo\.?\s*prom\.\s*\(1\)\s*de la cta\. diciembre\s*\$([\d,]+\.\d{2})',
     },
+    # Santander es documento escaneado
     "Santander": {
+        "nombre_cliente": r"grupofinancierosantander.*\n\s*(.*?)\s+codigo de cliente",
+        "clabe_inter": r"cuenta clabe:\s+(\d{18})",
+        "rfc": r"r\.f\.c\.\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo del (\d{2}-[a-z]{3}-\d{4}) al (\d{2}-[a-z]{3}-\d{4})',
         "descripcion": (
             r"(\d{2}-[a-z]{3}-\d{4})\s*" # Grupo 1: Fecha
@@ -178,6 +203,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r'saldo promedio\s*\$?([\d,]+\.\d{2})',
     },
     "BBVA": {
+        "nombre_cliente": r"no\. de cliente.*\n\s*(.*?)\s*\n.*?r\.f\.c",
+        "clabe_inter": r"cuenta clabe\s+(\d{18})",
+        "rfc": r"r\.f\.c\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo del (\d{2}/\d{2}/\d{4}) al (\d{2}/\d{2}/\d{4})',
         "descripcion": (
             r"(\d{2}/[a-z]{3})\s*\d{2}/[a-z]{3}" # Grupo 1: Fecha
@@ -191,6 +219,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r'saldo promedio\s+([\d,]+\.\d{2})',
     },
     "Multiva": {
+        "nombre_cliente": r"comprobante fiscal\s+([\w\s.,&áéíóúüñÁÉÍÓÚÜÑ\-]+?)\s+fecha de expedici[oó]n",
+        "clabe_inter": r"clabe\s+(\d{18})",
+        "rfc": r"rfc\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r'per[ií]odo del:\s*(\d{2}-[a-z]+-\d{4})\s+al\s+(\d{2}-[a-z]+-\d{4})',
         # Multiva no tiene conceptos claros aún
         "descripcion": r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito)\s+([\d,]+\.\d{2})\s*\n(\d{9})',
@@ -200,6 +231,9 @@ EXPRESIONES_REGEX = {
         "saldo_promedio": r'saldo promedio\s+([\d,]+\.\d{2})',
     },
     "Banamex": {
+        "nombre_cliente": r"cuenta priority\s+([\w\s.,&áéíóúüñÁÉÍÓÚÜÑ\-]+?)\s+detalle",
+        "clabe_inter": r"clabe interbancaria\s+(\d{18})",
+        "rfc": r"rfc\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})",
         "periodo": r"per[ií]odo del (\d{1,2}) al (\d{1,2}) de ([a-z]+) del (\d{4})",
         "descripcion": (
             r"(\d{2}\s*[a-z]{3})\s*" # Grupo 1: Fecha
