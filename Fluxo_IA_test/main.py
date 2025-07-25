@@ -5,6 +5,7 @@ from .procesamiento.extractor import extraer_texto_pdf
 from concurrent.futures import ThreadPoolExecutor
 from .models import Resultado, ErrorRespuesta
 from dotenv import load_dotenv
+import logging
 from typing import List, Union
 from pathlib import Path
 import asyncio
@@ -19,11 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent
 
 if ENV == "production":
     poppler_path_config = str(BASE_DIR / "poppler_bin_l" / "bin")
-    print(poppler_path_config)
+    logging.info(poppler_path_config)
 else:
     # Construimos la ruta a nuestra carpeta local de Poppler
     poppler_path_config = str(BASE_DIR / "poppler_bin_w" / "bin")
-    print(poppler_path_config)
+    logging.info(poppler_path_config)
 
 
 app = FastAPI() 
