@@ -39,8 +39,13 @@ def extraer_texto_pdf(pdf_bytes: bytes) -> str:
     return texto_total
 
 # Convierte la primera página del PDF a imagen (portada)
-def convertir_portada_a_imagen_bytes(pdf_bytes: bytes) -> BytesIO:
-    imagenes = convert_from_bytes(pdf_bytes, first_page=1, last_page=2)
+def convertir_portada_a_imagen_bytes(pdf_bytes: bytes, poppler_path: str = None) -> BytesIO:
+    imagenes = convert_from_bytes(
+        pdf_bytes, 
+        first_page=1, 
+        last_page=2,
+        poppler_path=poppler_path
+    )
     buffers = []
     for img in imagenes:
         buffer = BytesIO()

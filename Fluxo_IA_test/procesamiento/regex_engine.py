@@ -42,7 +42,6 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     """
     if not texto_extraido:
         return False
-    print(texto_extraido)
     print(len(texto_extraido.strip()))
 
     texto_limpio = texto_extraido.strip()
@@ -56,8 +55,8 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     return pasa_longitud and pasa_contenido
 
 # Función para enviar el prompt + imagen a GPT-4o
-async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
-    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes)
+async def analizar_portada_estado(prompt: str, pdf_bytes: bytes, poppler_path: str = None) -> str:
+    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes, poppler_path)
     content = [{"type": "text", "text": prompt}]
     # Hacemos encode a los datos de la imagen a base64
     for buffer in imagen_buffers:
@@ -76,7 +75,7 @@ async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
 
     return response.choices[0].message.content
 
-async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool]:
+async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes, poppler_path: str = None) -> Tuple[Dict[str, Any], bool]:
     """
     Orquesta de forma concurrente la extracción de texto y el análisis con IA para un solo PDF.
     """
@@ -90,7 +89,7 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     )
 
     # Tarea 2: Analizar la portada con OpenAI (operación de I/O).
-    tarea_analisis_ia = analizar_portada_estado(prompt, pdf_bytes)
+    tarea_analisis_ia = analizar_portada_estado(prompt, pdf_bytes, poppler_path)
 
     # Ejecutamos ambas tareas al mismo tiempo y esperamos sus resultados.
     # return_exceptions=True evita que una falle y cancele la otra.

@@ -6,22 +6,17 @@ from concurrent.futures import ThreadPoolExecutor
 from .models import Resultado, ErrorRespuesta
 from dotenv import load_dotenv
 from typing import List, Union
+from pathlib import Path
 import asyncio
 import os
 
 load_dotenv()
 
-# Configurar PATH de Poppler
-ENV = os.getenv("ENV", "local")
-
-# Verificamos que esté en producción
-if ENV == "production":
-    poppler_path = "/usr/bin"
-else:
-    poppler_path = os.getenv("POPPLER_PATH")
-
-if poppler_path and poppler_path not in os.environ["PATH"]:
-    os.environ["PATH"] += os.pathsep + poppler_path
+BASE_DIR = Path(__file__).resolve().parent
+print(BASE_DIR)
+# Construimos la ruta a nuestra carpeta local de Poppler
+poppler_path_config = str(BASE_DIR / "poppler_bin" / "bin")
+print(poppler_path_config)
 
 app = FastAPI() 
 prompt = prompt_base
@@ -43,7 +38,7 @@ async def procesar_pdf_api(
     for archivo in archivos:
         contenido_pdf = await archivo.read()
         archivos_en_memoria.append({"filename": archivo.filename, "content": contenido_pdf})
-        tarea = obtener_y_procesar_portada(prompt, contenido_pdf) # esta función es wrapper
+        tarea = obtener_y_procesar_portada(prompt, contenido_pdf, poppler_path_config) # esta función es wrapper
         tareas_analisis.append(tarea)
 
     try:
