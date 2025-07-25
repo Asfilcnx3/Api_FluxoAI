@@ -12,11 +12,17 @@ import os
 
 load_dotenv()
 
+# Configurar PATH de Poppler
+
+ENV = os.getenv("ENV", "local")
 BASE_DIR = Path(__file__).resolve().parent
-print(BASE_DIR)
-# Construimos la ruta a nuestra carpeta local de Poppler
-poppler_path_config = str(BASE_DIR / "poppler_bin" / "bin")
-print(poppler_path_config)
+
+if ENV == "production":
+    poppler_path_config = str(BASE_DIR / "poppler_bin_l" / "bin")
+else:
+    # Construimos la ruta a nuestra carpeta local de Poppler
+    poppler_path_config = str(BASE_DIR / "poppler_bin_w" / "bin")
+
 
 app = FastAPI() 
 prompt = prompt_base
