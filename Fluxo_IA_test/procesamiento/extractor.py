@@ -3,6 +3,7 @@ from typing import Dict, Any
 from io import BytesIO
 import pdfplumber
 import warnings
+import fitz
 import json
 import re
 
@@ -39,19 +40,31 @@ def extraer_texto_pdf(pdf_bytes: bytes) -> str:
     return texto_total
 
 # Convierte la primera página del PDF a imagen (portada)
-def convertir_portada_a_imagen_bytes(pdf_bytes: bytes, poppler_path: str = None) -> BytesIO:
-    imagenes = convert_from_bytes(
-        pdf_bytes, 
-        first_page=1, 
-        last_page=2,
-        poppler_path=poppler_path
-    )
+def convertir_portada_a_imagen_bytes(pdf_bytes: bytes) -> BytesIO:
     buffers = []
-    for img in imagenes:
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        buffer.seek(0)
-        buffers.append(buffer)
+    try:
+        # Se abre el documento directamente desde los bytes de memoria
+        documento = fitz.open(stream=pdf_bytes, filetype="pdf")
+
+        # Itera sobre las 2 primeras páginas (si tiene 1, solo itera sobre 1)
+        for num_pagina in range(min(len(documento), 2)):
+            pagina = documento.load_page(num_pagina)
+            
+            # renderiza la página en una imagen
+            pix = pagina.get_pixmap()
+
+            #convierte la imagen a bytes en formato png
+            img_bytes = pix.tobytes("png")
+
+            # guardamos los bytes en un buffer de memoria
+            buffer = BytesIO(img_bytes)
+            buffers.append(buffer)
+
+        documento.close()
+    
+    except Exception as e:
+        print(f"Error al convertir PDF a imagen con PyMuPDF: {e}")
+        return [] # lista vacía en caso de error
     return buffers
 
 # Extraer el JSON del markdown que nos da el modelo

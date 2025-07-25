@@ -1,8 +1,8 @@
 ﻿python-multipart
 pydantic
-pdf2image
 pdfplumber
 python-dotenv
 openai
 fastapi
 uvicorn
+PyMuPDF

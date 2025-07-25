@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 import asyncio
 import base64
+import fitz
 import os
 
 load_dotenv()
@@ -55,8 +56,8 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     return pasa_longitud and pasa_contenido
 
 # Función para enviar el prompt + imagen a GPT-4o
-async def analizar_portada_estado(prompt: str, pdf_bytes: bytes, poppler_path: str = None) -> str:
-    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes, poppler_path)
+async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
+    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes)
     content = [{"type": "text", "text": prompt}]
     # Hacemos encode a los datos de la imagen a base64
     for buffer in imagen_buffers:
@@ -75,7 +76,7 @@ async def analizar_portada_estado(prompt: str, pdf_bytes: bytes, poppler_path: s
 
     return response.choices[0].message.content
 
-async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes, poppler_path: str = None) -> Tuple[Dict[str, Any], bool]:
+async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool]:
     """
     Orquesta de forma concurrente la extracción de texto y el análisis con IA para un solo PDF.
     """
@@ -89,7 +90,7 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes, poppler_path:
     )
 
     # Tarea 2: Analizar la portada con OpenAI (operación de I/O).
-    tarea_analisis_ia = analizar_portada_estado(prompt, pdf_bytes, poppler_path)
+    tarea_analisis_ia = analizar_portada_estado(prompt, pdf_bytes)
 
     # Ejecutamos ambas tareas al mismo tiempo y esperamos sus resultados.
     # return_exceptions=True evita que una falle y cancele la otra.

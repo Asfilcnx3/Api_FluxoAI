@@ -5,27 +5,10 @@ from .procesamiento.extractor import extraer_texto_pdf
 from concurrent.futures import ThreadPoolExecutor
 from .models import Resultado, ErrorRespuesta
 from dotenv import load_dotenv
-import logging
 from typing import List, Union
-from pathlib import Path
 import asyncio
-import os
 
 load_dotenv()
-
-# Configurar PATH de Poppler
-
-ENV = os.getenv("ENV", "local")
-BASE_DIR = Path(__file__).resolve().parent
-
-if ENV == "production":
-    poppler_path_config = str(BASE_DIR / "poppler_bin_l" / "bin")
-    logging.info(poppler_path_config)
-else:
-    # Construimos la ruta a nuestra carpeta local de Poppler
-    poppler_path_config = str(BASE_DIR / "poppler_bin_w" / "bin")
-    logging.info(poppler_path_config)
-
 
 app = FastAPI() 
 prompt = prompt_base
@@ -47,7 +30,7 @@ async def procesar_pdf_api(
     for archivo in archivos:
         contenido_pdf = await archivo.read()
         archivos_en_memoria.append({"filename": archivo.filename, "content": contenido_pdf})
-        tarea = obtener_y_procesar_portada(prompt, contenido_pdf, poppler_path_config) # esta función es wrapper
+        tarea = obtener_y_procesar_portada(prompt, contenido_pdf) # esta función es wrapper
         tareas_analisis.append(tarea)
 
     try:
