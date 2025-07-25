@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 from typing import List, Optional
+from pydantic import BaseModel
 
 class ArchivoPDF(BaseModel):
     usar_ocr: Optional[bool] = False 
@@ -16,13 +16,14 @@ class Resultado(BaseModel):
     banco: str
     rfc: Optional[str] = None
     nombre_cliente: Optional[str] = None
-    clabe_inter: Optional[str] = None
+    clabe_interbancaria: Optional[str] = None
     periodo_inicio: Optional[str] = None
     periodo_fin: Optional[str] = None
-    total_comisiones: Optional[float] = None
-    total_depositos: Optional[float] = None
-    total_cargos: Optional[float] = None
+    comisiones: Optional[float] = None
+    depositos: Optional[float] = None
+    cargos: Optional[float] = None
     saldo_promedio: Optional[float] = None
     entradas_TPV_bruto: Optional[float] = None
     entradas_TPV_neto: Optional[float] = None
-    transacciones: List[Transaccion] = None
+    transacciones: List[Transaccion] = []
+    error_transacciones: Optional[str] = None

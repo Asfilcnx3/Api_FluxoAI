@@ -13,6 +13,10 @@ Tambien permite la posibilidad de que haya "palabras comunes" que se van a busca
 
 Esta actualización permite que la API tenga una busqueda del RFC, Cuenta Clabe y Nombre del negocio o dueño, siguiendo los requerimientos que se dieron previamente.
 
+## Actualización 7-24
+
+Esta actualización refactorizó todo el código, agregando mejoras a la lectura de los campos clave sin contar con los de extracción por regex, se modificó el endpoint principal para poder tener mejor control sobre los errores, documentos y el tipo de documento. Se eliminaron varias funciones y se agregaron muchas otras. Se agregó también las funciones asincronas para poder hacer varias llamadas a la API de forma paralela.
+
 ## Referencias de la API
 
 #### Home
