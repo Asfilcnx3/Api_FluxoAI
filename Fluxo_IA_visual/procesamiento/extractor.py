@@ -1,5 +1,4 @@
-from pdf2image import convert_from_bytes
-from typing import Dict, Any
+from typing import Dict, Any, List
 from io import BytesIO
 import pdfplumber
 import warnings
@@ -7,6 +6,9 @@ import fitz
 import json
 import re
 
+class PDFCifradoError(Exception):
+    """Excepción personalizada para PDFs protegidos por contraseña."""
+    pass
 
 def extraer_texto_pdf(pdf_bytes: bytes) -> str:
     """
@@ -40,26 +42,23 @@ def extraer_texto_pdf(pdf_bytes: bytes) -> str:
     return texto_total
 
 # Convierte la primera página del PDF a imagen (portada)
-def convertir_portada_a_imagen_bytes(pdf_bytes: bytes) -> BytesIO:
+def convertir_portada_a_imagen_bytes(pdf_bytes: bytes, paginas: List[int]) -> BytesIO:
+    """
+    Convierte una lista específica de números de página de un PDF a imágenes en memoria.
+    """
     buffers = []
+    matriz_escala = fitz.Matrix(2, 2)
     try:
-        # Se abre el documento directamente desde los bytes de memoria
         documento = fitz.open(stream=pdf_bytes, filetype="pdf")
-
-        # Itera sobre las 2 primeras páginas (si tiene 1, solo itera sobre 1)
-        for num_pagina in range(min(len(documento), 2)):
-            pagina = documento.load_page(num_pagina)
-            
-            # renderiza la página en una imagen
-            pix = pagina.get_pixmap()
-
-            #convierte la imagen a bytes en formato png
-            img_bytes = pix.tobytes("png")
-
-            # guardamos los bytes en un buffer de memoria
-            buffer = BytesIO(img_bytes)
-            buffers.append(buffer)
-
+        
+        for num_pagina in paginas:
+            # Los índices de página en PyMuPDF son base 0, por eso restamos 1.
+            if num_pagina - 1 < len(documento):
+                pagina = documento.load_page(num_pagina - 1)
+                pix = pagina.get_pixmap(matrix = matriz_escala)
+                img_bytes = pix.tobytes("png")
+                buffers.append(BytesIO(img_bytes))
+                
         documento.close()
     
     except Exception as e:
@@ -86,23 +85,20 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
 def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
     """
     Extrae texto de las primeras 'num_paginas' de un PDF para una verificación rápida.
+    Si el PDF está encriptado, lanza una excepción PDFCifradoError.
     """
     texto_parcial = ''
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "error",
-            message=r"Could get FontBBox from font descriptor"
-        )
-        try:
-            with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-                # Itera solo sobre el número de páginas que necesitamos
-                for i, pagina in enumerate(pdf.pages):
-                    if i >= num_paginas:
-                        break
-                    texto_pagina = pagina.extract_text()
-                    if texto_pagina:
-                        texto_parcial += texto_pagina.lower() + '\n'
-        except Warning as e:
-            print(f"Error al extraer texto del PDF, fuente mal formada: {e}")
-            return ""    
+    try:
+        # Abre el documento una sola vez
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            if doc.is_encrypted:
+                raise PDFCifradoError("El documento está protegido por contraseña, imposible trabajar con el.")
+            # Si no está encriptado, itera sobre el número de páginas que necesitamos
+            for i in range(min(len(doc), num_paginas)):
+                texto_parcial += doc[i].get_text().lower() + '\n'
+    except PDFCifradoError:
+        raise
+    except Exception as e:
+        print(f"Error durante la extracción limitada de texto con fitz: {e}")
+        return ""
     return texto_parcial

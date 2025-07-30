@@ -1,8 +1,13 @@
 ﻿python-multipart
 pydantic
-pdfplumber
+pydantic-settings==2.2.1
+anyio
+requests
 python-dotenv
 openai
 fastapi
 uvicorn
 PyMuPDF
+pdfplumber
+pytesseract
+Pillow

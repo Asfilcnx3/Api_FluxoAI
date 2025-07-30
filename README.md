@@ -17,6 +17,12 @@ Esta actualización permite que la API tenga una busqueda del RFC, Cuenta Clabe 
 
 Esta actualización refactorizó todo el código, agregando mejoras a la lectura de los campos clave sin contar con los de extracción por regex, se modificó el endpoint principal para poder tener mejor control sobre los errores, documentos y el tipo de documento. Se eliminaron varias funciones y se agregaron muchas otras. Se agregó también las funciones asincronas para poder hacer varias llamadas a la API de forma paralela.
 
+## Actualización 7-30
+
+Esta actualiazción agregó varias cosas como: el proceso en paralelo en el CPU de los documentos escaneados, resolución de errores como documentos con contraseña, extracción de texto más rapido, cambio de una librería que hacía un problema en el test, nuevos conceptos que puede buscar la API dentro de los diferentes bancos, un segundo modelo que mejore la visualización de los datos de la caratula, el primer modelo se le dió mejor calidad de imagen y un mejor prompt, también se agregó una validación con regex para mayor precisión.
+
+El ocr que se usa es Pytesseract con Tesseract-OCR
+
 ## Referencias de la API
 
 #### Home

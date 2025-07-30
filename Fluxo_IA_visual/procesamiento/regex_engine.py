@@ -1,5 +1,5 @@
 from .extractor import convertir_portada_a_imagen_bytes, extraer_json_del_markdown, extraer_texto_limitado
-from .auxiliares import construir_descripcion_optimizado, limpiar_monto
+from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconocer_banco_por_texto, reconciliar_resultados_ia, sanitizar_datos_ia, extraer_rfc_por_texto
 from .auxiliares import REGEX_COMPILADAS, PALABRAS_CLAVE_VERIFICACION
 from typing import List, Dict, Any, Tuple
 from dotenv import load_dotenv
@@ -11,8 +11,18 @@ import os
 
 load_dotenv()
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-client = AsyncOpenAI(api_key=openai_api_key)
+client_gpt = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
+client_openrouter = AsyncOpenAI(
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url=os.getenv("OPENROUTER_BASE_URL"),
+    default_headers={
+        "HTTP-Referer": "https://github.com/Asfilcnx3", 
+        "X-Title": "Fluxo IA Test", 
+    },
+)
 
 def sumar_lista_montos(montos: List[str]) -> float:
     """
@@ -56,8 +66,14 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     return pasa_longitud and pasa_contenido
 
 # Función para enviar el prompt + imagen a GPT-4o
-async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
-    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes)
+async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int]) -> str:
+    """
+    Se hace la llamada al modelo GPT-4o
+    """
+    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes, paginas = paginas_a_procesar)
+    if not imagen_buffers:
+        return # ya retorna el error que dió dentro de la función
+    
     content = [{"type": "text", "text": prompt}]
     # Hacemos encode a los datos de la imagen a base64
     for buffer in imagen_buffers:
@@ -69,8 +85,35 @@ async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
                 "detail": "auto"
                 },
             })
-    response = await client.chat.completions.create(
+    response = await client_gpt.chat.completions.create(
         model="gpt-4o",
+        messages=[{"role": "user","content": content}],
+    )
+
+    return response.choices[0].message.content
+
+# Función para enviar el prompt + imagen a GPT-4o
+async def analizar_portada_gemini(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int]) -> str:
+    """
+    Se hace la llamada al modelo GEMINI 1.5 flash
+    """
+    imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes, paginas = paginas_a_procesar)
+    if not imagen_buffers:
+        return # ya retorna el error que dió dentro de la función
+    
+    content = [{"type": "text", "text": prompt}]
+    # Hacemos encode a los datos de la imagen a base64
+    for buffer in imagen_buffers:
+        encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
+        content.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/png;base64,{encoded_image}",
+                "detail": "auto"
+                },
+            })
+    response = await client_openrouter.chat.completions.create(
+        model="google/gemini-flash-1.5",
         messages=[{"role": "user","content": content}],
     )
 
@@ -78,50 +121,82 @@ async def analizar_portada_estado(prompt: str, pdf_bytes: bytes) -> str:
 
 async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool]:
     """
-    Orquesta de forma concurrente la extracción de texto y el análisis con IA para un solo PDF.
+    Orquesta el proceso de forma secuencial siguiendo el siguiente roadmap:
+    1. Extrae texto inicial.
+    2. Reconoce el banco.
+    3. Decide qué páginas enviar a la IA.
+    4. Llama a la IA con las páginas correctas
+    5. corrige su respuesta.
     """
     loop = asyncio.get_running_loop()
-    # Tarea 1: Extraer el texto de las primeras páginas (operación de CPU).
-    # La ejecutamos en un hilo separado para no bloquear el programa.
-    tarea_extraccion_texto = loop.run_in_executor(
+    # --- 1. PRIMERO: Extraer texto inicial y determinar si es digital --- La ejecutamos en un hilo separado para no bloquear el programa.
+    texto_verificacion = await loop.run_in_executor(
         None,  # Usa el executor de hilos por defecto
         extraer_texto_limitado, 
         pdf_bytes
     )
+    es_documento_digital = es_escaneado_o_no(texto_verificacion)
 
-    # Tarea 2: Analizar la portada con OpenAI (operación de I/O).
-    tarea_analisis_ia = analizar_portada_estado(prompt, pdf_bytes)
+    # --- 2. SEGUNDO: Reconocer el banco y el RFC a partir del texto (con regex) ---
+    banco_por_texto = reconocer_banco_por_texto(texto_verificacion)
+    banco_estandarizado = banco_por_texto.upper() if banco_por_texto else ""
 
-    # Ejecutamos ambas tareas al mismo tiempo y esperamos sus resultados.
-    # return_exceptions=True evita que una falle y cancele la otra.
-    resultados_tareas = await asyncio.gather(
-        tarea_extraccion_texto, 
-        tarea_analisis_ia, 
-        return_exceptions=True
-    )
+    rfc_por_texto = extraer_rfc_por_texto(texto_verificacion, banco_estandarizado)
+    rfc_estandarizado = rfc_por_texto.upper() if rfc_por_texto else ""
+    print(rfc_estandarizado)
+
+    # --- 3. TERCERO: Decidir qué páginas procesar ---
+    paginas_para_ia = [1, 2] # Por defecto, las primeras dos
     
-    texto_verificacion, respuesta_str_ia = resultados_tareas
+    if banco_estandarizado == "BANREGIO":
+        print("Banco BANREGIO detectado. Ajustando páginas para el análisis de IA.")
+        try:
+            # Usamos fitz de nuevo, pero solo para un rápido conteo de páginas.
+            # Es muy eficiente y no procesa el contenido.
+            with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+                total_paginas = len(doc)
+            
+            if total_paginas > 5:
+                # Creamos la lista de páginas: la primera y las últimas 5
+                paginas_finales = list(range(total_paginas - 4, total_paginas + 1))
+                paginas_para_ia = sorted(list(set(paginas_para_ia + paginas_finales)))
+            else:
+                # Si el doc es corto, tomamos todas las páginas
+                paginas_para_ia = list(range(1, total_paginas + 1))
 
-    # Verificamos si alguna de las tareas falló
-    if isinstance(texto_verificacion, Exception):
-        print(f"Error en extracción de texto inicial: {texto_verificacion}")
-        # Si la extracción de texto falla, asumimos que no es digital y la IA podría ser la única fuente.
-        es_documento_digital = False
-    else:
-        es_documento_digital = es_escaneado_o_no(texto_verificacion)
-
-    if isinstance(respuesta_str_ia, Exception):
-        print(f"Error en la llamada a OpenAI: {respuesta_str_ia}")
-        # Si la IA falla, devolvemos un diccionario de error y el estado del documento.
-        return {"error": "Fallo en la comunicación con el servicio de IA."}, es_documento_digital
-
-    # Si ambas tareas fueron exitosas, procesamos el JSON.
-    datos_ia = extraer_json_del_markdown(respuesta_str_ia)
+        except Exception as e:
+            print(f"No se pudo determinar el total de páginas para Banregio: {e}. Usando páginas por defecto.")
+            paginas_para_ia = [1, 2]
     
-    return datos_ia, es_documento_digital
+    # --- 4. CUARTO: Llamar a las IA de forma PARALELA con las páginas correctas ---
+    tarea_gpt = analizar_portada_gpt(prompt, pdf_bytes, paginas_a_procesar = paginas_para_ia)
+    tarea_gemini = analizar_portada_gemini(prompt, pdf_bytes, paginas_a_procesar = paginas_para_ia)
+    
+    resultados_ia_brutos = await asyncio.gather(tarea_gpt, tarea_gemini, return_exceptions=True)
+
+    res_gpt_str, res_gemini_str = resultados_ia_brutos
+
+    datos_gpt = extraer_json_del_markdown(res_gpt_str) if not isinstance(res_gpt_str, Exception) else {}
+    datos_gemini = extraer_json_del_markdown(res_gemini_str) if not isinstance(res_gemini_str, Exception) else {}
+
+    # --- SANITIZACION ---
+    datos_gpt_sanitizados = sanitizar_datos_ia(datos_gpt)
+    datos_gemini_sanitizados = sanitizar_datos_ia(datos_gemini)
+
+    # --- RECONCILIACIÓN ---
+    datos_ia_reconciliados = reconciliar_resultados_ia(datos_gpt_sanitizados, datos_gemini_sanitizados)
+
+    # --- 5. QUINTO: Corregir el resultado de la IA y devolver ---
+    # Usamos el banco que reconocimos por texto, que es más fiable.
+    if banco_estandarizado:
+        datos_ia_reconciliados["banco"] = banco_estandarizado
+    if rfc_estandarizado:
+        datos_ia_reconciliados["rfc"] = rfc_estandarizado
+    
+    return datos_ia_reconciliados, es_documento_digital
 
 
-def procesar_regex_generico(resultados: dict, texto:str) -> Dict[str, Any]:
+def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str, Any]:
     """
     Aplica expresiones regulares definidas por banco y retorna resultados.
 
