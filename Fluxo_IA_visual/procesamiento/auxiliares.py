@@ -208,8 +208,15 @@ EXPRESIONES_REGEX = {
             r"\$([\d,]+\.\d{2})\s+\$[\d,]+\.\d{2}\s*" # Grupo 3: Monto a encontrar y monto a ignorar
             r"\n((?:.*\n){6})" # Grupo 4: Lineas despues
         ), #r'(\d{2}\s+[a-z]{3})\s+transf interbancaria spei\s+(\d{20})\s+\$([\d,]+\.\d{2})\s+\$[\d,]+\.\d{2}\s*\n((?:.*\n){6})',
-        "descripcion_clip_multilinea": (
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,3}.*?(?:deposito bpu|amexco se|dep).*?\n(?:.*?\n){0,2}.*?(?:american express company mexic|first data merchant services m|pocket de latinoamerica sapi).*?\n.*?\n)"
+        "descripcion_clip_multilinea": ( # spei pocket deposito bpu
+            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?deposito bpu.*?\n(?:.*?\n){0,10}.*?pocket de latinoamerica sapi.*?\n.*?\n)"
+            # r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?(?:deposito bpu|amexco se|dep).*?\n(?:.*?\n){0,10}.*?(?:american express company mexic|first data merchant services m|pocket de latinoamerica sapi).*?\n.*?\n)"
+        ),
+        "descripcion_traspaso_multilinea": ( # spei first data dep
+            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?dep.*?\n(?:.*?\n){0,10}.*?first data merchant services m.*?\n.*?\n)"
+        ),
+        "descripcion_amex_multilinea": ( # spei american express amexco
+            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?amexco se.*?\n(?:.*?\n){0,10}.*?american express company mexic.*?\n.*?\n)"
         ),
     },
     "banregio": {

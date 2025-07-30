@@ -3,7 +3,7 @@ from .procesamiento.auxiliares import prompt_base, verificar_total_depositos
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from .procesamiento.extractor import extraer_texto_pdf, PDFCifradoError
 from .procesamiento_ocr.extractor_ocr import extraer_texto_con_ocr
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from .models import Resultado, ErrorRespuesta
 from dotenv import load_dotenv
 from typing import List, Union
@@ -27,7 +27,7 @@ async def procesar_pdf_api(
     tareas_analisis = []
     archivos_en_memoria = []
 
-    # ------- 1. Analisis de la portada con IA para determinar las entradas y si el documento es digital o no -------
+    # ------- 1. ANÁLISIS DE LA PORTADA CON IA PARA DETERMINAR ENTRADAS Y SI ES DOCUMENTO ESCANEADO -------
     for archivo in archivos:
         contenido_pdf = await archivo.read()
         archivos_en_memoria.append({"filename": archivo.filename, "content": contenido_pdf})

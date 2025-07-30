@@ -25,6 +25,16 @@ El ocr que se usa es Pytesseract con Tesseract-OCR
 
 ## Referencias de la API
 
+### Variables de entorno
+
+La API usa "load_dotenv", asi que las variables de entorno para que funcione todo el código que debes tener son las siguientes:
+
+-- OPENAI_API_KEY
+
+-- OPENROUTER_API_KEY
+
+-- OPENROUTER_BASE_URL
+
 #### Home
 
 ```http
