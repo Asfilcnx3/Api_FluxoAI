@@ -1,7 +1,7 @@
 from .procesamiento.regex_engine import procesar_regex_generico, obtener_y_procesar_portada
 from .procesamiento.auxiliares import prompt_base, verificar_total_depositos
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from .procesamiento.extractor import extraer_texto_pdf, PDFCifradoError
+from .procesamiento.extractor import extraer_texto_pdf_con_fitz, PDFCifradoError
 from .procesamiento_ocr.extractor_ocr import extraer_texto_con_ocr
 from concurrent.futures import ProcessPoolExecutor
 from .models import Resultado, ErrorRespuesta
@@ -98,7 +98,7 @@ async def procesar_pdf_api(
         with ProcessPoolExecutor() as executor:
             # Añadimos las tareas de extracción digital
             for doc in documentos_digitales:
-                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf, doc["content"]))
+                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
 
             # Añadimos las tareas de extracción con OCR
             for doc in documentos_escaneados:

@@ -1,5 +1,5 @@
 from .extractor import convertir_portada_a_imagen_bytes, extraer_json_del_markdown, extraer_texto_limitado
-from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconocer_banco_por_texto, reconciliar_resultados_ia, sanitizar_datos_ia, extraer_rfc_por_texto
+from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconocer_banco_por_texto, reconciliar_resultados_ia, sanitizar_datos_ia, extraer_rfc_por_texto, limpiar_y_normalizar_texto
 from .auxiliares import REGEX_COMPILADAS, PALABRAS_CLAVE_VERIFICACION
 from typing import List, Dict, Any, Tuple
 from dotenv import load_dotenv
@@ -262,7 +262,7 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
                 total_entradas += sumar_lista_montos([monto_str])
                 transacciones_filtradas.append({
                     "fecha": transaccion[0],
-                    "descripcion": descripcion.strip(),
+                    "descripcion": limpiar_y_normalizar_texto(descripcion.strip()),
                     "monto": monto_str
                 })
         

@@ -10,35 +10,31 @@ class PDFCifradoError(Exception):
     """Excepción personalizada para PDFs protegidos por contraseña."""
     pass
 
-def extraer_texto_pdf(pdf_bytes: bytes) -> str:
+def extraer_texto_pdf_con_fitz(pdf_bytes: bytes) -> str:
     """
-    Extrae todo el texto de uno o varios archivos PDF y los convierte a minúsculas, usamos with para no cargar el documento en memoria RAM y que se cierre cuando termine de ejecutarse.
+    Extrae texto de un archivo PDF desde memoria (bytes) usando PyMuPDF (fitz).
+    Convierte todo a minúsculas. Usa `with` para liberar memoria automáticamente.
 
     Args:
-        ruta_pdf (str): La ruta o lista de rutas a los archivos PDF.
+        pdf_bytes (bytes): Contenido del PDF en bytes.
 
     Returns:
-        str: El texto extraído en minúsculas (normalizado).
+        str: Texto extraído en minúsculas (normalizado).
     """
     texto_total = ''
 
-    # Creamos un contexto para atrapar un posible warning
     with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "error",
-            message=r"Could get FontBBox from font descriptor"
-        )
+        warnings.simplefilter("ignore")
         try:
-            # Abre el PDF desde los bytes en memoria
-            with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-                for pagina in pdf.pages:
-                    texto_pagina = pagina.extract_text()
+            with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+                for pagina in doc:
+                    texto_pagina = pagina.get_text(sort=True)
                     if texto_pagina:
                         texto_total += texto_pagina.lower() + '\n'
-        except Warning as e:
-            print(f"Error al extraer texto del PDF, fuente mal formada: {e}")
+        except Exception as e:
+            print(f"Error al extraer texto con fitz: {e}")
             return ""
-    
+
     return texto_total
 
 # Convierte la primera página del PDF a imagen (portada)

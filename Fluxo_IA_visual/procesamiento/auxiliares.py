@@ -156,17 +156,17 @@ EXPRESIONES_REGEX = {
     },
     "banorte": {
         "descripcion": (
-            r"(\d{2}-[a-z]{3}-\d{2})\s*" # Grupo 1: Fecha ("ej:  05-may-25")
+            r"(\d{2}-[a-z]{3}-\d{2})\s*" # Grupo 1: Fecha ("ej: ")
             r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("Banorte") + # Grupo 3: Descripción completa
             r"\s*([\d,]+\.\d{2})" # Grupo 3: Monto
         ), # r'(\d{2}-[a-z]{3}-\d{2})([a-zA-Z][a-zA-Z ]*?)\s+(\d{8}[cd])\s+([\d,]+\.\d{2})',
-        "descripcion_clip_multilinea": (
+        "descripcion_clip_multilinea": ( # spei recibido ganancias clip
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2}).*?\n(?:.*\n){1}.*?ganancias clip(?:.*\n){1}.*))'
         ),
-        "descripcion_traspaso_multilinea": (
+        "descripcion_traspaso_multilinea": ( # traspaso de cta clip
             r'(\d{2}-[a-z]{3}-\d{2}).*?((traspaso de cta.*?([\d,]+\.\d{2}).*\n.*?clip.*))'
         ),
-        "descripcion_amex_multilinea": (
+        "descripcion_amex_multilinea": ( # spei recibido amexco
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
         ),
     },
@@ -209,14 +209,15 @@ EXPRESIONES_REGEX = {
             r"\n((?:.*\n){6})" # Grupo 4: Lineas despues
         ), #r'(\d{2}\s+[a-z]{3})\s+transf interbancaria spei\s+(\d{20})\s+\$([\d,]+\.\d{2})\s+\$[\d,]+\.\d{2}\s*\n((?:.*\n){6})',
         "descripcion_clip_multilinea": ( # spei pocket deposito bpu
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?deposito bpu.*?\n(?:.*?\n){0,10}.*?pocket de latinoamerica sapi.*?\n.*?\n)"
-            # r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?(?:deposito bpu|amexco se|dep).*?\n(?:.*?\n){0,10}.*?(?:american express company mexic|first data merchant services m|pocket de latinoamerica sapi).*?\n.*?\n)"
+            r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s*\d{20}\s*\$\s*([\d,]+\.\d{2})\s*\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,9}.*?deposito bpu.*?\n(?:.*?\n){1,5}.*?pocket de latinoamerica sapi.*?\n.*?\n)"
+        # r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s+.*?\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2})"
         ),
         "descripcion_traspaso_multilinea": ( # spei first data dep
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?dep.*?\n(?:.*?\n){0,10}.*?first data merchant services m.*?\n.*?\n)"
+            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\n\s*transf interbancaria spei(?:.*?\n){1,3}.*?dep.*?\n(?:.*?\n)*?.*?first data merchant services m)"
+        # r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,10}.*?dep.*?\n(?:.*?\n){1,5}.*?first data merchant services m.*?\n.*?\n)"
         ),
         "descripcion_amex_multilinea": ( # spei american express amexco
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,6}.*?amexco se.*?\n(?:.*?\n){0,10}.*?american express company mexic.*?\n.*?\n)"
+            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\n\s*transf interbancaria spei(?:.*?\n){1,3}.*?.*?amexco se.*?\n(?:.*?\n)*?.*?american express company mexic)"
         ),
     },
     "banregio": {
@@ -235,7 +236,7 @@ EXPRESIONES_REGEX = {
             r"([\d,]+\.\d{2})" # Grupo 5: Monto
         ),
         "descripcion_clip_multilinea": ( # Deposito BPU
-            r"(\d{2}-[a-z]{3}-\d{4})(\d{7})(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s+([\d,]+\.\d{2}).*?\n[\s\S]*?deposito bpu)"
+            r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n\s*recibido de stp.*?\n[\s\S]*?deposito bpu)"
         ),
     },
     "bbva": {
@@ -251,7 +252,7 @@ EXPRESIONES_REGEX = {
         "descripcion_traspaso_multilinea": ( # es billpocket
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})\n.*?(deposito bpu[\s\S]*?pocket de latinoamerica sapi de cv)"
         ),
-        "descripcion_amex_multilinea": ( # es recibidobanorte o recibidosantander de net pay o getnet
+        "descripcion_amex_multilinea": ( # es recibidobanorte
             r"(\d{2}/[a-z]{3})\s*(spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2}).*(\n.*(?:sq|af)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s))"
         ),
     },
@@ -262,10 +263,10 @@ EXPRESIONES_REGEX = {
             r"(\d{2}(?:/\d{2}/\d{4})?)\s*"         # fecha
             r"(ft\d{14})\s*"                       # referencia
             r"(ventas tpvs \d{7} venta t(?:dd|dc))\s*" # concepto
-            r"[\d,]+\.\d{2}\s+"                    # Primer monto (ignorado)
-            r"([\d,]+\.\d{2})\s+"                  # Segundo monto (capturado)
+            r"[\d,]+\.\d{2}\s*"                    # Primer monto (ignorado)
+            r"([\d,]+\.\d{2})\s*"                  # Segundo monto (capturado)
             r"\d{1,3}(?:,\d{3})*\.\d{2}\s*"        # Tercer monto (ignorado)
-            r"\n(\d{4}-\d{2}-\d{2})"               # fecha para descripción
+            r"\n\s*(\d{4}-\d{2}-\d{2})"               # fecha para descripción
         ),
     },
     "citibanamex": {
@@ -468,3 +469,18 @@ def limpiar_monto(monto: Any) -> float:
             
     # Si no es ni número ni string (ej. None), devolvemos 0.0
     return 0.0
+
+def limpiar_y_normalizar_texto(texto: str) -> str:
+    """
+    Limpia y normaliza el texto extraído de un PDF.
+    1. Elimina el espaciado errático entre letras (kerning).
+    2. Colapsa múltiples espacios o saltos de línea entre palabras a un solo espacio.
+    """
+    if not texto:
+        return ""
+
+    # Colapsar múltiples espacios/saltos de línea a un solo espacio
+    # \s+ busca una o más ocurrencias de cualquier tipo de espacio en blanco
+    texto_normalizado = re.sub(r'\s+', ' ', texto)
+
+    return texto_normalizado.strip()
