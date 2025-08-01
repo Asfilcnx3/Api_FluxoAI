@@ -253,7 +253,7 @@ EXPRESIONES_REGEX = {
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})\n.*?(deposito bpu[\s\S]*?pocket de latinoamerica sapi de cv)"
         ),
         "descripcion_amex_multilinea": ( # es recibidobanorte
-            r"(\d{2}/[a-z]{3})\s*(spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2}).*(\n.*(?:sq|af)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s))"
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2}).*(\n.*(?:sq|af)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s))"
         ),
     },
     "multiva": {
@@ -473,14 +473,12 @@ def limpiar_monto(monto: Any) -> float:
 def limpiar_y_normalizar_texto(texto: str) -> str:
     """
     Limpia y normaliza el texto extraído de un PDF.
-    1. Elimina el espaciado errático entre letras (kerning).
-    2. Colapsa múltiples espacios o saltos de línea entre palabras a un solo espacio.
+    1. Colapsa múltiples espacios o saltos de línea entre palabras a un solo espacio.
     """
     if not texto:
         return ""
 
-    # Colapsar múltiples espacios/saltos de línea a un solo espacio
-    # \s+ busca una o más ocurrencias de cualquier tipo de espacio en blanco
-    texto_normalizado = re.sub(r'\s+', ' ', texto)
+    # Reemplaza secuencias de 2 o más espacios/tabs con un solo espacio.
+    texto_normalizado = re.sub(r'[ \t]{2,}', ' ', texto)
 
     return texto_normalizado.strip()
