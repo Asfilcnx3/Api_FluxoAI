@@ -246,14 +246,11 @@ EXPRESIONES_REGEX = {
             r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("bbva") + # Grupo 3: Regex especifica
             r"([\d,]+\.\d{2})\s*\n.*?(\d{9})" # Grupo 4 y 5: monto y ID
         ), # r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}(?:\s+[a-zA-Z]\d{2})?\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito|spei recibidobanorte|spei recibidosantander|spei recibidostp)\s+([\d,]+\.\d{2})\s*\n.*?(\d{9})',
-        "descripcion_clip_multilinea": ( # es payclip (recibido santander y recibido banorte)
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2}).*(\n.*gana[\s\S]*?payclip s de rl de cv)"
+        "descripcion_clip_multilinea": ( # es payclip, getnet o netpay (recibido santander y recibido banorte)
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2})([\s\S]*?(?:gana|0000001af|0000001sq)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s|payclip s de rl de cv))"
         ),
         "descripcion_traspaso_multilinea": ( # es billpocket
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})\n.*?(deposito bpu[\s\S]*?pocket de latinoamerica sapi de cv)"
-        ),
-        "descripcion_amex_multilinea": ( # es recibidobanorte
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2}).*(\n.*(?:sq|af)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s))"
         ),
     },
     "multiva": {
