@@ -23,6 +23,10 @@ Esta actualiazción agregó varias cosas como: el proceso en paralelo en el CPU 
 
 El ocr que se usa es Pytesseract con Tesseract-OCR
 
+## Actualizacion 8-6
+
+Esta actualización agregó más robustes a los bancos 'Azteca', 'Inbursa', 'Afirme', 'BBVA', 'Multiva' e 'Intercam', mejorando la forma en la que algunos detectan transacciones y creando un soporte para bancos sin descripción anteriores como intercam e inbursa. La actualización trae consigo 2 bugs posibles, uno en BBVA con un inicio de concepto que puede ser el mismo que otros pero sin ser necesario escanear y eso causa fallos mínimos (no detectar 1 o 2 conceptos por PDF) y el otro es con el banco AFIRME, el error es a proposito ya que el banco tiene un tipo de outlier y en ese pdf la fecha y descripcion están volteadas.
+
 ## Referencias de la API
 
 ### Variables de entorno
