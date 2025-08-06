@@ -16,7 +16,7 @@ BANCO_MAP = {
     "banca afirme": "afirme",
     "grupo financiero hsbc": "hsbc",
     "grupo financiero mifel": "mifel",
-    "scotiabank": "scotiabank",
+    "scotiabank inverlat": "scotiabank",
     "banco regional": "banregio",
     "grupo financiero bbva": "bbva",
     "banco multiva": "multiva",
@@ -29,9 +29,13 @@ BANCO_MAP = {
     "banco monex": "monex",
     "banco azteca": "azteca",
     "bankaool": "bankaool",
+    "banco inbursa": "inbursa",
+    "intercuenta enlace intercam": "intercam",
 }
 # compilamos los bancos
 BANCO_REGEX = re.compile("|".join(BANCO_MAP.keys()))
+
+PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe"]
 
 # Diccionario con los patrones de RFC por banco
 RFC_PATTERNS = {
@@ -112,7 +116,7 @@ Ignora cualquier otra parte del documento. No infieras ni estimes valores.
 frases_bancos = {
     "banbajío": r"(?:iva |comision )?deposito negocios afiliados \(adquirente\)(?: optblue amex)?",
     "banorte": r".*?\d{8}[cd]",
-    #          r"[a-zA-Z][a-zA-Z ]*?\s*\d{8}[cd]",
+    #          r"[a-zA-Z][a-zA-Z ]*?\s+\d{8}[cd]",
     "afirme": r"venta tpv(?:cr|db)",
     "hsbc": r"transf[\s~]*rec[\s~]*hsbcnet[\s~]*tpv[\s~]*(?:db|cr)?|transf[\s~]*rec[\s~]*hsbcnet[\s~]*dep[\s~]*tpv|deposito[\s~]*bpu\d{10}",
     "mifel": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
@@ -123,7 +127,9 @@ frases_bancos = {
     "bbva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
     "multiva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
     "citibanamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)",
-    "banamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)"
+    "banamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)",
+    # Azteca no tiene una para una línea
+    "azteca": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
 }
 
 # Unimos TODAS las alternativas (expresiones especificas y genéricas) en un solo grupo usando "|" (OR)
@@ -177,6 +183,9 @@ EXPRESIONES_REGEX = {
             r"(\d{6})(?: \d{7})?\s*" # Grupo 3: ID
             r"\$\s*([\d,]+\.\d{2})" # Grupo 4: Monto
         ), # r'(\d{2}) (venta tpv(?:cr|db)) (\d{6})(?: \d{7})? \$\s*([\d,]+\.\d{2})',
+        "descripcion_clip_multilinea": ( # venta tdd / venta tdc (una línea pero diferente forma de arquitectura)
+            r"(venta tpv(?:cr|db)\s*\d{8})\s+(\d{2}/\d{2}/\d{2})\s+\d{7,8}\s+\$\d{1,3}(?:,\d{3})*\.\d{2}\s+\$([\d,]+\.\d{2})"
+        ),
     },
     "hsbc": {
         "descripcion": (
@@ -247,11 +256,14 @@ EXPRESIONES_REGEX = {
             r"([\d,]+\.\d{2})\s*\n.*?(\d{9})" # Grupo 4 y 5: monto y ID
         ), # r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}(?:\s+[a-zA-Z]\d{2})?\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito|spei recibidobanorte|spei recibidosantander|spei recibidostp)\s+([\d,]+\.\d{2})\s*\n.*?(\d{9})',
         "descripcion_clip_multilinea": ( # es payclip, getnet o netpay (recibido santander y recibido banorte)
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte))\s*([\d,]+\.\d{2})([\s\S]*?(?:gana|0000001af|0000001sq)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s|payclip s de rl de cv))"
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte|stp|afirme))\s*([\d,]+\.\d{2})([\s\S]*?(?:gana|0000001af|0000001sq|deposito bpu|trans sr pago|dispersion sihay ref)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s|payclip s de rl de cv|pocket de latinoamerica sapi de cv|cobra online sapi de cv|kiwi bop sa de cv))"
         ),
         "descripcion_traspaso_multilinea": ( # es billpocket
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})\n.*?(deposito bpu[\s\S]*?pocket de latinoamerica sapi de cv)"
+            r"(\d{2}/[a-z]{3})\s*(spei recibidobanorte)\s*([\d,]+\.\d{2})([\s\S]*?00072180012119359724[\s\S]*?kiwi international payment technologies)"
         ),
+        "descripcion_amex_multilinea": (
+            r"(\d{2}/[a-z]{3})\s*(w41\s*traspaso entre cuentas)\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
+        )
     },
     "multiva": {
         "descripcion": r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito)\s+([\d,]+\.\d{2})\s*\n(\d{9})',
@@ -264,6 +276,9 @@ EXPRESIONES_REGEX = {
             r"([\d,]+\.\d{2})\s*"                  # Segundo monto (capturado)
             r"\d{1,3}(?:,\d{3})*\.\d{2}\s*"        # Tercer monto (ignorado)
             r"\n\s*(\d{4}-\d{2}-\d{2})"               # fecha para descripción
+        ),
+        "descripcion_traspaso_multilinea": ( # spei recibido stp
+        r"(\d{2}(?:/\d{2}/\d{4})?)\s*(ft\d{14})\s*(spei recibido stp)\s*[\d,]+\.\d{2}\s*([\d,]+\.\d{2})(.*?\n.*?\n.*?latinoamerica sapi de cv[\s\S]*?bpu2437419281)"
         ),
     },
     "citibanamex": {
@@ -284,6 +299,27 @@ EXPRESIONES_REGEX = {
         ), # r"(\d{2}\s+[a-z]{3})\s*(deposito ventas netas(?:.|\n)*?por evopaymx)\s*([\d,]+\.\d{2})",
         "descripcion_clip_multilinea": ( # evopay (ventas netas amex y d tar)
             r"(\d{2}\s*[a-z]{3})\s*(deposito ventas netas (?:d tar|amex)[\s\S]*?por evopay[\s\S]*?suc\s*\d{4})\s*([\d,]+\.\d{2})"
+        ),
+    },
+    "azteca": {
+        "descripcion": (
+            r"([0-9a-zA-Z]{1,2})\.?\s*" # Grupo 1: Fecha
+            r"(%s)\s*" % construir_regex_descripcion("azteca") + # Grupo 2: Expresión exacta y genericas
+            r"(\d{6,8})\s+([a-zA-Z0-9]{4,10})\s*" # Grupo 3: ID de la transacción
+            r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
+        ),
+        "descripcion_clip_multilinea": ( # monto, descr 1, monto, descr 2
+            r"(\d{2}/\d{2}/\d{4})\s+(transferencia spei a su favor)\s+\(\+\)\s*\$([\d,]+\.\d{2})\s*spei(\n\s*emisor:\s*(?:banorte|santander)\n.+?\n.+?payclip s de rl decv[\s\S]*?gananciasclip)"
+        ),
+    },
+    "inbursa": {
+        "descripcion_clip_multilinea": ( # spei recibido stp
+        r"([a-z]{3}\.?\s*(?:\d{2})?)\s*(\d{10}\s*deposito spei)\s*([\d,]+\.\d{2}).*?\n(.*?(?:kiwi international payment technologies|cobra online sapi de cv|operadora paypal de mexico s de rl)[\s\S]*?clave de rastreo.*)"
+        ),
+    },
+    "intercam": {
+        "descripcion_clip_multilinea": ( # spei recibido stp
+        r"(\d{1,2})\s+(\d{9}\s+recepcion spei\s*\|\s*(?:jp morgan|santander|banorte)\s*\|[\s\S]*?)(\d{1,3}(?:,\d{3})*\.\d{2})([\s\S]*?136180018635900157)"
         ),
     }
 }
@@ -310,6 +346,7 @@ def _procesar_santander(t): return " ".join(t[1:-1]), t[-1]
 # fecha, descripción, monto, final de la descripción
 def _procesar_bbva(t): return " ".join([t[1], t[-1]]), t[-2]
 def _procesar_multiva(t): return " ".join([t[1], t[2], t[-1]]), t[-2]
+def _procesar_intercam(t): return " ".join([t[1], t[2], t[-1]]), t[-2]
 
 # fecha, transacción, monto
 def _procesar_banregio(t): return " ".join([t[1]]), t[-1]
@@ -324,6 +361,10 @@ def _procesar_mifel(t): return " ".join([t[2], t[-1], t[1]]), t[-2]
 # monto, final de transacción, inicio de transacción, monto
 def _procesar_bajio(t): return " ".join([t[2], t[1]]), t[-1]
 
+# monto, final de transacción, inicio de transacción, monto
+def _procesar_azteca(t): return " ".join([t[1], t[-1]]), t[-2]
+def _procesar_inbursa(t): return " ".join([t[1], t[-1]]), t[-2]
+
 DESPACHADOR_DESCRIPCION = {
     "banbajío": _procesar_bajio,
     "banorte": _procesar_banorte,
@@ -337,6 +378,9 @@ DESPACHADOR_DESCRIPCION = {
     "multiva": _procesar_multiva,
     "citibanamex": _procesar_banamex,
     "banamex": _procesar_banamex,
+    "intercam": _procesar_intercam,
+    "azteca": _procesar_azteca,
+    "inbursa": _procesar_inbursa
 }
 
 def construir_descripcion_optimizado(transaccion: Tuple, banco: str) -> Tuple[str, str]:

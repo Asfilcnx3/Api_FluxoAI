@@ -1,6 +1,6 @@
 from .extractor import convertir_portada_a_imagen_bytes, extraer_json_del_markdown, extraer_texto_limitado
 from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconocer_banco_por_texto, reconciliar_resultados_ia, sanitizar_datos_ia, extraer_rfc_por_texto, limpiar_y_normalizar_texto
-from .auxiliares import REGEX_COMPILADAS, PALABRAS_CLAVE_VERIFICACION
+from .auxiliares import REGEX_COMPILADAS, PALABRAS_CLAVE_VERIFICACION, PALABRAS_EXCLUIDAS
 from typing import List, Dict, Any, Tuple
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -258,7 +258,7 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         total_entradas = 0
         for transaccion in transacciones_matches:
             descripcion, monto_str = construir_descripcion_optimizado(transaccion, banco)
-            if "comision" not in descripcion and "iva" not in descripcion and "com." not in descripcion:
+            if all(palabra not in descripcion for palabra in PALABRAS_EXCLUIDAS):
                 total_entradas += sumar_lista_montos([monto_str])
                 transacciones_filtradas.append({
                     "fecha": transaccion[0],
