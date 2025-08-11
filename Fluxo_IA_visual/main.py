@@ -5,24 +5,41 @@ from .procesamiento.extractor import extraer_texto_pdf_con_fitz, PDFCifradoError
 from .procesamiento_ocr.extractor_ocr import extraer_texto_con_ocr
 from concurrent.futures import ProcessPoolExecutor
 from .models import Resultado, ErrorRespuesta
+from .NomiFlash import router_nomi
 from dotenv import load_dotenv
 from typing import List, Union
 import asyncio
 
 load_dotenv()
 
-app = FastAPI() 
+app = FastAPI(
+    title="Procesamiento de entradas (TPV o Nómina)",
+    version="1.0.1"
+) 
 prompt = prompt_base
+
+app.include_router(router_nomi.router)
 
 @app.get("/")
 async def home():
     return "Hola, te equivocaste al momento de consumir la API, pero no te preocupes, para consumirla ve a con '/procesar_pdf/' o ve a '/docs/'"
 
 # Endpoint principal 
-@app.post("/procesar_pdf/", response_model=List[Union[Resultado, ErrorRespuesta]])
+@app.post(
+        "fluxo/procesar_pdf/", 
+        response_model=List[Union[Resultado, ErrorRespuesta]],
+        summary="(API principal) Extrae estructurados de trasacciones TPV en PDF."
+    )
 async def procesar_pdf_api(
-    archivos: List[UploadFile] = File(...)
+    archivos: List[UploadFile] = File(..., description="Uno o más archivos PDF a extraer transacciones TPV")
 ):
+    """
+    Sube uno o más archivos PDF. El sistema procesa todos en paralelo y devuelve resultados.
+    
+    - Si un archivo se procesa correctamente, obtendrás los datos extraídos.
+    - Si un archivo individual falla (ej. está corrupto), obtendrás un objeto con el campo `error_transacciones` detallando el problema.
+    - Si ocurre un error de servicio (ej. la API de IA no responde), toda la petición fallará con un código de error y un error global `ErrorRespuesta`.
+    """
     # ------- listas a usar más adelante -------
     tareas_analisis = []
     archivos_en_memoria = []

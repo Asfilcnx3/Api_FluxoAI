@@ -174,7 +174,7 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     
     resultados_ia_brutos = await asyncio.gather(tarea_gpt, tarea_gemini, return_exceptions=True)
 
-    res_gpt_str, res_gemini_str = resultados_ia_brutos
+    res_gpt_str, res_gemini_str = resultados_ia_brutos # la respuesta de gemini tiene un error en los tokens
 
     datos_gpt = extraer_json_del_markdown(res_gpt_str) if not isinstance(res_gpt_str, Exception) else {}
     datos_gemini = extraer_json_del_markdown(res_gemini_str) if not isinstance(res_gemini_str, Exception) else {}
