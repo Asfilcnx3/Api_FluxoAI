@@ -67,7 +67,7 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
     except json.JSONDecodeError:
         raise ValueError(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
 
-def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
+async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
     imagen_buffers = convertir_pdf_a_imagenes(pdf_bytes, paginas=paginas_a_procesar)
     if not imagen_buffers:
         return None
@@ -80,7 +80,7 @@ def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List
             "image_url": {"url": f"data:image/png;base64,{encoded_image}", "detail": detalle}
         })
     try:
-        response = client_gpt.chat.completions.create(
+        response = await client_gpt.chat.completions.create(
             model="gpt-5",
             messages=[{"role": "user", "content": content}],
             reasoning_effort=razonamiento
@@ -89,6 +89,50 @@ def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"El servicio de IA no está disponible: {e}")
 
+def limpiar_monto(monto: Any) -> float:
+    """
+    Convierte un monto de cualquier tipo (string, int, float) a un float limpio.
+    Maneja de forma segura valores como '$1,234.56', 1234, 1234.56, y None.
+    """
+    # Si ya es un número, simplemente lo convertimos a float y lo devolvemos.
+    if isinstance(monto, (int, float)):
+        return float(monto)
+
+    # Si es un string, aplicamos la lógica de limpieza.
+    if isinstance(monto, str):
+        # Elimina el símbolo de moneda, comas y espacios
+        monto_limpio = monto.replace('$', '').replace(',', '').strip()
+        try:
+            return float(monto_limpio)
+        except ValueError:
+            # Esto ocurre si el string está vacío o no es numérico después de limpiar
+            return 0.0
+        
+def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Toma el diccionario crudo de la IA y asegura que los tipos de datos
+    sean los correctos para el modelo Pydantic.
+    """
+    if not datos_crudos:
+        return {}
+
+    datos_limpios = datos_crudos.copy()
+
+    # --- Forzar campos a ser STRINGS ---
+    # Campos que deben ser strings (incluso si la IA los devuelve como números)
+    campos_str = ["dependencia", "secretaria", "numero_empleado", "puesto_cargo", "categoria", "periodo_inicio", "periodo_fin", "fecha_pago", "periodicidad"]
+    for campo in campos_str:
+        if campo in datos_limpios and datos_limpios[campo] is not None:
+            datos_limpios[campo] = str(datos_limpios[campo])
+
+    # --- Forzar campos a ser FLOATS ---
+    # Campos que deben ser números limpios
+    campos_float = ["salario_neto", "total_percepciones", "total_deducciones", "saldo_promedio"]
+    for campo in campos_float:
+        if campo in datos_limpios:
+            datos_limpios[campo] = limpiar_monto(datos_limpios[campo])
+            
+    return datos_limpios
 
 async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
     """
@@ -100,13 +144,15 @@ async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
         pdf_bytes = await archivo.read()
         
         # Analizar con GPT. Puede lanzar HTTPException (fatal) o ValueError (por archivo).
-        respuesta_gpt = analizar_portada_gpt(prompt_base, pdf_bytes)
+        respuesta_gpt = await analizar_portada_gpt(prompt_base, pdf_bytes)
         
         # Extraer JSON de la respuesta.
         datos_crudos = extraer_json_del_markdown(respuesta_gpt)
+
+        datos_listos = sanitizar_datos_ia(datos_crudos)
         
         # Si todo fue exitoso, devuelve los datos.
-        return NomiRes(**datos_crudos)
+        return NomiRes(**datos_listos)
 
     except Exception as e:
         # Si la excepción es HTTPException, se debe relanzar para que FastAPI la maneje como error global.
