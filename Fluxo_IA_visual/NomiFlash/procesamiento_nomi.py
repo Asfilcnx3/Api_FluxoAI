@@ -4,12 +4,12 @@ import json
 import re
 import os
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from fastapi import UploadFile, HTTPException
-from openai import AsyncOpenAI
+from openai import OpenAI
 from ..models import NomiRes, NomiErrorRespuesta
 
-client_gpt_nomi = AsyncOpenAI(
+client_gpt_nomi = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY_NOMI")
 )
 
@@ -76,7 +76,7 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
     except json.JSONDecodeError:
         raise ValueError(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
 
-async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
+def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
     imagen_buffers = convertir_pdf_a_imagenes(pdf_bytes, paginas=paginas_a_procesar)
     if not imagen_buffers:
         return None
@@ -89,7 +89,7 @@ async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar
             "image_url": {"url": f"data:image/png;base64,{encoded_image}", "detail": detalle}
         })
     try:
-        response = await client_gpt_nomi.chat.completions.create(
+        response = client_gpt_nomi.chat.completions.create(
             model="gpt-5",
             messages=[{"role": "user", "content": content}],
             reasoning_effort=razonamiento
@@ -143,17 +143,17 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
             
     return datos_limpios
 
-async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
+def _procesar_un_archivo(archivo: UploadFile) -> Union[NomiRes, NomiErrorRespuesta]:
     """
     Función auxiliar que procesa un solo archivo.
     Devuelve un objeto NomiRes en caso de éxito o NomiErrorRespuesta en caso de fallo.
     """
     try:
         # Leer contenido. Si falla, la excepción será capturada.
-        pdf_bytes = await archivo.read()
+        pdf_bytes = archivo.file.read()
         
         # Analizar con GPT. Puede lanzar HTTPException (fatal) o ValueError (por archivo).
-        respuesta_gpt = await analizar_portada_gpt(prompt_base, pdf_bytes)
+        respuesta_gpt = analizar_portada_gpt(prompt_base, pdf_bytes)
         
         # Extraer JSON de la respuesta.
         datos_crudos = extraer_json_del_markdown(respuesta_gpt)

@@ -29,7 +29,7 @@ Esta actualización agregó más robustes a los bancos 'Azteca', 'Inbursa', 'Afi
 
 ## Actualizacion 8-12
 
-En esta actualización se agrega un router a la API para el mismo cliente pero con otras reglas de negocio para la extracción, estas nuevas reglas que sigue son para un negocio llamado "NomiFlash".
+En esta actualización se agrega un router a la API para el mismo cliente pero con otras reglas de negocio para la extracción, estas nuevas reglas que sigue son para un negocio llamado "NomiFlash". Este router es diferente porque es Sincrono, no usa await y solo puede recibir 1 parametro de entrada.
 
 ## Referencias de la API
 
