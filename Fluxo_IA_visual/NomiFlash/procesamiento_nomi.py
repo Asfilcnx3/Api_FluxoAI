@@ -13,7 +13,6 @@ client_gpt_nomi = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY_NOMI")
 )
 
-
 prompt_base = """
 Esta imágen es de la primera páginas de un recibo de nómina, pueden venir gráficos o tablas.
 
@@ -28,7 +27,7 @@ Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumplien
 Campos a extraer:
 
 - nombre
-- rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c"
+- rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c", los primeros 10 caracteres del rfc y curp son iguales
 - curp # es un código de 4 letras, 6 números, 6 letras y 2 números
 - dependencia # (ejemplo: 'Gobierno del Estado de Puebla' o 'SNTE')
 - secretaria # Secretaría o institución pública
@@ -42,8 +41,10 @@ Campos a extraer:
 - periodo_fin # Devuelve en formato "2025-12-25"
 - fecha_pago # Devuelve en formato "2025-12-25"
 - periodicidad # (ejemplo: "Quincenal", "Mensual") es la cantidad de días entre periodo_inicio y periodo_fin
+- error_lectura # Null por defecto
 
 Ignora cualquier otra parte del documento. No infieras ni estimes valores.
+En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura" un "Documento sin coincidencias" 
 """
 
 # --- FUNCIONES AUXILIARES ---

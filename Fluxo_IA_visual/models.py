@@ -48,3 +48,4 @@ class NomiRes(BaseModel):
     periodo_fin: Optional[str] = None
     fecha_pago: Optional[str] = None
     periodicidad: Optional[str] = None
+    error_lectura: Optional[str] = None
