@@ -7,6 +7,10 @@ class ArchivoPDF(BaseModel):
 class ErrorRespuesta(BaseModel):
     error: str
 
+class NomiErrorRespuesta(BaseModel):
+    filename: str
+    error: str
+
 class Transaccion(BaseModel):
     fecha: str
     descripcion: str
@@ -29,6 +33,9 @@ class Resultado(BaseModel):
     error_transacciones: Optional[str] = None
 
 class NomiRes(BaseModel):
+    nombre: Optional[str] = None
+    rfc: Optional[str] = None
+    curp: Optional[str] = None
     dependencia: Optional[str] = None
     secretaria: Optional[str] = None
     numero_empleado: Optional[str] = None
@@ -41,4 +48,3 @@ class NomiRes(BaseModel):
     periodo_fin: Optional[str] = None
     fecha_pago: Optional[str] = None
     periodicidad: Optional[str] = None
-    error_nomina_transaccion: Optional[str] = None

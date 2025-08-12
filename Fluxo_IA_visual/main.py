@@ -26,7 +26,7 @@ async def home():
 
 # Endpoint principal 
 @app.post(
-        "fluxo/procesar_pdf/", 
+        "/fluxo/procesar_pdf/", 
         response_model=List[Union[Resultado, ErrorRespuesta]],
         summary="(API principal) Extrae estructurados de trasacciones TPV en PDF."
     )

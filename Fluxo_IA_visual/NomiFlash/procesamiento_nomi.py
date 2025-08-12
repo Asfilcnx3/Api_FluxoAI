@@ -2,11 +2,17 @@ import fitz
 import base64
 import json
 import re
+import os
 from io import BytesIO
 from typing import List, Dict, Any
 from fastapi import UploadFile, HTTPException
-from ..procesamiento.regex_engine import client_gpt
-from ..models import NomiRes
+from openai import AsyncOpenAI
+from ..models import NomiRes, NomiErrorRespuesta
+
+client_gpt_nomi = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY_NOMI")
+)
+
 
 prompt_base = """
 Esta imágen es de la primera páginas de un recibo de nómina, pueden venir gráficos o tablas.
@@ -21,6 +27,9 @@ Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumplien
 
 Campos a extraer:
 
+- nombre
+- rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c"
+- curp # es un código de 4 letras, 6 números, 6 letras y 2 números
 - dependencia # (ejemplo: 'Gobierno del Estado de Puebla' o 'SNTE')
 - secretaria # Secretaría o institución pública
 - numero_empleado # puede aparecer como  'NO. EMPLEADO'
@@ -80,7 +89,7 @@ async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar
             "image_url": {"url": f"data:image/png;base64,{encoded_image}", "detail": detalle}
         })
     try:
-        response = await client_gpt.chat.completions.create(
+        response = await client_gpt_nomi.chat.completions.create(
             model="gpt-5",
             messages=[{"role": "user", "content": content}],
             reasoning_effort=razonamiento
@@ -120,7 +129,7 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
 
     # --- Forzar campos a ser STRINGS ---
     # Campos que deben ser strings (incluso si la IA los devuelve como números)
-    campos_str = ["dependencia", "secretaria", "numero_empleado", "puesto_cargo", "categoria", "periodo_inicio", "periodo_fin", "fecha_pago", "periodicidad"]
+    campos_str = ["nombre", "rfc", "curp", "dependencia", "secretaria", "numero_empleado", "puesto_cargo", "categoria", "periodo_inicio", "periodo_fin", "fecha_pago", "periodicidad"]
     for campo in campos_str:
         if campo in datos_limpios and datos_limpios[campo] is not None:
             datos_limpios[campo] = str(datos_limpios[campo])
@@ -137,7 +146,7 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
 async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
     """
     Función auxiliar que procesa un solo archivo.
-    Devuelve un objeto NomiRes, ya sea con datos o con un mensaje de error.
+    Devuelve un objeto NomiRes en caso de éxito o NomiErrorRespuesta en caso de fallo.
     """
     try:
         # Leer contenido. Si falla, la excepción será capturada.
@@ -149,6 +158,7 @@ async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
         # Extraer JSON de la respuesta.
         datos_crudos = extraer_json_del_markdown(respuesta_gpt)
 
+        # Sanitizamos los datos para que funcione perfectamente
         datos_listos = sanitizar_datos_ia(datos_crudos)
         
         # Si todo fue exitoso, devuelve los datos.
@@ -160,4 +170,7 @@ async def _procesar_un_archivo(archivo: UploadFile) -> NomiRes:
             raise
         
         # Para cualquier otro error (ValueError de conversión, etc.), lo reportamos en el campo de error del archivo.
-        return NomiRes(error_nomina_transaccion=f"Error procesando '{archivo.filename}': {e}")
+        return NomiErrorRespuesta(
+            filename=archivo.filename,
+            error=f"Error procesando el archivo: {str(e)[:200]}"
+        )

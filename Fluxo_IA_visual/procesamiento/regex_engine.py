@@ -11,8 +11,8 @@ import os
 
 load_dotenv()
 
-client_gpt = AsyncOpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+client_gpt_fluxo = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY_FLUXO")
 )
 
 client_openrouter = AsyncOpenAI(
@@ -85,7 +85,7 @@ async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar
                 "detail": "auto"
                 },
             })
-    response = await client_gpt.chat.completions.create(
+    response = await client_gpt_fluxo.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user","content": content}],
     )

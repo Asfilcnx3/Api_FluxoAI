@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
-from typing import List
-from ..models import NomiRes
+from typing import List, Union
+from ..models import NomiRes, NomiErrorRespuesta
 import asyncio
 from .procesamiento_nomi import _procesar_un_archivo
 
@@ -11,7 +11,7 @@ router = APIRouter(
 
 @router.post(
         "/extraer_datos",
-        response_model=List[NomiRes],
+        response_model=List[Union[NomiRes, NomiErrorRespuesta]],
         summary="(Demo de Prueba) Extrae datos de uno o más recibos de nómina en PDF."
 )
 async def procesar_nomina(
