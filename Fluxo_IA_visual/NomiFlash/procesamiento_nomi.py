@@ -1,20 +1,55 @@
 import fitz
-import base64
-import json
 import re
-import os
-from io import BytesIO
-from typing import List, Dict, Any, Union
-from fastapi import UploadFile, HTTPException
-from openai import OpenAI
-from ..models import NomiRes, NomiErrorRespuesta
+from typing import Optional, Tuple
+from fastapi import UploadFile
+from ..procesamiento.extractor import PDFCifradoError
+from .auxiliares_nomi import analizar_portada_gpt, extraer_json_del_markdown, sanitizar_datos_ia
+from ..models import RespuestaComprobante, RespuestaEstado, RespuestaNomina
 
-client_gpt_nomi = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY_NOMI")
+def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
+    """
+    Extrae texto de las primeras 'num_paginas' de un PDF.
+    Si está encriptado, lanza PDFCifradoError.
+    """
+    texto_parcial = ''
+    try:
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            if doc.is_encrypted:
+                raise PDFCifradoError("El documento está protegido por contraseña.")
+            for i in range(min(len(doc), num_paginas)):
+                texto_parcial += doc[i].get_text(sort=True).lower() + '\n'
+    except PDFCifradoError:
+        raise
+    except Exception as e:
+        print(f"Error durante la extracción limitada de texto con fitz: {e}")
+        raise RuntimeError(f"No se pudo leer el contenido del PDF: {e}")
+    return texto_parcial
+
+# Creamos el diccionario de patrones compilados
+RFC_CURP_PATTERNS_COMPILADOS = re.compile(
+    r"r\.?f\.?c\.?\s+(?P<RFC>[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})"
+    r".*?curp:\s*(?P<CURP>[A-Z]{4}\d{6}[HM][A-Z]{5}\d{2})",
+    re.IGNORECASE | re.DOTALL
 )
+def extraer_rfc_curp_por_texto(texto: str) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Busca el RFC y/o el CURP en el texto. Devuelve siempre una tupla de dos elementos.
+    """
+    if not texto:
+        return None, None
+    
+    rfc, curp = None, None
+    coincidencias = RFC_CURP_PATTERNS_COMPILADOS.finditer(texto)
+    for match in coincidencias:
+        if match.group("RFC"):
+            rfc = match.group("RFC").upper()
+        if match.group("CURP"):
+            curp = match.group("CURP").upper()
+            
+    return rfc, curp
 
-prompt_base = """
-Esta imágen es de la primera páginas de un recibo de nómina, pueden venir gráficos o tablas.
+PROMPT_NOMINA = """
+Esta imágen es de la primera página de un recibo de nómina, pueden venir gráficos o tablas.
 
 En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
 
@@ -41,137 +76,118 @@ Campos a extraer:
 - periodo_fin # Devuelve en formato "2025-12-25"
 - fecha_pago # Devuelve en formato "2025-12-25"
 - periodicidad # (ejemplo: "Quincenal", "Mensual") es la cantidad de días entre periodo_inicio y periodo_fin
-- error_lectura # Null por defecto
+- error_lectura_nomina # Null por defecto
 
 Ignora cualquier otra parte del documento. No infieras ni estimes valores.
-En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura" un "Documento sin coincidencias" 
+En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_nomina" un "Documento sin coincidencias" 
 """
 
-# --- FUNCIONES AUXILIARES ---
-def convertir_pdf_a_imagenes(pdf_bytes: bytes, paginas: List[int] = [1]) -> List[BytesIO]:
-    buffers_imagenes = []
-    matriz_escala = fitz.Matrix(2, 2)  # Aumentar resolución
+PROMPT_ESTADO_CUENTA = """
+Estas son las primeras 2 páginas de un recibo de cuenta, pueden venir gráficos o tablas.
 
-    try:
-        documento = fitz.open(stream=pdf_bytes, filetype="pdf")
-        for num_pagina in paginas:
-            if 0 <= num_pagina - 1 < len(documento):
-                pagina = documento.load_page(num_pagina - 1)
-                pix = pagina.get_pixmap(matrix=matriz_escala)
-                img_bytes = pix.tobytes("png")
-                buffers_imagenes.append(BytesIO(img_bytes))
-            else:
-                print(f"Advertencia: Página {num_pagina} fuera de rango.")
-        documento.close()
-    except Exception as e:
-        # Lanza un error estándar que será atrapado y reportado por archivo
-        raise ValueError(f"No se pudo procesar el archivo como PDF: {e}")
+En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
 
-    return buffers_imagenes
+Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumpliendo estas reglas:
 
-def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
-    json_match = re.search(r'```json\s*(\{.*?\})\s*```', respuesta, re.DOTALL)
-    json_string = json_match.group(1) if json_match else respuesta
-    try:
-        return json.loads(json_string)
-    except json.JSONDecodeError:
-        raise ValueError(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
+- Los valores tipo string deben estar completamente en MAYÚSCULAS.
+- Los valores numéricos deben devolverse como número sin símbolos ni comas (por ejemplo, "$31,001.00" debe devolverse como 31001.00).
+- Si hay varios RFC, el válido es el que aparece junto al nombre y dirección del cliente.
 
-def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
-    imagen_buffers = convertir_pdf_a_imagenes(pdf_bytes, paginas=paginas_a_procesar)
-    if not imagen_buffers:
-        return None
+Campos a extraer:
 
-    content = [{"type": "text", "text": prompt}]
-    for buffer in imagen_buffers:
-        encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
-        content.append({
-            "type": "image_url",
-            "image_url": {"url": f"data:image/png;base64,{encoded_image}", "detail": detalle}
-        })
-    try:
-        response = client_gpt_nomi.chat.completions.create(
-            model="gpt-5",
-            messages=[{"role": "user", "content": content}],
-            reasoning_effort=razonamiento
-        )
-        return response.choices[0].message.content  
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"El servicio de IA no está disponible: {e}")
+- clabe # el número de cuenta clabe del usuario/cliente, puede aparecer como 'No. cuenta CLABE'
+- nombre_usuario # el nombre del usuario/cliente
+- rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c"
+- numero_cuenta # el número de cuenta, puede aparecer como 'No. de Cuenta'
+- error_lectura_estado # Null por defecto
 
-def limpiar_monto(monto: Any) -> float:
+Ignora cualquier otra parte del documento. No infieras ni estimes valores.
+En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_estado" un "Documento sin coincidencias" 
+"""
+
+PROMPT_COMPROBANTE = """
+Esta imágen es de la primera página de un comprobante de domicilio, pueden venir gráficos o tablas.
+
+En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
+
+Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumpliendo estas reglas:
+
+- Los valores tipo string deben estar completamente en MAYÚSCULAS.
+- Los valores numéricos deben devolverse como número sin símbolos ni comas (por ejemplo, "$31,001.00" debe devolverse como 31001.00).
+- Si hay varios RFC, el válido es el que aparece junto al nombre y dirección del cliente.
+
+Campos a extraer:
+
+- domicilio # el domicilio completo, normalmente está junto al nombre del cliente
+- inicio_periodo # inicio del periodo facturado en formato "2025-12-25"
+- fin_periodo # fin del periodo facturado en formato "2025-12-25"
+
+Ignora cualquier otra parte del documento. No infieras ni estimes valores.
+En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_estado" un "Documento sin coincidencias" 
+"""
+
+# --- PROCESADOR PARA NÓMINA ---
+async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
     """
-    Convierte un monto de cualquier tipo (string, int, float) a un float limpio.
-    Maneja de forma segura valores como '$1,234.56', 1234, 1234.56, y None.
-    """
-    # Si ya es un número, simplemente lo convertimos a float y lo devolvemos.
-    if isinstance(monto, (int, float)):
-        return float(monto)
-
-    # Si es un string, aplicamos la lógica de limpieza.
-    if isinstance(monto, str):
-        # Elimina el símbolo de moneda, comas y espacios
-        monto_limpio = monto.replace('$', '').replace(',', '').strip()
-        try:
-            return float(monto_limpio)
-        except ValueError:
-            # Esto ocurre si el string está vacío o no es numérico después de limpiar
-            return 0.0
-        
-def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Toma el diccionario crudo de la IA y asegura que los tipos de datos
-    sean los correctos para el modelo Pydantic.
-    """
-    if not datos_crudos:
-        return {}
-
-    datos_limpios = datos_crudos.copy()
-
-    # --- Forzar campos a ser STRINGS ---
-    # Campos que deben ser strings (incluso si la IA los devuelve como números)
-    campos_str = ["nombre", "rfc", "curp", "dependencia", "secretaria", "numero_empleado", "puesto_cargo", "categoria", "periodo_inicio", "periodo_fin", "fecha_pago", "periodicidad"]
-    for campo in campos_str:
-        if campo in datos_limpios and datos_limpios[campo] is not None:
-            datos_limpios[campo] = str(datos_limpios[campo])
-
-    # --- Forzar campos a ser FLOATS ---
-    # Campos que deben ser números limpios
-    campos_float = ["salario_neto", "total_percepciones", "total_deducciones", "saldo_promedio"]
-    for campo in campos_float:
-        if campo in datos_limpios:
-            datos_limpios[campo] = limpiar_monto(datos_limpios[campo])
-            
-    return datos_limpios
-
-def _procesar_un_archivo(archivo: UploadFile) -> Union[NomiRes, NomiErrorRespuesta]:
-    """
-    Función auxiliar que procesa un solo archivo.
-    Devuelve un objeto NomiRes en caso de éxito o NomiErrorRespuesta en caso de fallo.
+    Función auxiliar que procesa los archivos de nómina siguiendo lógica de negocio interna.
+    Tiene comprobación interna con regex para más precisión (RFC Y CURP)
+    Devuelve un objeto RespuestaNomina en caso de éxito o error_lectura_nomina en caso de fallo.
     """
     try:
         # Leer contenido. Si falla, la excepción será capturada.
-        pdf_bytes = archivo.file.read()
-        
-        # Analizar con GPT. Puede lanzar HTTPException (fatal) o ValueError (por archivo).
-        respuesta_gpt = analizar_portada_gpt(prompt_base, pdf_bytes)
-        
-        # Extraer JSON de la respuesta.
-        datos_crudos = extraer_json_del_markdown(respuesta_gpt)
+        pdf_bytes = await archivo.read()
 
-        # Sanitizamos los datos para que funcione perfectamente
+        # --- Lógica de negocio específica para Nómina ---
+        # 1. Extraemos texto para la validación con regex
+        texto_inicial = extraer_texto_limitado(pdf_bytes)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial)
+        
+        # 2. Analizamos con la IA usando el prompt de nómina
+        respuesta_gpt = await analizar_portada_gpt(PROMPT_NOMINA, pdf_bytes)
+        datos_crudos = extraer_json_del_markdown(respuesta_gpt)
         datos_listos = sanitizar_datos_ia(datos_crudos)
+
+        # --- Lógica de corrección específica para Nómina ---
+        # 3. Sobrescribimos los datos de la IA con los de la regex (más fiables)
+        if rfc:
+            datos_listos["rfc"] = rfc
+        if curp:
+            datos_listos["curp"] = curp
         
         # Si todo fue exitoso, devuelve los datos.
-        return NomiRes(**datos_listos)
+        return RespuestaNomina(**datos_listos)
 
     except Exception as e:
-        # Si la excepción es HTTPException, se debe relanzar para que FastAPI la maneje como error global.
-        if isinstance(e, HTTPException):
-            raise
-        
-        # Para cualquier otro error (ValueError de conversión, etc.), lo reportamos en el campo de error del archivo.
-        return NomiErrorRespuesta(
-            filename=archivo.filename,
-            error=f"Error procesando el archivo: {str(e)[:200]}"
-        )
+        # Error por procesamiento
+        return RespuestaNomina(error_lectura_nomina=f"Error procesando '{archivo.filename}': {e}")
+    
+# --- PROCESADOR PARA ESTADO DE CUENTA ---
+async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
+    """
+    Procesa un archivo de estado de cuenta.
+    Devuelve un objeto RespuestaEstado en caso de éxito o error_lectura_estado en caso de fallo.
+    """
+    try:
+        pdf_bytes = await archivo.read()
+        respuesta_ia = await analizar_portada_gpt(PROMPT_ESTADO_CUENTA, pdf_bytes, [2])
+        datos_crudos = extraer_json_del_markdown(respuesta_ia)
+        datos_listos = sanitizar_datos_ia(datos_crudos)
+        return RespuestaEstado(**datos_listos)
+    except Exception as e:
+        return RespuestaEstado(error_lectura_estado=f"Error procesando '{archivo.filename}': {e}")
+    
+
+# --- PROCESADOR PARA COMPROBANTE DE DOMICILIO ---
+async def procesar_comprobante(archivo: UploadFile) -> RespuestaComprobante:
+    """
+    Procesa un archivo de comprobante de domicilio.
+    Devuelve un objeto RespuestaComprobante en caso de éxito o error_lectura_comprobante en caso de fallo.
+    """
+    try:
+        pdf_bytes = await archivo.read()
+        respuesta_ia = await analizar_portada_gpt(PROMPT_COMPROBANTE, pdf_bytes)
+        datos_crudos = extraer_json_del_markdown(respuesta_ia)
+        datos_listos = sanitizar_datos_ia(datos_crudos)
+        return RespuestaComprobante(**datos_listos)
+    except Exception as e:
+        return RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")

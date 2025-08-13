@@ -11,3 +11,4 @@ PyMuPDF
 pdfplumber
 pytesseract
 Pillow
+python-dateutil

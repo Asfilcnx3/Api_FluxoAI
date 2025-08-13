@@ -8,7 +8,6 @@ class ErrorRespuesta(BaseModel):
     error: str
 
 class NomiErrorRespuesta(BaseModel):
-    filename: str
     error: str
 
 class Transaccion(BaseModel):
@@ -32,7 +31,7 @@ class Resultado(BaseModel):
     transacciones: List[Transaccion] = []
     error_transacciones: Optional[str] = None
 
-class NomiRes(BaseModel):
+class RespuestaNomina(BaseModel):
     nombre: Optional[str] = None
     rfc: Optional[str] = None
     curp: Optional[str] = None
@@ -48,4 +47,24 @@ class NomiRes(BaseModel):
     periodo_fin: Optional[str] = None
     fecha_pago: Optional[str] = None
     periodicidad: Optional[str] = None
-    error_lectura: Optional[str] = None
+    error_lectura_nomina: Optional[str] = None
+
+class RespuestaEstado(BaseModel):
+    clabe: Optional[str] = None
+    nombre_usuario: Optional[str] = None
+    rfc: Optional[str] = None
+    numero_cuenta: Optional[str] = None
+    error_lectura_estado: Optional[str] = None
+
+class RespuestaComprobante(BaseModel):
+    domicilio: Optional[str] = None
+    inicio_periodo: Optional[str] = None
+    fin_periodo: Optional[str] = None
+    error_lectura_comprobante: Optional[str] = None
+
+class ResultadoConsolidado(BaseModel):
+    Nomina: Optional[RespuestaNomina] = None
+    Estado: Optional[RespuestaEstado] = None
+    Comprobante: Optional[RespuestaComprobante] = None
+    es_menor_a_3_meses: Optional[bool] = None
+    el_rfc_es_igual: Optional[bool] = None    

@@ -27,9 +27,9 @@ El ocr que se usa es Pytesseract con Tesseract-OCR
 
 Esta actualización agregó más robustes a los bancos 'Azteca', 'Inbursa', 'Afirme', 'BBVA', 'Multiva' e 'Intercam', mejorando la forma en la que algunos detectan transacciones y creando un soporte para bancos sin descripción anteriores como intercam e inbursa. La actualización trae consigo 2 bugs posibles, uno en BBVA con un inicio de concepto que puede ser el mismo que otros pero sin ser necesario escanear y eso causa fallos mínimos (no detectar 1 o 2 conceptos por PDF) y el otro es con el banco AFIRME, el error es a proposito ya que el banco tiene un tipo de outlier y en ese pdf la fecha y descripcion están volteadas.
 
-## Actualizacion 8-12
+## Actualizacion 8-12 y 8-13
 
-En esta actualización se agrega un router a la API para el mismo cliente pero con otras reglas de negocio para la extracción, estas nuevas reglas que sigue son para un negocio llamado "NomiFlash". Este router es diferente porque es Sincrono, no usa await y solo puede recibir 1 parametro de entrada.
+En esta actualización se agrega un router a la API para el mismo cliente pero con otras reglas de negocio para la extracción, estas nuevas reglas que sigue son para un negocio llamado "NomiFlash". Este router es asincrono, lo que hace que se analicen las llamadas en paralelo por la API de OpenAI, los parametros a analizar son 3 y siguen reglas de negocio al finalizar la estracción.
 
 ## Referencias de la API
 

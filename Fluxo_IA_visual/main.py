@@ -14,7 +14,7 @@ load_dotenv()
 
 app = FastAPI(
     title="Procesamiento de entradas (TPV o Nómina)",
-    version="1.0.3"
+    version="1.1.1"
 ) 
 prompt = prompt_base
 
