@@ -31,6 +31,9 @@ Esta actualización agregó más robustes a los bancos 'Azteca', 'Inbursa', 'Afi
 
 En esta actualización se agrega un router a la API para el mismo cliente pero con otras reglas de negocio para la extracción, estas nuevas reglas que sigue son para un negocio llamado "NomiFlash". Este router es asincrono, lo que hace que se analicen las llamadas en paralelo por la API de OpenAI, los parametros a analizar son 3 y siguen reglas de negocio al finalizar la estracción.
 
+## Actualización 8-18
+Esta actualización agrega la lectura de QR por medio de una librería que maneja imagenes, se cambió un poco la forma de analizar cada estado de cuentas y el resultado se agregó lo que el qr trae por defecto.
+
 ## Referencias de la API
 
 ### Variables de entorno
