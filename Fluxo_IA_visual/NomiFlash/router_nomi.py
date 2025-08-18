@@ -26,7 +26,7 @@ async def procesar_documentos_consolidados(
     Sube uno o más archivos PDF. El sistema procesa todos en paralelo y devuelve una lista de resultados.
     
     - Si un archivo se procesa correctamente, obtendrás los datos extraídos.
-    - Si un archivo individual falla (ej. está corrupto), obtendrás un objeto con el campo `error_nomina_transaccion` detallando el problema.
+    - Si un archivo individual falla (ej. está corrupto), obtendrás un objeto con el campo `error_lectura` detallando el problema.
     - Si ocurre un error de servicio (ej. la API de IA no responde), toda la petición fallará con un código de error 503.
     """
     try:

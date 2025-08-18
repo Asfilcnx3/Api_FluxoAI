@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
 import base64
 import fitz
@@ -8,6 +8,8 @@ import os
 import re
 from openai import AsyncOpenAI
 from ..models import ResultadoConsolidado
+from pyzbar.pyzbar import decode
+from PIL import Image
 
 client_gpt_nomi = AsyncOpenAI(
     api_key=os.getenv("OPENAI_API_KEY_NOMI")
@@ -38,6 +40,27 @@ def convertir_pdf_a_imagenes(pdf_bytes: bytes, paginas: List[int] = [1]) -> List
 
     return buffers_imagenes
 
+
+def leer_qr_de_imagenes(imagen_buffers: List[BytesIO]) -> Optional[str]:
+    """
+    Lee una lista de imágenes en memoria y devuelve el contenido del primer QR que encuentre.
+    """
+    for buffer in imagen_buffers:
+        # Reiniciamos el puntero del buffer para que PIL pueda leerlo
+        buffer.seek(0)
+        imagen = Image.open(buffer)
+
+        # 'decode' busca todos los códigos de barras/QR en la imagen
+        codigos_encontrados = decode(imagen)
+
+        if codigos_encontrados:
+            # Devolvemos el dato del primer código encontrado, decodificado a string
+            primer_codigo = codigos_encontrados[0].data.decode("utf-8")
+            return primer_codigo
+
+    print("No se encontró ningún código QR en las imágenes.")
+    return None # No se encontró ningún QR en ninguna imagen
+
 def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
     json_match = re.search(r'```json\s*(\{.*?\})\s*```', respuesta, re.DOTALL)
     json_string = json_match.group(1) if json_match else respuesta
@@ -46,13 +69,18 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
     except json.JSONDecodeError:
         raise ValueError(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
 
-async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int] = [1], razonamiento: str = "low", detalle: str = "high") -> str:
-    imagen_buffers = convertir_pdf_a_imagenes(pdf_bytes, paginas=paginas_a_procesar)
+async def analizar_portada_gpt(
+        prompt: str, 
+        imagen_buffers: List[BytesIO], 
+        razonamiento: str = "low", 
+        detalle: str = "high"
+    ) -> str:
     if not imagen_buffers:
         return None
 
     content = [{"type": "text", "text": prompt}]
     for buffer in imagen_buffers:
+        buffer.seek(0)
         encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
         content.append({
             "type": "image_url",

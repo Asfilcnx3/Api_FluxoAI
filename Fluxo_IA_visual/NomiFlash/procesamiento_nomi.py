@@ -1,9 +1,11 @@
 import fitz
 import re
+import asyncio
+from io import BytesIO
 from typing import Optional, Tuple
 from fastapi import UploadFile
 from ..procesamiento.extractor import PDFCifradoError
-from .auxiliares_nomi import analizar_portada_gpt, extraer_json_del_markdown, sanitizar_datos_ia
+from .auxiliares_nomi import analizar_portada_gpt, extraer_json_del_markdown, sanitizar_datos_ia, convertir_pdf_a_imagenes, leer_qr_de_imagenes
 from ..models import RespuestaComprobante, RespuestaEstado, RespuestaNomina
 
 def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
@@ -141,14 +143,28 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
         # 1. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_limitado(pdf_bytes)
         rfc, curp = extraer_rfc_curp_por_texto(texto_inicial)
+
+        # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
+        loop = asyncio.get_running_loop()
+
+        imagen_buffers = await loop.run_in_executor(
+            None, convertir_pdf_a_imagenes, pdf_bytes
+        )
+
+        # 2.5 Leemos el QR de las imágenes (lógica condicional aquí)
+        datos_qr = await loop.run_in_executor(
+            None, leer_qr_de_imagenes, imagen_buffers
+        )
         
-        # 2. Analizamos con la IA usando el prompt de nómina
-        respuesta_gpt = await analizar_portada_gpt(PROMPT_NOMINA, pdf_bytes)
+        # 3. Analizamos con la IA usando el prompt de nómina y las mismas imagenes
+        respuesta_gpt = await analizar_portada_gpt(PROMPT_NOMINA, imagen_buffers)
         datos_crudos = extraer_json_del_markdown(respuesta_gpt)
         datos_listos = sanitizar_datos_ia(datos_crudos)
 
         # --- Lógica de corrección específica para Nómina ---
         # 3. Sobrescribimos los datos de la IA con los de la regex (más fiables)
+        if datos_qr:
+            datos_listos["datos_qr"] = datos_qr
         if rfc:
             datos_listos["rfc"] = rfc
         if curp:
@@ -164,18 +180,57 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
 # --- PROCESADOR PARA ESTADO DE CUENTA ---
 async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
     """
-    Procesa un archivo de estado de cuenta.
-    Devuelve un objeto RespuestaEstado en caso de éxito o error_lectura_estado en caso de fallo.
+    Procesa un estado de cuenta, analizando la primera, segunda y última página.
+    Ejecuta la lectura de QR y el análisis de IA en paralelo para mayor eficiencia.
     """
     try:
         pdf_bytes = await archivo.read()
-        respuesta_ia = await analizar_portada_gpt(PROMPT_ESTADO_CUENTA, pdf_bytes, [2])
-        datos_crudos = extraer_json_del_markdown(respuesta_ia)
+        loop = asyncio.get_running_loop()
+
+        # --- 1. Determinar dinámicamente las páginas a procesar ---
+        paginas_a_procesar = []
+        try:
+            # Abrimos el PDF brevemente solo para contar las páginas
+            with fitz.open(stream=BytesIO(pdf_bytes), filetype="pdf") as doc:
+                total_paginas = len(doc)
+            
+            # Creamos la lista: [1, 2, ultima_pagina]
+            # Usamos set para manejar PDFs cortos (ej. de 1 o 2 páginas) sin duplicados.
+            paginas_a_procesar = sorted(list(set([1, 2, total_paginas])))
+            print(f"Procesando páginas {paginas_a_procesar} para '{archivo.filename}'")
+            
+        except Exception as e:
+            # Si falla, usamos un valor seguro por defecto
+            print(f"No se pudo determinar el total de páginas para '{archivo.filename}': {e}. Usando páginas [1, 2].")
+            paginas_a_procesar = [1, 2]
+
+        # --- 2. Convertir solo las páginas necesarias a imágenes ---
+        imagen_buffers = await loop.run_in_executor(
+            None, convertir_pdf_a_imagenes, pdf_bytes, paginas_a_procesar
+        )
+        if not imagen_buffers:
+            raise ValueError("No se pudieron generar imágenes del PDF.")
+
+        # --- 3. Ejecutar LECTURA DE QR y ANÁLISIS DE IA en paralelo ---
+        # Creamos las dos tareas que dependen de las imágenes
+        tarea_qr = loop.run_in_executor(None, leer_qr_de_imagenes, imagen_buffers)
+        tarea_ia = analizar_portada_gpt(PROMPT_ESTADO_CUENTA, imagen_buffers)
+        
+        # Esperamos a que ambas terminen
+        resultados_paralelos = await asyncio.gather(tarea_qr, tarea_ia)
+        datos_qr, respuesta_ia_str = resultados_paralelos
+
+        # --- 4. Combinar los resultados ---
+        datos_crudos = extraer_json_del_markdown(respuesta_ia_str)
         datos_listos = sanitizar_datos_ia(datos_crudos)
+
+        if datos_qr:
+            datos_listos["datos_qr"] = datos_qr
+
         return RespuestaEstado(**datos_listos)
+
     except Exception as e:
         return RespuestaEstado(error_lectura_estado=f"Error procesando '{archivo.filename}': {e}")
-    
 
 # --- PROCESADOR PARA COMPROBANTE DE DOMICILIO ---
 async def procesar_comprobante(archivo: UploadFile) -> RespuestaComprobante:
@@ -185,7 +240,15 @@ async def procesar_comprobante(archivo: UploadFile) -> RespuestaComprobante:
     """
     try:
         pdf_bytes = await archivo.read()
-        respuesta_ia = await analizar_portada_gpt(PROMPT_COMPROBANTE, pdf_bytes)
+
+        # 1. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
+        loop = asyncio.get_running_loop()
+
+        imagen_buffers = await loop.run_in_executor(
+            None, convertir_pdf_a_imagenes, pdf_bytes
+        )
+
+        respuesta_ia = await analizar_portada_gpt(PROMPT_COMPROBANTE, imagen_buffers)
         datos_crudos = extraer_json_del_markdown(respuesta_ia)
         datos_listos = sanitizar_datos_ia(datos_crudos)
         return RespuestaComprobante(**datos_listos)

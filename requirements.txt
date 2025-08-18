@@ -12,3 +12,4 @@ pdfplumber
 pytesseract
 Pillow
 python-dateutil
+pyzbar

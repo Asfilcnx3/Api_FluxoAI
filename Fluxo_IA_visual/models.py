@@ -32,6 +32,7 @@ class Resultado(BaseModel):
     error_transacciones: Optional[str] = None
 
 class RespuestaNomina(BaseModel):
+    datos_qr: Optional[str] = None
     nombre: Optional[str] = None
     rfc: Optional[str] = None
     curp: Optional[str] = None
@@ -50,6 +51,7 @@ class RespuestaNomina(BaseModel):
     error_lectura_nomina: Optional[str] = None
 
 class RespuestaEstado(BaseModel):
+    datos_qr: Optional[str] = None
     clabe: Optional[str] = None
     nombre_usuario: Optional[str] = None
     rfc: Optional[str] = None
