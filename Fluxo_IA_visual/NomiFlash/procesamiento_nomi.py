@@ -66,8 +66,8 @@ Campos a extraer:
 - nombre
 - rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c", los primeros 10 caracteres del rfc y curp son iguales
 - curp # es un código de 4 letras, 6 números, 6 letras y 2 números
-- dependencia # (ejemplo: 'Gobierno del Estado de Puebla' o 'SNTE')
-- secretaria # Secretaría o institución pública
+- dependencia # Secretaría o institución pública
+- secretaria # (ejemplo: 'Gobierno del Estado de Puebla' o 'SNTE')
 - numero_empleado # puede aparecer como  'NO. EMPLEADO'
 - puesto_cargo # Puesto o cargo, puede aparecer como 'DESCRIPCIÓN DEL PUESTO'
 - categoria # (ejemplo: "07", "08", "T")
@@ -77,7 +77,7 @@ Campos a extraer:
 - periodo_inicio # Devuelve en formato "2025-12-25"
 - periodo_fin # Devuelve en formato "2025-12-25"
 - fecha_pago # Devuelve en formato "2025-12-25"
-- periodicidad # (ejemplo: "Quincenal", "Mensual") es la cantidad de días entre periodo_inicio y periodo_fin
+- periodicidad # (es la cantidad de días entre periodo_inicio y periodo_fin pero en palabra, ejemplo: "Quincenal", "Mensual") 
 - error_lectura_nomina # Null por defecto
 
 Ignora cualquier otra parte del documento. No infieras ni estimes valores.
@@ -151,6 +151,9 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
             None, convertir_pdf_a_imagenes, pdf_bytes
         )
 
+        if not imagen_buffers:
+            raise ValueError("No se pudieron generar imágenes del PDF.")
+
         # 2.5 Leemos el QR de las imágenes (lógica condicional aquí)
         datos_qr = await loop.run_in_executor(
             None, leer_qr_de_imagenes, imagen_buffers
@@ -211,19 +214,17 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
         if not imagen_buffers:
             raise ValueError("No se pudieron generar imágenes del PDF.")
 
-        # --- 3. Ejecutar LECTURA DE QR y ANÁLISIS DE IA en paralelo ---
-        # Creamos las dos tareas que dependen de las imágenes
-        tarea_qr = loop.run_in_executor(None, leer_qr_de_imagenes, imagen_buffers)
-        tarea_ia = analizar_portada_gpt(PROMPT_ESTADO_CUENTA, imagen_buffers)
+        # 2.5 Leemos el QR de las imágenes (lógica condicional aquí)
+        datos_qr = await loop.run_in_executor(
+            None, leer_qr_de_imagenes, imagen_buffers
+        )
         
-        # Esperamos a que ambas terminen
-        resultados_paralelos = await asyncio.gather(tarea_qr, tarea_ia)
-        datos_qr, respuesta_ia_str = resultados_paralelos
-
-        # --- 4. Combinar los resultados ---
-        datos_crudos = extraer_json_del_markdown(respuesta_ia_str)
+        # 3. Analizamos con la IA usando el prompt de nómina y las mismas imagenes
+        respuesta_gpt = await analizar_portada_gpt(PROMPT_ESTADO_CUENTA, imagen_buffers)
+        datos_crudos = extraer_json_del_markdown(respuesta_gpt)
         datos_listos = sanitizar_datos_ia(datos_crudos)
 
+        # --- Lógica de corrección específica para Nómina ---
         if datos_qr:
             datos_listos["datos_qr"] = datos_qr
 
@@ -252,5 +253,6 @@ async def procesar_comprobante(archivo: UploadFile) -> RespuestaComprobante:
         datos_crudos = extraer_json_del_markdown(respuesta_ia)
         datos_listos = sanitizar_datos_ia(datos_crudos)
         return RespuestaComprobante(**datos_listos)
+    
     except Exception as e:
         return RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")
