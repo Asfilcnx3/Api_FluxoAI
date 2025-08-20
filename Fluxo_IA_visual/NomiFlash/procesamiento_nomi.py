@@ -97,7 +97,7 @@ Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumplien
 
 Campos a extraer:
 
-- clabe # el número de cuenta clabe del usuario/cliente, puede aparecer como 'No. cuenta CLABE'
+- clabe # puede iniciar con 0 el número de cuenta clabe del usuario/cliente, puede aparecer como 'No. cuenta CLABE', extraelo todo
 - nombre_usuario # el nombre del usuario/cliente
 - rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c"
 - numero_cuenta # el número de cuenta, puede aparecer como 'No. de Cuenta'
