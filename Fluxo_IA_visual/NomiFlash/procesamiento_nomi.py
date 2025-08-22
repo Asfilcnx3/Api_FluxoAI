@@ -2,7 +2,7 @@ import fitz
 import re
 import asyncio
 from io import BytesIO
-from typing import Optional, Tuple, Pattern
+from typing import Optional, Tuple, List, Dict
 from fastapi import UploadFile
 from ..procesamiento.extractor import PDFCifradoError
 from .auxiliares_nomi import analizar_portada_gpt, extraer_json_del_markdown, sanitizar_datos_ia, convertir_pdf_a_imagenes, leer_qr_de_imagenes
@@ -27,34 +27,42 @@ def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
         raise RuntimeError(f"No se pudo leer el contenido del PDF: {e}")
     return texto_parcial
 
-# Creamos el diccionario de patrones compilados
-PATTERNS_COMPILADOS_NOMINA = re.compile(
-    r"r\.?f\.?c\.?\s+(?P<RFC>[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})"
-    r".*?curp:\s*(?P<CURP>[A-Z]{4}\d{6}[HM][A-Z]{5}\d{2})",
-    re.IGNORECASE | re.DOTALL
-)
+# Diccionario de regex para RFC y CURP por tipo de documento
+PATTERNS_COMPILADOS_RFC_CURP: Dict[str, Dict[str, re.Pattern]] = {
+    "RFC": {
+        "nomina": re.compile(r"r\.?f\.?c\.?\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3})"),
+        "estado": re.compile(r"r\.?f\.?c\.?:\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3})"),
+    },
+    "CURP": {
+        "nomina": re.compile(r"curp:\s*([a-z]{4}\d{6}[hm][a-z]{5}\d{2})"),
+        "estado": re.compile(r"curp:\s*([a-z]{4}\d{6}[hm][a-z]{5}\d{2})"),  # si aplica para estado
+    }
+}
 
-PATTERNS_COMPILADOS_ESTADO = re.compile(
-    r"r?f\.?c\.?:\s+(?P<RFC>[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})",
-    re.IGNORECASE | re.DOTALL
-)
+def extraer_rfc_curp_por_texto(texto: str, tipo_doc: str) -> Tuple[List[str], List[str]]:
+    """
+    Busca RFC y/o CURP en el texto probando solo los patrones 
+    definidos para el tipo de documento indicado (ej: 'nomina', 'estado').
+    Devuelve dos listas: [RFCs encontrados], [CURPs encontrados].
+    """
+    if not texto or not tipo_doc:
+        return [], []
 
-def extraer_rfc_curp_por_texto(texto: str, tipo_patron_compilado: Pattern) -> Tuple[Optional[str], Optional[str]]:
-    """
-    Busca el RFC y/o el CURP en el texto. Devuelve siempre una tupla de dos elementos.
-    """
-    if not texto:
-        return None, None
-    
-    rfc, curp = None, None
-    coincidencias = tipo_patron_compilado.finditer(texto)
-    for match in coincidencias:
-        if match.groupdict().get("RFC"):
-            rfc = match.group("RFC").upper()
-        if match.groupdict().get("CURP"):
-            curp = match.group("CURP").upper()
-            
-    return rfc, curp
+    rfcs, curps = [], []
+
+    # Buscar RFCs para ese tipo de documento
+    patron_rfc = PATTERNS_COMPILADOS_RFC_CURP["RFC"].get(tipo_doc.lower())
+    if patron_rfc:
+        for match in patron_rfc.finditer(texto):
+            rfcs.append(match.group(1).upper())
+
+    # Buscar CURPs para ese tipo de documento
+    patron_curp = PATTERNS_COMPILADOS_RFC_CURP["CURP"].get(tipo_doc.lower())
+    if patron_curp:
+        for match in patron_curp.finditer(texto):
+            curps.append(match.group(1).upper())
+
+    return rfcs, curps
 
 PROMPT_NOMINA = """
 Esta imágen es de la primera página de un recibo de nómina, pueden venir gráficos o tablas.
@@ -148,7 +156,7 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
         # --- Lógica de negocio específica para Nómina ---
         # 1. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_limitado(pdf_bytes)
-        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, PATTERNS_COMPILADOS_NOMINA)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, "nomina")
 
         # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
         loop = asyncio.get_running_loop()
@@ -175,9 +183,9 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
         if datos_qr:
             datos_listos["datos_qr"] = datos_qr
         if rfc:
-            datos_listos["rfc"] = rfc
+            datos_listos["rfc"] = rfc[-1]
         if curp:
-            datos_listos["curp"] = curp
+            datos_listos["curp"] = curp[-1]
         
         # Si todo fue exitoso, devuelve los datos.
         return RespuestaNomina(**datos_listos)
@@ -198,7 +206,7 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
         # --- Lógica de negocio específica para Nómina ---
         # 0. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_limitado(pdf_bytes)
-        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, PATTERNS_COMPILADOS_ESTADO)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, "estado")
 
         loop = asyncio.get_running_loop()
 
@@ -240,7 +248,7 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
         if datos_qr:
             datos_listos["datos_qr"] = datos_qr
         if rfc:
-            datos_listos["rfc"] = rfc
+            datos_listos["rfc"] = rfc[-1]
 
         print(datos_listos)
         return RespuestaEstado(**datos_listos)
