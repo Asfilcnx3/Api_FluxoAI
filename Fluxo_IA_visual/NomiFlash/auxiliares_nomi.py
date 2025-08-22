@@ -10,6 +10,8 @@ from openai import AsyncOpenAI
 from ..models import ResultadoConsolidado
 from pyzbar.pyzbar import decode
 from PIL import Image
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 client_gpt_nomi = AsyncOpenAI(
     api_key=os.getenv("OPENAI_API_KEY_NOMI")
@@ -139,10 +141,6 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
             datos_limpios[campo] = limpiar_monto(datos_limpios[campo])
             
     return datos_limpios
-
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from typing import Optional
 
 def verificar_fecha_comprobante(fecha_str: Optional[str]) -> Optional[bool]:
     """

@@ -2,7 +2,7 @@ import fitz
 import re
 import asyncio
 from io import BytesIO
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Pattern
 from fastapi import UploadFile
 from ..procesamiento.extractor import PDFCifradoError
 from .auxiliares_nomi import analizar_portada_gpt, extraer_json_del_markdown, sanitizar_datos_ia, convertir_pdf_a_imagenes, leer_qr_de_imagenes
@@ -28,12 +28,18 @@ def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
     return texto_parcial
 
 # Creamos el diccionario de patrones compilados
-RFC_CURP_PATTERNS_COMPILADOS = re.compile(
+PATTERNS_COMPILADOS_NOMINA = re.compile(
     r"r\.?f\.?c\.?\s+(?P<RFC>[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})"
     r".*?curp:\s*(?P<CURP>[A-Z]{4}\d{6}[HM][A-Z]{5}\d{2})",
     re.IGNORECASE | re.DOTALL
 )
-def extraer_rfc_curp_por_texto(texto: str) -> Tuple[Optional[str], Optional[str]]:
+
+PATTERNS_COMPILADOS_ESTADO = re.compile(
+    r"r?f\.?c\.?:\s+(?P<RFC>[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})",
+    re.IGNORECASE | re.DOTALL
+)
+
+def extraer_rfc_curp_por_texto(texto: str, tipo_patron_compilado: Pattern) -> Tuple[Optional[str], Optional[str]]:
     """
     Busca el RFC y/o el CURP en el texto. Devuelve siempre una tupla de dos elementos.
     """
@@ -41,11 +47,11 @@ def extraer_rfc_curp_por_texto(texto: str) -> Tuple[Optional[str], Optional[str]
         return None, None
     
     rfc, curp = None, None
-    coincidencias = RFC_CURP_PATTERNS_COMPILADOS.finditer(texto)
+    coincidencias = tipo_patron_compilado.finditer(texto)
     for match in coincidencias:
-        if match.group("RFC"):
+        if match.groupdict().get("RFC"):
             rfc = match.group("RFC").upper()
-        if match.group("CURP"):
+        if match.groupdict().get("CURP"):
             curp = match.group("CURP").upper()
             
     return rfc, curp
@@ -71,7 +77,7 @@ Campos a extraer:
 - numero_empleado # puede aparecer como  'NO. EMPLEADO'
 - puesto_cargo # Puesto o cargo, puede aparecer como 'DESCRIPCIÓN DEL PUESTO'
 - categoria # (ejemplo: "07", "08", "T")
-- salario_neto # Puede aparecer como 'SUELDOS DEL PERSONAL DE BASE'
+- salario_neto # Normalmente aparece como 'Importe Neto'
 - total_percepciones # aparece a la derecha de 'Total percepciones'
 - total_deducciones # aparece a la derecha de 'Total deducciones'
 - periodo_inicio # Devuelve en formato "2025-12-25"
@@ -142,7 +148,7 @@ async def procesar_nomina(archivo: UploadFile) -> RespuestaNomina:
         # --- Lógica de negocio específica para Nómina ---
         # 1. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_limitado(pdf_bytes)
-        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, PATTERNS_COMPILADOS_NOMINA)
 
         # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
         loop = asyncio.get_running_loop()
@@ -188,6 +194,12 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
     """
     try:
         pdf_bytes = await archivo.read()
+
+        # --- Lógica de negocio específica para Nómina ---
+        # 0. Extraemos texto para la validación con regex
+        texto_inicial = extraer_texto_limitado(pdf_bytes)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, PATTERNS_COMPILADOS_ESTADO)
+
         loop = asyncio.get_running_loop()
 
         # --- 1. Determinar dinámicamente las páginas a procesar ---
@@ -227,7 +239,10 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> RespuestaEstado:
         # --- Lógica de corrección específica para Nómina ---
         if datos_qr:
             datos_listos["datos_qr"] = datos_qr
+        if rfc:
+            datos_listos["rfc"] = rfc
 
+        print(datos_listos)
         return RespuestaEstado(**datos_listos)
 
     except Exception as e:

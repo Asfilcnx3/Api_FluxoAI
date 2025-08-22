@@ -41,9 +41,9 @@ class RespuestaNomina(BaseModel):
     numero_empleado: Optional[str] = None
     puesto_cargo: Optional[str] = None
     categoria: Optional[str] = None
-    salario_neto: Optional[float] = None
     total_percepciones: Optional[float] = None
     total_deducciones: Optional[float] = None
+    salario_neto: Optional[float] = None
     periodo_inicio: Optional[str] = None
     periodo_fin: Optional[str] = None
     fecha_pago: Optional[str] = None
