@@ -261,8 +261,8 @@ EXPRESIONES_REGEX = {
         "descripcion_traspaso_multilinea": ( # es billpocket
             r"(\d{2}/[a-z]{3})\s*(spei recibidobanorte)\s*([\d,]+\.\d{2})([\s\S]*?00072180012119359724[\s\S]*?kiwi international payment technologies)"
         ),
-        "descripcion_amex_multilinea": (
-            r"(\d{2}/[a-z]{3})\s*(w41\s*traspaso entre cuentas)\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
+        "descripcion_amex_multilinea": ( # bmrcash
+            r"(\d{2}/[a-z]{3})\s*((?:w41|w02)\s*(?:traspaso entre cuentas|deposito de tercero))\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
         )
     },
     "multiva": {

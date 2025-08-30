@@ -46,7 +46,7 @@ def convertir_portada_a_imagen_bytes(pdf_bytes: bytes, paginas: List[int]) -> By
     matriz_escala = fitz.Matrix(2, 2)
     try:
         documento = fitz.open(stream=pdf_bytes, filetype="pdf")
-        
+    
         for num_pagina in paginas:
             # Los índices de página en PyMuPDF son base 0, por eso restamos 1.
             if num_pagina - 1 < len(documento):

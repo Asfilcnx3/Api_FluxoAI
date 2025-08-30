@@ -65,10 +65,16 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
 
     return pasa_longitud and pasa_contenido
 
-# Función para enviar el prompt + imagen a GPT-4o
-async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int]) -> str:
+# Función para enviar el prompt + imagen a GPT-5
+async def analizar_portada_gpt(
+        prompt: str, 
+        pdf_bytes: bytes,
+        paginas_a_procesar: List[int],
+        razonamiento: str = "low", 
+        detalle: str = "high"
+    ) -> str:
     """
-    Se hace la llamada al modelo GPT-4o
+    Se hace la llamada al modelo GPT-5 con razonamiento bajo y detalle de imagen alto
     """
     imagen_buffers = convertir_portada_a_imagen_bytes(pdf_bytes, paginas = paginas_a_procesar)
     if not imagen_buffers:
@@ -82,17 +88,18 @@ async def analizar_portada_gpt(prompt: str, pdf_bytes: bytes, paginas_a_procesar
             "type": "image_url",
             "image_url": {
                 "url": f"data:image/png;base64,{encoded_image}",
-                "detail": "auto"
+                "detail": detalle
                 },
             })
     response = await client_gpt_fluxo.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[{"role": "user","content": content}],
+        reasoning_effort=razonamiento
     )
 
     return response.choices[0].message.content
 
-# Función para enviar el prompt + imagen a GPT-4o
+# Función para enviar el prompt + imagen a gemini
 async def analizar_portada_gemini(prompt: str, pdf_bytes: bytes, paginas_a_procesar: List[int]) -> str:
     """
     Se hace la llamada al modelo GEMINI 1.5 flash
