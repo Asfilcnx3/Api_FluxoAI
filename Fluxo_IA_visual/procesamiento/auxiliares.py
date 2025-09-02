@@ -1,5 +1,5 @@
 from typing import Tuple, List, Any, Dict, Optional, Union
-from ..models import ResultadoExtraccion, ErrorRespuesta, Transaccion, ResultadoAnalisisIA, ResultadoTPV
+from ..models import ResultadoExtraccion, ErrorRespuesta, ResultadoAnalisisIA, ResultadoTPV
 import re
 
 PALABRAS_CLAVE_VERIFICACION = re.compile(
@@ -472,17 +472,18 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
     return datos_limpios
 
 def total_depositos_verificacion(
-    resultados_parciales: List[Union[ResultadoExtraccion, ErrorRespuesta]]
+    resultados_portada: List[Union[Tuple[Dict, bool], Exception]]
 ) -> Tuple[float, bool]:
     """
-    Suma los depósitos de una lista de resultados de análisis ya procesados.
+    Suma los depósitos de una lista de resultados de análisis con IA.
     """
     total_depositos = 0.0
-    for resultado in resultados_parciales:
-        if isinstance(resultado, ResultadoExtraccion) and resultado.AnalisisIA:
-            depo = resultado.AnalisisIA.depositos or 0.0
-            total_depositos += depo
-            
+    for resultado in resultados_portada:
+        if not isinstance(resultado, Exception):
+            datos_ia, _ = resultado
+            if datos_ia:
+                depo = datos_ia.get("depositos") or 0.0
+                total_depositos += float(depo)
     es_mayor = total_depositos >= 250_000
     return total_depositos, es_mayor
 
