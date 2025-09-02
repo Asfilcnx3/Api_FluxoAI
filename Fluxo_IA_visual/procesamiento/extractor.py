@@ -62,21 +62,16 @@ def convertir_portada_a_imagen_bytes(pdf_bytes: bytes, paginas: List[int]) -> By
         return [] # lista vacía en caso de error
     return buffers
 
-# Extraer el JSON del markdown que nos da el modelo
 def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
-    json_string_match = re.search(r'```json\s*(.*?)\s*```', respuesta, re.DOTALL)
-    if json_string_match:
-        json_string = json_string_match.group(1)
-        datos_crudos = json.loads(json_string)
-    else:
-        # Esto es para cuando el output no tiene el formato markdown esperado
-        print("No pude encontrar un JSON debajo del markdown.")
-        try:
-            datos_crudos = json.loads(respuesta)
-        except json.JSONDecodeError as e:
-            print(f"Fallo en crear los datos crudos del json: {e}")
-            datos_crudos = {} # Assign an empty dict or handle as appropriate
-    return datos_crudos
+    print(respuesta)
+    json_match = re.search(r'```json\s*(\{.*?\})\s*```', respuesta, re.DOTALL)
+    json_string = json_match.group(1) if json_match else respuesta
+    try:
+        print("Json encontrado")
+        return json.loads(json_string)
+    except json.JSONDecodeError:
+        print(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
+        return {}
 
 def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
     """

@@ -34,6 +34,10 @@ En esta actualización se agrega un router a la API para el mismo cliente pero c
 ## Actualización 8-18
 Esta actualización agrega la lectura de QR por medio de una librería que maneja imagenes, se cambió un poco la forma de analizar cada estado de cuentas y el resultado se agregó lo que el qr trae por defecto.
 
+## Actualizacion 9-1
+Esta actualización agrega un nuevo tipo de lógica que mejora el json structure para la salida de datos, mejora la lógica interna y ya no se bloquea el proceso si tiene menos de 250,000 pesos.
+Mejora la validación de pydantic.
+
 ## Referencias de la API
 
 ### Variables de entorno

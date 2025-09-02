@@ -1,10 +1,10 @@
 from .procesamiento.regex_engine import procesar_regex_generico, obtener_y_procesar_portada
-from .procesamiento.auxiliares import prompt_base, verificar_total_depositos
+from .procesamiento.auxiliares import prompt_base, total_depositos_verificacion, crear_objeto_resultado
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from .procesamiento.extractor import extraer_texto_pdf_con_fitz, PDFCifradoError
 from .procesamiento_ocr.extractor_ocr import extraer_texto_con_ocr
 from concurrent.futures import ProcessPoolExecutor
-from .models import Resultado, ErrorRespuesta
+from .models import ResultadoTotal, ErrorRespuesta, ResultadoExtraccion
 from .NomiFlash import router_nomi
 from dotenv import load_dotenv
 from typing import List, Union
@@ -14,7 +14,7 @@ load_dotenv()
 
 app = FastAPI(
     title="Procesamiento de entradas (TPV o Nómina)",
-    version="1.1.1"
+    version="1.1.3"
 ) 
 prompt = prompt_base
 
@@ -27,7 +27,7 @@ async def home():
 # Endpoint principal 
 @app.post(
         "/fluxo/procesar_pdf/", 
-        response_model=List[Union[Resultado, ErrorRespuesta]],
+        response_model = ResultadoTotal,
         summary="(API principal) Extrae estructurados de trasacciones TPV en PDF."
     )
 async def procesar_pdf_api(
@@ -40,14 +40,18 @@ async def procesar_pdf_api(
     - Si un archivo individual falla (ej. está corrupto), obtendrás un objeto con el campo `error_transacciones` detallando el problema.
     - Si ocurre un error de servicio (ej. la API de IA no responde), toda la petición fallará con un código de error y un error global `ErrorRespuesta`.
     """
+
+
     # ------- listas a usar más adelante -------
     tareas_analisis = []
     archivos_en_memoria = []
 
     # ------- 1. ANÁLISIS DE LA PORTADA CON IA PARA DETERMINAR ENTRADAS Y SI ES DOCUMENTO ESCANEADO -------
     for archivo in archivos:
+        # usamos await para leer el archivo en paralelo
         contenido_pdf = await archivo.read()
         archivos_en_memoria.append({"filename": archivo.filename, "content": contenido_pdf})
+        # ejecutamos en diferentes nucleos del procesador
         tarea = obtener_y_procesar_portada(prompt, contenido_pdf) # esta función es wrapper
         tareas_analisis.append(tarea)
 
@@ -58,23 +62,12 @@ async def procesar_pdf_api(
         # En caso de que la llamada de la IA falle de forma masiva, detenemos todo.
         raise HTTPException(status_code=500, detail=f"Error crítico durante el análisis con IA: {str(e)}")
     
-    # ------- Verificamos de forma general los depósitos -------
-    # Extraemos solo los datos de la IA para la verificación
-    lista_datos_ia = [res[0] for res in resultados_portada if not isinstance(res, Exception)]
-
-    # Verificación si es mayor a 250_000
-    if not verificar_total_depositos(lista_datos_ia):
-        raise HTTPException(
-            status_code=400,
-            detail= "El total de los depositos no supera los 250,000. No podemos continuar con el análisis."
-        )
-    
     # --- 2. SEPARACIÓN DE DOCUMENTOS DIGITALES Y ESCANEADOS ---
     # Preparamos las listas para el siguiente paso.
     documentos_digitales = []
     documentos_escaneados = []
     # Creamos una lista final de resultados, pre-llenada para mantener el orden.
-    resultados_finales = [None] * len(archivos)
+    resultados_finales: List[Union[ResultadoExtraccion, None]] = [None] * len(archivos)
 
     for i, resultado_bruto in enumerate(resultados_portada):
         filename = archivos_en_memoria[i]["filename"]
@@ -82,12 +75,20 @@ async def procesar_pdf_api(
         if isinstance(resultado_bruto, Exception):
             # Verificamos si es nuestro error de contraseña
             if isinstance(resultado_bruto, PDFCifradoError):
-                resultados_finales[i] = ErrorRespuesta(error="Documento con contraseña, imposible trabajar con este documento.")
+                error_msg = "Documento con contraseña, imposible trabajar con este documento."
+                resultados_finales[i] = ResultadoExtraccion(
+                    AnalisisIA=None,
+                    DetalleTransacciones=ErrorRespuesta(error=error_msg))
             else:
                 # Para cualquier otro error inesperado en la etapa inicial
-                resultados_finales[i] = ErrorRespuesta(error=f"Fallo el procesamiento inicial de '{filename}': {str(resultado_bruto)}")
+                error_msg = f"Fallo el procesamiento inicial de '{filename}': {str(resultado_bruto)}"
+                resultados_finales[i] = ResultadoExtraccion(
+                    AnalisisIA=None,
+                    DetalleTransacciones=ErrorRespuesta(error=error_msg)
+                )
             continue # Pasamos al siguiente archivo
-
+        
+        print(resultado_bruto)
         # Si no hubo error, desempacamos los resultados
         datos_ia, es_digital = resultado_bruto
         # Intenta procesar este archivo, preparado para cualquier error
@@ -105,51 +106,85 @@ async def procesar_pdf_api(
                 error=f"Error al procesar los datos de la extracción inicial en: '{filename}'. Vuelve a mandar este archivo."
             )
 
-    # --- 3. EXTRACCIÓN PARA DOCUMENTO DIGITALES Y ESCANEADOS CON OCR ---
-    textos_extraidos = []
-    if documentos_digitales or documentos_escaneados:
+    # --- 3. PROCESAMIENTO OBLIGATORIO DE DOCUMENTOS DIGITALES ---
+    if documentos_digitales:
         # Extracción de texto en paralelo ()
         loop = asyncio.get_running_loop()
-        tareas_extraccion = []
+
         # Usamos ProcessPoolExecutor para paralelismo en la CPU
         with ProcessPoolExecutor() as executor:
             # Añadimos las tareas de extracción digital
-            for doc in documentos_digitales:
-                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
-
-            # Añadimos las tareas de extracción con OCR
-            for doc in documentos_escaneados:
-                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
+            tareas_extraccion_digital = [
+                loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"])
+                for doc in documentos_digitales
+            ]
+            textos_digitales_extraidos = await asyncio.gather(*tareas_extraccion_digital, return_exceptions=True)
         
-        # Esperamos a que todas las tareas de extracción terminen
-        textos_extraidos = await asyncio.gather(*tareas_extraccion)
+        for i, texto in enumerate(textos_digitales_extraidos):
+            doc_info = documentos_digitales[i]
+            try:
+                # Obtenemos el diccionario plano de la regex
+                resultado_dict = procesar_regex_generico(doc_info["ia_data"], texto, "digital")
 
-    # --- 4. PROCESAMIENTO FINAL CON REGEX (con manejo de errores individual) ---
-    # Separamos los textos extraidos para cada flujo
-    textos_digitales_extraidos = textos_extraidos[:len(documentos_digitales)]
-    textos_ocr_extraidos = textos_extraidos[len(documentos_digitales):]
+                # *** CAMBIO CLAVE: Convertimos el dict a un objeto Pydantic estructurado ***
+                resultado_estructurado = crear_objeto_resultado(resultado_dict)
+                
+                # Guardamos el objeto correcto en nuestra lista de resultados
+                resultados_finales[doc_info["index"]] = resultado_estructurado
+            
+            except Exception as e:
+                # Manejo de error si la regex falla para un archivo digital
+                resultados_finales[doc_info["index"]] = ResultadoExtraccion(
+                    AnalisisIA=doc_info["ia_data"],
+                    DetalleTransacciones=ErrorRespuesta(error=f"Fallo Regex en '{filename}': {e}")
+                )
 
-    # PROCESAMOS LOS RESULTADOS DE LOS DOCUMENTOS DIGITALES
-    for i, texto in enumerate(textos_digitales_extraidos):
-        doc_info = documentos_digitales[i]
-        try:
-            # Colocamos tipo digital por si necesitamos modificar en el futuro las regex
-            resultado_procesado = procesar_regex_generico(doc_info["ia_data"], texto, "digital")
-            resultados_finales[doc_info["index"]] = resultado_procesado
-        except Exception as e:
-            resultados_finales[doc_info["index"]] = ErrorRespuesta(error=f"Fallo el procesamiento de Regex en el archivo digital '{archivos_en_memoria[doc_info['index']]['filename']}'. Causa: {e}")
+    # --- 4. CÁLCULO DE DEPÓSITOS Y DECISIÓN ---
+    total_depositos_calculado, es_mayor = total_depositos_verificacion(resultados_finales)
 
-    # PROCESAMOS LOS RESULTADOS DE LOS DOCUMENTOS ESCANEADOS CON OCR
-    for i, texto in enumerate(textos_ocr_extraidos):
-        doc_info = documentos_escaneados[i]
-        try:
-            # Colocamos tipo OCR por si necesitamos modificar en el futuro las regex
-            resultado_procesado = procesar_regex_generico(doc_info["ia_data"], texto, "ocr")
-            if isinstance(resultado_procesado, dict):
-                resultado_procesado["origen_extraccion"] = "OCR"
-            resultados_finales[doc_info["index"]] = resultado_procesado
+    print(total_depositos_calculado)
+    print(es_mayor)
 
-        except Exception as e:
-            resultados_finales[doc_info["index"]] = ErrorRespuesta(error=f"Fallo el procesamiento de Regex en el archivo escaneado '{archivos_en_memoria[doc_info['index']]['filename']}'. Causa: {e}")
+    # --- 5. PROCESAMIENTO CONDICIONAL DE DOCUMENTOS ESCANEADOS ---
+    if documentos_escaneados:
+        if es_mayor:
+            loop = asyncio.get_running_loop()
+            with ProcessPoolExecutor() as executor:
+                tareas_ocr = [
+                    loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"])
+                    for doc in documentos_escaneados
+                ]
+                textos_ocr_brutos = await asyncio.gather(*tareas_ocr, return_exceptions=True)
 
-    return resultados_finales
+            for i, texto in enumerate(textos_ocr_brutos):
+                doc_info = documentos_escaneados[i]
+                try:
+                    resultado_dict_ocr = procesar_regex_generico(doc_info["ia_data"], texto, "ocr")
+
+                    # *** (también para el flujo de OCR) ***
+                    resultado_estructurado_ocr = crear_objeto_resultado(resultado_dict_ocr)
+                    
+                    resultados_finales[doc_info["index"]] = resultado_estructurado_ocr
+                except Exception as e:
+                    resultados_finales[doc_info["index"]] = ResultadoExtraccion(
+                        AnalisisIA=doc_info["ia_data"],
+                        DetalleTransacciones=ErrorRespuesta(error=f"Fallo Regex en OCR para '{filename}': {e}")
+                    )
+        else:
+            for doc_info in documentos_escaneados:
+                error_ocr = ErrorRespuesta(
+                    error="Este documento es escaneado y el total de depósitos no supera los $250,000."
+                )
+                resultados_finales[doc_info["index"]] = ResultadoExtraccion(
+                    AnalisisIA=doc_info["ia_data"],
+                    DetalleTransacciones=error_ocr
+                )
+
+    # --- 6. ENSAMBLE DE LA RESPUESTA FINAL ---
+    resultados_limpios = [res for res in resultados_finales if res is not None]
+
+    return ResultadoTotal(
+        total_depositos = total_depositos_calculado,
+        es_mayor_a_250 = es_mayor,
+        resultados_individuales = resultados_limpios
+    )

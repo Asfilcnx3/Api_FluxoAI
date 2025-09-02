@@ -1,4 +1,5 @@
-from typing import Tuple, List, Any, Dict, Optional
+from typing import Tuple, List, Any, Dict, Optional, Union
+from ..models import ResultadoExtraccion, ErrorRespuesta, Transaccion, ResultadoAnalisisIA, ResultadoTPV
 import re
 
 PALABRAS_CLAVE_VERIFICACION = re.compile(
@@ -7,7 +8,7 @@ PALABRAS_CLAVE_VERIFICACION = re.compile(
 
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
-    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "clipmx", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup"
+    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup"
 ]
 
 BANCO_MAP = {
@@ -470,24 +471,20 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
             
     return datos_limpios
 
-def verificar_total_depositos(datos_extraidos: List[Dict[str, Any]]) -> bool:
+def total_depositos_verificacion(
+    resultados_parciales: List[Union[ResultadoExtraccion, ErrorRespuesta]]
+) -> Tuple[float, bool]:
     """
-    Suma el campo 'depositos' de una lista de diccionarios y verifica 
-    si el total es mayor a 250,000.
-
-    Args:
-        lista_datos_ia: La lista de diccionarios extraídos por la IA.
-
-    Returns:
-        True si la suma es mayor a 250,000, False en caso contrario.
+    Suma los depósitos de una lista de resultados de análisis ya procesados.
     """
-    total_depositos = 0
-    for datos_de_un_pdf in datos_extraidos:
-        depo = datos_de_un_pdf.get("depositos", 0.0)
-
-        if depo is not None:
-            total_depositos += float(depo)
-    return total_depositos > 250_000
+    total_depositos = 0.0
+    for resultado in resultados_parciales:
+        if isinstance(resultado, ResultadoExtraccion) and resultado.AnalisisIA:
+            depo = resultado.AnalisisIA.depositos or 0.0
+            total_depositos += depo
+            
+    es_mayor = total_depositos >= 250_000
+    return total_depositos, es_mayor
 
 def limpiar_monto(monto: Any) -> float:
     """
@@ -521,5 +518,44 @@ def limpiar_y_normalizar_texto(texto: str) -> str:
 
     # Reemplaza secuencias de 2 o más espacios/tabs con un solo espacio.
     texto_normalizado = re.sub(r'[ \t]{2,}', ' ', texto)
-
     return texto_normalizado.strip()
+
+def crear_objeto_resultado(datos_dict: dict) -> ResultadoExtraccion:
+    """
+    Transforma un diccionario plano de resultados en un objeto Pydantic
+    ResultadoExtraccion completamente estructurado y anidado.
+    """
+    try:
+        # 1. Creamos el sub-objeto AnalisisIA
+        analisis_ia = ResultadoAnalisisIA(
+            banco=datos_dict.get("banco"),
+            rfc=datos_dict.get("rfc"),
+            nombre_cliente=datos_dict.get("nombre_cliente"),
+            clabe_interbancaria=datos_dict.get("clabe_interbancaria"),
+            periodo_inicio=datos_dict.get("periodo_inicio"),
+            periodo_fin=datos_dict.get("periodo_fin"),
+            comisiones=datos_dict.get("comisiones"),
+            depositos=datos_dict.get("depositos"),
+            cargos=datos_dict.get("cargos"),
+            saldo_promedio=datos_dict.get("saldo_promedio"),
+            entradas_TPV_bruto=datos_dict.get("entradas_TPV_bruto"),
+            entradas_TPV_neto=datos_dict.get("entradas_TPV_neto"),
+        )
+
+        # 2. Creamos el sub-objeto DetalleTransacciones
+        detalle_transacciones = ResultadoTPV(
+            transacciones=datos_dict.get("transacciones", []),
+            error_transacciones=datos_dict.get("error_transacciones")
+        )
+
+        # 3. Ensamblamos y devolvemos el objeto principal
+        return ResultadoExtraccion(
+            AnalisisIA=analisis_ia,
+            DetalleTransacciones=detalle_transacciones
+        )
+    except Exception as e:
+        # Si algo falla en la creación del modelo, devolvemos un objeto de error
+        return ResultadoExtraccion(
+            AnalisisIA=None,
+            DetalleTransacciones=ErrorRespuesta(error=f"Error al estructurar el diccionario de respuesta: {e}")
+        )

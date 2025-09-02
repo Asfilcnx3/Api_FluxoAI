@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 
 class ArchivoPDF(BaseModel):
@@ -15,7 +15,7 @@ class Transaccion(BaseModel):
     descripcion: str
     monto: str
 
-class Resultado(BaseModel):
+class ResultadoAnalisisIA(BaseModel):
     banco: str
     rfc: Optional[str] = None
     nombre_cliente: Optional[str] = None
@@ -28,8 +28,19 @@ class Resultado(BaseModel):
     saldo_promedio: Optional[float] = None
     entradas_TPV_bruto: Optional[float] = None
     entradas_TPV_neto: Optional[float] = None
+
+class ResultadoTPV(BaseModel):
     transacciones: List[Transaccion] = []
     error_transacciones: Optional[str] = None
+
+class ResultadoExtraccion(BaseModel):
+    AnalisisIA: Optional[ResultadoAnalisisIA] = None
+    DetalleTransacciones: Optional[Union[ResultadoTPV, ErrorRespuesta]] = None
+
+class ResultadoTotal(BaseModel):
+    total_depositos: Optional[float] = None
+    es_mayor_a_250: Optional[bool] = None
+    resultados_individuales: List[ResultadoExtraccion]
 
 class RespuestaNomina(BaseModel):
     datos_qr: Optional[str] = None
