@@ -6,84 +6,205 @@ PALABRAS_CLAVE_VERIFICACION = re.compile(
     r"banco|banca|cliente|estado de cuenta|rfc|periodo"
 )
 
+# Creamos la lista e palabras excluidas
+PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe"]
+
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
     "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup"
 ]
 
-BANCO_MAP = {
-    "banco mercantil del norte": "banorte",
-    "banco del bajio": "banbajío",
-    "banca afirme": "afirme",
-    "grupo financiero hsbc": "hsbc",
-    "grupo financiero mifel": "mifel",
-    "scotiabank inverlat": "scotiabank",
-    "banco regional": "banregio",
-    "grupo financiero bbva": "bbva",
-    "banco multiva": "multiva",
-    "banco santander": "santander",
-    "bancosantander": "santander",
-    "banco nacional de mexico": "banamex",
-    "banco nacional de méxico": "banamex",
-    "banco bancrea": "bancrea",
-    "banco inbursa": "inbursa",
-    "banco monex": "monex",
-    "banco azteca": "azteca",
-    "bankaool": "bankaool",
-    "banco inbursa": "inbursa",
-    "intercuenta enlace intercam": "intercam",
+CONFIGURACION_BANCOS = {
+    "banorte": {
+        "alias": ["banco mercantil del norte"],
+        "rfc_pattern": [r"rfc:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"total de comisiones cobradas / pagadas\s*\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"total de depósitos\s*\$\s*([\d,]+\.\d{2})"]
+    },
+    "banbajío": {
+        "alias": ["banco del bajio"],
+        "rfc_pattern": [r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente cobradas\s*\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"saldo anterior \(\+\) depositos \(\-\) cargos saldo actual\s*\n\$\s*[\d,.]+\s+\$\s*([\d,]+\.\d{2})"]
+    },
+    "afirme": {
+        "alias": ["banca afirme"],
+        "rfc_pattern": [r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"total de comisiones\s*\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos\s+\$\s*([\d,]+\.\d{2})"]
+    },
+    "hsbc": {
+        "alias": ["grupo financiero hsbc"],
+        "rfc_pattern": [r"rfc[^\n]*\n\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"], # Versión multilínea
+        "comisiones_pattern": [r"comisiones cobradas(?: en el mes)? \$([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[éeóo]sitos/? \$ ([\d,]+\.\d{2})"]
+    },
+    "mifel": {
+        "alias": ["grupo financiero mifel"],
+        "rfc_pattern": [r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente cobradas\s+([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"[0-9]\.\s*dep[óo]sitos\s+\$?([\d,]+(?:\.\d{2})?)"]
+    },
+    "scotiabank": {
+        "alias": ["scotiabank inverlat"],
+        "rfc_pattern": [r"r\.f\.c\.cliente\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones\s*cobradas\s*\$([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"\(\+\)dep[óo]sitos\s*\$([\d,]+\.\d{2})"]
+    },
+    "banregio": {
+        "alias": ["banco regional"],
+        "rfc_pattern": [r"rfc:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente cobradas\s*\$([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"(?:\+?\s*abonos)\s*\$([\d,]+\.\d{2})"]
+    },
+    "bbva": {
+        "alias": ["grupo financiero bbva"],
+        "rfc_pattern": [r"r\.f\.c\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"total comisiones\s+([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[óo]sitos\s*/\s*abonos\s*\(\+\)\s*\d+\s+([\d,]+\.\d{2})"]
+    },
+    "multiva": {
+        "alias": ["banco multiva"],
+        "rfc_pattern": [r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones cobradas\/bonificaciones\s+([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"retiros\/depósitos\s+[\d,]+\.\d{2}\s+([\d,]+\.\d{2})"]
+    },
+    "santander": {
+        "alias": ["banco santander", "bancosantander"],
+        "rfc_pattern": [r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones cobradas\s*.+?\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"(?:dep.{0,10}sitos)\s*\$?([\d,]+\.\d{2})"]
+    },
+    "banamex": {
+        "alias": ["banco nacional de mexico", "banco nacional de méxico"],
+        "rfc_pattern": [r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",r"registro federal de contribuyentes:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente cobradas\s*\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos\s*([\d,]+\.\d{2})"]
+    },
+    "citibanamex":{
+        "alias": ["citibanamex"],
+        "rfc_pattern": [r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",r"registro federal de contribuyentes:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente cobradas\s*\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos\s*([\d,]+\.\d{2})"]
+    },
+    "bancrea": {
+        "alias": ["banco bancrea"],
+        "rfc_pattern": [r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones cobradas en el per[ií]odo\s+([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos\s*([\d,]+\.\d{2})"]
+    },
+    "inbursa": {
+        "alias": ["banco inbursa"],
+        "rfc_pattern": [r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"en el periodo\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"abonos\s*([\d,]+\.\d{2})"]
+    },
+    "monex": {
+        "alias": ["banco monex"],
+        "rfc_pattern": [r"rfc titular:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones\s+([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"total abonos:\s*([\d,]+\.\d{2})"]
+    },
+    "azteca": {
+        "alias": ["banco azteca"],
+        "rfc_pattern": [r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones[\s\S]*?\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos[\s\S]*?\$\s*([\d,]+\.\d{2})"]
+    },
+    "bankaool": {
+        "alias": ["bankaool"],
+        "rfc_pattern": [r"rfc\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones cobradas[\s\S]*?\$\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[oó]sitos[\s\S]*?\$\s*([\d,]+\.\d{2})"]
+    },
+    "intercam": {
+        "alias": ["intercuenta enlace intercam"],
+        "rfc_pattern": [r"r\.f\.c\.\s*([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"comisiones efectivamente\s*([\d,]+\.\d{2})"],
+        "depositos_pattern": [r"dep[éeóo]sitos\s*([\d,]+\.\d{2})"]
+    },
 }
-# compilamos los bancos
-BANCO_REGEX = re.compile("|".join(BANCO_MAP.keys()))
 
-PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe"]
+ALIAS_A_BANCO_MAP = {}
 
-# Diccionario con los patrones de RFC por banco
-RFC_PATTERNS = {
-    "banbajío": r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "banorte": r"rfc:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "afirme": r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "hsbc": r"rfc[^\n]*\n\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})", # Versión multilínea
-    "mifel": r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "scotiabank": r"r\.f\.c\.cliente\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "banregio": r"rfc:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "santander": r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "bbva": r"r\.f\.c\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "multiva": r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "banamex": r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "banamex": r"registro federal de contribuyentes:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "citibanamex": r"rfc\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-    "citibanamex": r"registro federal de contribuyentes:\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})",
-}
+# Crear un mapa de alias a nombre estándar ("banco del bajio" -> "banbajío")
+for nombre_std, config in CONFIGURACION_BANCOS.items():
+    # Añadimos el Alias
+    for alias in config["alias"]:
+        ALIAS_A_BANCO_MAP[alias] = nombre_std
 
-# Creamos el diccionario de patrones compilados
-RFC_PATTERNS_COMPILADOS = {
-    banco: re.compile(patron, re.IGNORECASE) 
-    for banco, patron in RFC_PATTERNS.items()
-}
+# Compilar la regex para detectar CUALQUIER nombre de banco
+BANCO_DETECTION_REGEX = re.compile("|".join(ALIAS_A_BANCO_MAP.keys()))
 
-# Creamos la función para reconocer el banco en las primeras 2 páginas
-def reconocer_banco_por_texto(texto: str) -> Optional[str]:
-    """
-    Busca en el texto un nombre de banco conocido y devuelve su nombre estandarizado.
+PATRONES_COMPILADOS = {}
+for nombre_str, config in CONFIGURACION_BANCOS.items():
+    PATRONES_COMPILADOS[nombre_str] = {} # Inicializa el diccionario para el banco
     
-    Args:
-        texto: El texto extraído de las primeras páginas del PDF.
-        
-    Returns:
-        El nombre del banco estandarizado si se encuentra, o None si no hay coincidencia.
+    # Itera dinámicamente sobre todas las claves de patrones (rfc_pattern, comisiones_pattern, etc.)
+    for key, pattern_list in config.items():
+        if key.endswith("_pattern"):
+            if not pattern_list:
+                continue
+            
+            # UNIMOS LA LISTA ED PATRONES EN UNA SOLA REGEX "|" y lo envolvimos en (?:...)
+            patron_combinado = "|".join(f"(?:{p})" for p in pattern_list)
+
+            # Guardamos el patrón compilado con un nombre de clave limpio (sin '_pattern')
+            nombre_clave = key.replace("_pattern", "")
+            PATRONES_COMPILADOS[nombre_str][nombre_clave] = re.compile(patron_combinado)
+
+def extraer_unico(d: dict, clave: str):
+    lista = d.get(clave, [])
+    return lista[0] if lista else None
+
+def extraer_datos_por_banco(texto: str) -> Dict[str, Any]:
     """
+    Analiza el texto para identificar el banco y luego extrae datos específicos
+    (como RFC, comisiones, depósitos, etc.) usando la configuración para ese banco.
+    """
+    resultados = {
+        "banco": None,
+        "rfc": None,
+        "comisiones": None,
+        "depositos": None, 
+    }
+
     if not texto:
-        return None
-        
-    match = BANCO_REGEX.search(texto.lower())
-    
-    if match:
-        nombre_encontrado = match.group(0)
-        # Devuelve el nombre estandarizado del diccionario
-        return BANCO_MAP.get(nombre_encontrado)
-        
-    return None
+        return resultados
+
+    # --- 1. Identificar el banco ---
+    match_banco = BANCO_DETECTION_REGEX.search(texto)
+    if not match_banco:
+        return resultados
+
+    banco_estandarizado = ALIAS_A_BANCO_MAP.get(match_banco.group(0))
+    resultados["banco"] = banco_estandarizado.upper()
+
+    patrones_del_banco = PATRONES_COMPILADOS.get(banco_estandarizado)
+    if not patrones_del_banco:
+        return resultados
+
+    # --- 2. Extraer datos crudos con findall ---
+    datos_crudos = {}
+    for clave, patron in patrones_del_banco.items():
+        datos_crudos[clave] = re.findall(patron, texto)
+
+    # --- 3. Procesar resultados con extraer_unico ---
+    for nombre_clave in patrones_del_banco.keys():
+        valor_capturado = extraer_unico(datos_crudos, nombre_clave)
+
+        if valor_capturado:
+            # Si el campo es numérico
+            if nombre_clave in ["comisiones", "depositos", "cargos", "saldo_promedio"]:
+                try:
+                    monto_limpio = str(valor_capturado).replace(",", "").replace("$", "").strip()
+                    resultados[nombre_clave] = float(monto_limpio)
+                except (ValueError, TypeError):
+                    resultados[nombre_clave] = None
+            else:  
+                resultados[nombre_clave] = str(valor_capturado).upper()
+
+    return resultados
 
 # Creamos el prompt del modelo a utilizar
 prompt_base = """
@@ -389,26 +510,6 @@ def construir_descripcion_optimizado(transaccion: Tuple, banco: str) -> Tuple[st
     # Proporciona una función por defecto si el banco no se encuentra.
     funcion_procesadora = DESPACHADOR_DESCRIPCION.get(banco.lower(), lambda t: ("", "0.0"))
     return funcion_procesadora(transaccion)
-
-def extraer_rfc_por_texto(texto: str, banco: str) -> Optional[str]:
-    """
-    Busca el RFC en el texto usando la regex específica para el banco detectado.
-    """
-    if not texto or not banco:
-        return None
-
-    # Busca el patrón compilado para el banco correspondiente
-    patron = RFC_PATTERNS_COMPILADOS.get(banco.lower())
-    if not patron:
-        return None # No hay un patrón definido para este banco
-
-    match = patron.search(texto)
-    
-    # Si encuentra una coincidencia, devuelve el grupo capturado (el RFC) en mayúsculas
-    if match:
-        return match.group(1)
-        
-    return None
 
 def reconciliar_resultados_ia(res_gpt: dict, res_gemini:dict) -> dict:
     """

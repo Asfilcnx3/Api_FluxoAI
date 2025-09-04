@@ -1,5 +1,5 @@
 from .extractor import convertir_portada_a_imagen_bytes, extraer_json_del_markdown, extraer_texto_limitado
-from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconocer_banco_por_texto, reconciliar_resultados_ia, sanitizar_datos_ia, extraer_rfc_por_texto, limpiar_y_normalizar_texto
+from .auxiliares import construir_descripcion_optimizado, limpiar_monto, reconciliar_resultados_ia, sanitizar_datos_ia, limpiar_y_normalizar_texto, extraer_datos_por_banco
 from .auxiliares import REGEX_COMPILADAS, PALABRAS_CLAVE_VERIFICACION, PALABRAS_EXCLUIDAS
 from typing import List, Dict, Any, Tuple
 from dotenv import load_dotenv
@@ -145,12 +145,15 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     es_documento_digital = es_escaneado_o_no(texto_verificacion)
 
     # --- 2. SEGUNDO: Reconocer el banco y el RFC a partir del texto (con regex) ---
-    banco_por_texto = reconocer_banco_por_texto(texto_verificacion)
-    banco_estandarizado = banco_por_texto.upper() if banco_por_texto else ""
-
-    rfc_por_texto = extraer_rfc_por_texto(texto_verificacion, banco_estandarizado)
-    rfc_estandarizado = rfc_por_texto.upper() if rfc_por_texto else ""
+    datos_regex = extraer_datos_por_banco(texto_verificacion.lower())
+    banco_estandarizado = datos_regex.get("banco")
+    print(banco_estandarizado)
+    rfc_estandarizado = datos_regex.get("rfc")
     print(rfc_estandarizado)
+    comisiones_estanarizadas = datos_regex.get("comisiones")
+    print(comisiones_estanarizadas)
+    depositos_estanarizadas = datos_regex.get("depositos")
+    print(depositos_estanarizadas)
 
     # --- 3. TERCERO: Decidir qué páginas procesar ---
     paginas_para_ia = [1, 2] # Por defecto, las primeras dos
@@ -199,6 +202,10 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
         datos_ia_reconciliados["banco"] = banco_estandarizado
     if rfc_estandarizado:
         datos_ia_reconciliados["rfc"] = rfc_estandarizado
+    if comisiones_estanarizadas:
+        datos_ia_reconciliados["comisiones"] = comisiones_estanarizadas
+    if depositos_estanarizadas:
+        datos_ia_reconciliados["depositos"] = depositos_estanarizadas
     
     return datos_ia_reconciliados, es_documento_digital
 

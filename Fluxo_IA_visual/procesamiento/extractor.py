@@ -86,7 +86,7 @@ def extraer_texto_limitado(pdf_bytes: bytes, num_paginas: int = 2) -> str:
                 raise PDFCifradoError("El documento está protegido por contraseña, imposible trabajar con el.")
             # Si no está encriptado, itera sobre el número de páginas que necesitamos
             for i in range(min(len(doc), num_paginas)):
-                texto_parcial += doc[i].get_text().lower() + '\n'
+                texto_parcial += doc[i].get_text(sort=True).lower() + '\n'
     except PDFCifradoError:
         raise
     except Exception as e:
