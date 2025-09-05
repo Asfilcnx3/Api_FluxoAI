@@ -244,7 +244,7 @@ frases_bancos = {
     "mifel": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
     # Scotiabank no tiene una para una línea
     "scotiabank": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
-    "banregio": "tra\s+\d{7}-abono ventas\s+(?:tdd|tdc)",
+    "banregio": r"tra\s+\d{7}-abono ventas\s+(?:tdd|tdc)",
     "santander": "deposito ventas del dia afil",
     "bbva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
     "multiva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
@@ -385,6 +385,9 @@ EXPRESIONES_REGEX = {
         ),
         "descripcion_amex_multilinea": ( # bmrcash
             r"(\d{2}/[a-z]{3})\s*((?:w41|w02)\s*(?:traspaso entre cuentas|deposito de tercero))\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
+        ),
+        "descripción_jpmorgan_multilinea": (
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidojp morgan)\s*([\d,]+\.\d{2})((?:.*?\n){1,18}.*?zettle by paypal(?:.*?\n){1,5}.*?)"
         )
     },
     "multiva": {

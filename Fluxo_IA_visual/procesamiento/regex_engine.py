@@ -250,7 +250,8 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         "descripcion",
         "descripcion_clip_multilinea",
         "descripcion_traspaso_multilinea",
-        "descripcion_amex_multilinea"
+        "descripcion_amex_multilinea",
+        "descripción_jpmorgan_multilinea"
     ]
 
     transacciones_matches = []
