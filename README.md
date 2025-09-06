@@ -38,6 +38,9 @@ Esta actualización agrega la lectura de QR por medio de una librería que manej
 Esta actualización agrega un nuevo tipo de lógica que mejora el json structure para la salida de datos, mejora la lógica interna y ya no se bloquea el proceso si tiene menos de 250,000 pesos.
 Mejora la validación de pydantic.
 
+## Actualización 9-6
+Se agrega una validación para que el servidor no se caiga al analizar muchos documentos TPV analizados. Se agregó un campo de analisis general para el cliente. se agregó una mejor validación pydantic para los modelos que se están trabajando.
+
 ## Referencias de la API
 
 ### Variables de entorno

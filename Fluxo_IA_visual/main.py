@@ -148,19 +148,18 @@ async def procesar_pdf_api(
     loop = asyncio.get_running_loop()
     tareas_extraccion = []
     documentos_a_procesar_regex = []
+    procesar_ocr = es_mayor and len(documentos_escaneados) <= 15
 
+    # Añadir tareas de extracción digital
+    for doc in documentos_digitales:
+        tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
+        documentos_a_procesar_regex.append(doc) # Mantenemos el orden
 
-    with ProcessPoolExecutor() as executor:
-        # Añadir tareas de extracción digital
-        for doc in documentos_digitales:
-            tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
+    # Añadir tareas de OCR condicionalmente
+    if procesar_ocr:
+        for doc in documentos_escaneados:
+            tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
             documentos_a_procesar_regex.append(doc) # Mantenemos el orden
-
-        # Añadir tareas de OCR condicionalmente
-        if es_mayor:
-            for doc in documentos_escaneados:
-                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
-                documentos_a_procesar_regex.append(doc) # Mantenemos el orden
 
     # --- 4. EJECUCIÓN CONCURRENTE Y PROCESAMIENTO DE RESULTADOS ---
     textos_extraidos_brutos = [] 
@@ -193,9 +192,18 @@ async def procesar_pdf_api(
                 })
 
     # --- 5. MANEJO DE ESCANEADOS OMITIDOS ---
-    if not es_mayor:
+    if not procesar_ocr and documentos_escaneados:
+        if len(documentos_escaneados) > 15:
+            error_msg = "La cantidad de documentos escaneados supera el límite de 15."
+        elif not es_mayor:
+            error_msg = "Este documento es escaneado y el total de depósitos no supera los $250,000."
+        else:
+            # Caso improbable, pero es bueno tener un fallback
+            error_msg = "El procesamiento OCR fue omitido por seguridad."
+
+        # Asignamos el mismo error a todos los documentos escaneados omitidos
         for doc_info in documentos_escaneados:
-            error_obj = ErrorRespuesta(error="Este documento es escaneado y el total de depósitos no supera los $250,000.")
+            error_obj = ErrorRespuesta(error=error_msg)
             resultados_finales[doc_info["index"]] = ResultadoExtraccion(
                 AnalisisIA=doc_info["ia_data"],
                 DetalleTransacciones=error_obj
@@ -204,8 +212,14 @@ async def procesar_pdf_api(
     # --- 6. ENSAMBLE DE LA RESPUESTA FINAL ---
     resultados_limpios = [res for res in resultados_finales if res is not None]
 
+    # Generamos la lista de resultados generales A PARTIR de la lista de resultados individuales con una simple y elegante comprensión de lista.
+    resultados_generales = [
+        res.AnalisisIA for res in resultados_limpios if res.AnalisisIA is not None
+    ]
+
     return ResultadoTotal(
-        total_depositos=total_depositos_calculado,
-        es_mayor_a_250=es_mayor,
-        resultados_individuales=resultados_limpios
+        total_depositos = total_depositos_calculado,
+        es_mayor_a_250 = es_mayor,
+        resultados_generales = resultados_generales,
+        resultados_individuales = resultados_limpios
     )

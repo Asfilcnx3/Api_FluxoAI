@@ -40,6 +40,7 @@ class ResultadoExtraccion(BaseModel):
 class ResultadoTotal(BaseModel):
     total_depositos: Optional[float] = None
     es_mayor_a_250: Optional[bool] = None
+    resultados_generales: List[ResultadoAnalisisIA]
     resultados_individuales: List[ResultadoExtraccion]
 
 class RespuestaNomina(BaseModel):
