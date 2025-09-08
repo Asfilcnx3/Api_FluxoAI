@@ -151,22 +151,22 @@ async def procesar_pdf_api(
     procesar_ocr = es_mayor and len(documentos_escaneados) <= 15
 
     # Añadir tareas de extracción digital
-    for doc in documentos_digitales:
-        tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
-        documentos_a_procesar_regex.append(doc) # Mantenemos el orden
+    with ProcessPoolExecutor() as executor:
+        for doc in documentos_digitales:
+            tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_pdf_con_fitz, doc["content"]))
+            documentos_a_procesar_regex.append(doc) # Mantenemos el orden
 
     # Añadir tareas de OCR condicionalmente
-    if procesar_ocr:
-        for doc in documentos_escaneados:
-            tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
-            documentos_a_procesar_regex.append(doc) # Mantenemos el orden
+        if procesar_ocr:
+            for doc in documentos_escaneados:
+                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
+                documentos_a_procesar_regex.append(doc) # Mantenemos el orden
 
     # --- 4. EJECUCIÓN CONCURRENTE Y PROCESAMIENTO DE RESULTADOS ---
     textos_extraidos_brutos = [] 
     if tareas_extraccion:
-        with ProcessPoolExecutor() as executor:
-            # Ejecutamos todas las tareas pesadas en un solo lote
-            textos_extraidos_brutos = await asyncio.gather(*tareas_extraccion, return_exceptions=True)
+        # Ejecutamos todas las tareas pesadas en un solo lote
+        textos_extraidos_brutos = await asyncio.gather(*tareas_extraccion, return_exceptions=True)
 
         # *** El bucle de procesamiento ahora está DENTRO del 'if' ***
         # Esto garantiza que solo se ejecute si 'textos_extraidos_brutos' tiene contenido.
