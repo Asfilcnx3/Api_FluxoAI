@@ -11,9 +11,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List files for debugging
-        run: ls -R
-
       - name: Set up Python
         # Usamos una acción estándar para configurar Python. Es más fiable.
         uses: actions/setup-python@v5
@@ -24,8 +21,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r fluxo-api/requirements.txt
+          pip install -r requirements.txt
 
       - name: Run tests
         run: |
-          pytest -v fluxo-api/
+          pytest -v --disable-warnings --maxfail=1
