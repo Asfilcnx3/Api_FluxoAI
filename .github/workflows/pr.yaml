@@ -15,6 +15,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+        - name: List files in the repository
+        run: ls -R
+
       - name: Set up Python
         # Usamos una acción estándar para configurar Python. Es más fiable.
         uses: actions/setup-python@v5
