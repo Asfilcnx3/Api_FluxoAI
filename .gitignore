@@ -1,10 +1,8 @@
-Fluxo_IA_alpha
-Fluxo_IA_beta
-Fluxo_IA_demo
-Fluxo_IA_unit
-Fluxo_IA_usman
-Fluxo_IA_utah
-Fluxo_IA_uyuy
-Fluxo_IA_uzzz
-tests
+# Versiones anteriores de la API
+control_versiones
+
+# variables de entorno 
 .env
+
+# cache de los pytest
+.pytest_cache
