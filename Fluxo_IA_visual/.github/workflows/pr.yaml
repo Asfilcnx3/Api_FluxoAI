@@ -15,6 +15,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        # Usamos una acción estándar para configurar Python. Es más fiable.
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # Activa el caché para acelerar instalaciones futuras
+
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
