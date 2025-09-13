@@ -3,8 +3,6 @@ import re
 from io import BytesIO
 from fpdf import FPDF
 from datetime import datetime, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
-import asyncio
 
 from Fluxo_IA_visual.models.responses import  AnalisisTPV
 
