@@ -9,7 +9,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./fluxo-api
+        working-directory: fluxo-api
 
     steps:
       - name: Checkout code
