@@ -6,18 +6,13 @@ on:
 jobs:
   ckeck:
     runs-on: ubuntu-latest 
-    
-    defaults:
-      run:
-        shell: bash
-        working-directory: fluxo-api
 
     steps:
-      - name: List files for debugging
-        run: ls -R
-      
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: List files for debugging
+        run: ls -R
 
       - name: Set up Python
         # Usamos una acción estándar para configurar Python. Es más fiable.
