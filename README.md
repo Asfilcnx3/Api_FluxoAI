@@ -51,19 +51,25 @@ La API usa "load_dotenv", asi que las variables de entorno para que funcione tod
 
 #### --- API Configuration ---
 API_V1_STR=/api/v1
+
 APP_VERSION=1.1.3
+
 PROJECT_NAME=Extracción de Texto de PDFs con IA
+
 DEV_NAME=Abraham - KiaB
 
 #### --- OpenAI Configuration ---
 OPENAI_API_KEY_FLUXO=
+
 FLUXO_MODEL=gpt-5
 
 OPENAI_API_KEY_NOMI=
+
 NOMI_MODEL=gpt-5
 
 #### --- OpenRouter Configuration ---
 OPENROUTER_API_KEY=
+
 OPENROUTER_BASE_URL=
 
 #### --- Environment ---
@@ -71,6 +77,7 @@ ENVIRONMENT="development"
 
 #### --- DEVELOPMENT SETTINGS ---
 DEBUG=true
+
 LOG_LEVEL="INFO"
 
 #### Home
