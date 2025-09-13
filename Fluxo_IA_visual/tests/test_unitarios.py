@@ -483,14 +483,14 @@ def fake_pdf():
     """
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("helvetica", size=12)
     # Añadimos texto que nuestras funciones de prueba puedan reconocer
-    pdf.cell(200, 10, txt="Estado de Cuenta del banco BANREGIO RFC123", ln=True)
+    pdf.cell(200, 10, text="Estado de Cuenta del banco BANREGIO RFC123", ln=True)
     pdf.add_page()
-    pdf.cell(200, 10, txt="Página 2", ln=True)
+    pdf.cell(200, 10, text="Página 2", ln=True)
     
     # Devolvemos el contenido del PDF como bytes
-    return pdf.output(dest='S')
+    return pdf.output()
 
 @pytest.fixture
 def small_fake_pdf():
@@ -500,12 +500,12 @@ def small_fake_pdf():
     """
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("helvetica", size=12)
     # Añadimos texto que nuestras funciones de prueba puedan reconocer
-    pdf.cell(200, 10, txt="Estado de Cuenta BANREGIO RFC123", ln=True)
+    pdf.cell(200, 10, text="Estado de Cuenta BANREGIO RFC123", ln=True)
     
     # Devolvemos el contenido del PDF como bytes
-    return pdf.output(dest='S')
+    return pdf.output()
 
 # ---- Pruebas para obtener_y_procesar_portada ----
 @pytest.mark.asyncio
