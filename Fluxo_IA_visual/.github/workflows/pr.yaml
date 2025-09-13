@@ -1,7 +1,7 @@
 name: Pull Request Check
 
 on:
-  pull_request:
+  - pull_request
 
 jobs:
   ckeck:
@@ -9,16 +9,11 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./fluxo-api/Fluxo_IA_visual
+        working-directory: ./fluxo-api
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
 
       - name: Install Dependencies
         run: |
@@ -27,4 +22,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest fluxo-api/Fluxo_IA_visual/tests/test_unitarios.py
+          pytest -v
