@@ -14,3 +14,4 @@ Pillow
 python-dateutil
 pytest-asyncio
 pyzbar
+fpdf2
