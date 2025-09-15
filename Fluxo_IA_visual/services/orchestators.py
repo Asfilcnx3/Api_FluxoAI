@@ -405,7 +405,7 @@ async def procesar_comprobante(archivo: UploadFile) -> NomiFlash.RespuestaCompro
         datos_listos = sanitizar_datos_ia(datos_crudos)
         return NomiFlash.RespuestaComprobante(**datos_listos)
     
-    except Exception as e:
+    except Exception as e: 
         return NomiFlash.RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")
     
 
