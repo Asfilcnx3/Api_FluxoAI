@@ -1,6 +1,5 @@
 import pytest
 import re
-from io import BytesIO
 from fpdf import FPDF
 from datetime import datetime, timedelta
 
