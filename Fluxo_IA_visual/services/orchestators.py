@@ -211,7 +211,7 @@ async def procesar_nomina(archivo: UploadFile) -> NomiFlash.RespuestaNomina:
 
         # --- Lógica de negocio específica para Nómina ---
         # 1. Extraemos texto para la validación con regex
-        texto_inicial = extraer_texto_de_pdf(pdf_bytes)
+        texto_inicial = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
         rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, "nomina")
 
         # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
@@ -261,7 +261,7 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> NomiFlash.RespuestaEsta
 
         # --- Lógica de negocio específica para Nómina ---
         # 0. Extraemos texto para la validación con regex
-        texto_inicial = extraer_texto_de_pdf(pdf_bytes)
+        texto_inicial = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
         rfc, _ = extraer_rfc_curp_por_texto(texto_inicial, "estado")
 
         loop = asyncio.get_running_loop()
@@ -405,7 +405,7 @@ async def procesar_comprobante(archivo: UploadFile) -> NomiFlash.RespuestaCompro
         datos_listos = sanitizar_datos_ia(datos_crudos)
         return NomiFlash.RespuestaComprobante(**datos_listos)
     
-    except Exception as e:
+    except Exception as e: 
         return NomiFlash.RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")
     
 
@@ -425,7 +425,7 @@ async def procesar_constancia(archivo: UploadFile) -> CSF.ResultadoConsolidado:
     try:
         # 1. Extraemos el texto del pdf
         pdf_bytes = await archivo.read()
-        texto = extraer_texto_de_pdf(pdf_bytes)
+        texto = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
 
         if not texto:
             # Aqui se va a empezar la lógica por si es una iamgen
