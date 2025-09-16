@@ -5,7 +5,7 @@ CONFIGURACION_CSF = {
         "identificacion_contribuyente": {
             "rfc_pattern": [r"rfc:\s+([a-z0-9]{12,13})"],
             "curp_pattern": [r"curp:\s+([a-z0-9]{18})"],
-            "nombre_pattern": [r"nombre \(s\):\s+([a-z\s]+)\n"],
+            "nombre_pattern": [r"nombre \(s\):\s+([^\n]+)\n"],
             "primer_apellido_pattern": [r"primer apellido:\s+([a-z\s]+)\n"],
             "segundo_apellido_pattern": [r"segundo apellido:\s+([a-z\s]+)\n"],
             "inicio_operaciones_pattern": [r"fecha inicio de operaciones:\s+([0-9]{1,2}\s+de\s+[a-z]+\s+de\s+[0-9]{4})"],

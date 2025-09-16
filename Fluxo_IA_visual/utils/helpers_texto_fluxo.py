@@ -277,6 +277,9 @@ EXPRESIONES_REGEX = {
         "descripcion_traspaso_multilinea": ( # es transferencia spei bn
             r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei bn)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n(.*)"
         ),
+        "descripcion_amex_multilinea": ( # transferencia kiwi international
+            r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(dispersion de fondos)"
+        )
     },
     "scotiabank": {
         "descripcion": (
