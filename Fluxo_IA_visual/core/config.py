@@ -3,7 +3,7 @@ from enum import Enum
 from typing import List
 
 from dotenv import load_dotenv
-from pydantic import field_validator, ValidationError
+from pydantic import field_validator, ValidationError, SecretStr
 from pydantic_settings import BaseSettings
 
 # Carga las variables de entorno desde un archivo .env si existe
@@ -35,15 +35,15 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str] = ["*"]  # Por defecto permite todo para desarrollo
 
     # OpenAI Settings Fluxo
-    OPENAI_API_KEY_FLUXO: str # es obligatoria para que el servicio funcione
+    OPENAI_API_KEY_FLUXO: SecretStr # es obligatoria para que el servicio funcione
     FLUXO_MODEL: str = "gpt-5"
 
     # OpenAI Settings Nomi
-    OPENAI_API_KEY_NOMI: str # es obligatoria para que el servicio funcione
+    OPENAI_API_KEY_NOMI: SecretStr # es obligatoria para que el servicio funcione
     NOMI_MODEL: str = "gpt-5"
 
     # OpenRouter Settings
-    OPENROUTER_API_KEY: str
+    OPENROUTER_API_KEY: SecretStr
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
 
     ## Development settings
@@ -61,39 +61,42 @@ class Settings(BaseSettings):
 
     @field_validator("OPENAI_API_KEY_FLUXO")
     @classmethod
-    def validate_fluxo_api_key(cls, v: str) -> str:
+    def validate_fluxo_api_key(cls, secret: str) -> SecretStr:
         """
         Valida que la clave de OpenAI no esté vacía y tenga un formato plausible.
         """
+        v = secret.get_secret_value()
         if not v:
             raise ValueError("La variable de entorno OPENAI_API_KEY_FLUXO no puede estar vacía.")
         if not v.startswith("sk-"):
             raise ValueError("OPENAI_API_KEY_FLUXO no comienza con 'sk-'. Podría ser inválida.")
-        return v
+        return secret
     
     @field_validator("OPENAI_API_KEY_NOMI")
     @classmethod
-    def validate_nomi_api_key(cls, v: str) -> str:
+    def validate_nomi_api_key(cls, secret: str) -> SecretStr:
         """
         Valida que la clave de OpenAI no esté vacía y tenga un formato plausible.
         """
+        v = secret.get_secret_value()
         if not v:
             raise ValueError("La variable de entorno OPENAI_API_KEY_NOMI no puede estar vacía.")
         if not v.startswith("sk-"):
             raise ValueError("OPENAI_API_KEY_NOMI no comienza con 'sk-'. Podría ser inválida.")
-        return v
+        return secret
     
     @field_validator("OPENROUTER_API_KEY")
     @classmethod
-    def validate_openrouter_api_key(cls, v: str) -> str:
+    def validate_openrouter_api_key(cls, secret: str) -> SecretStr:
         """
         Valida que la clave de OpenAI no esté vacía y tenga un formato plausible.
         """
+        v = secret.get_secret_value()
         if not v:
             raise ValueError("La variable de entorno OPENROUTER_API_KEY no puede estar vacía.")
         if not v.startswith("sk-"):
             raise ValueError("OPENROUTER_API_KEY no comienza con 'sk-'. Podría ser inválida.")
-        return v
+        return secret
     
 # INICIALIZACIÓN SEGURA 
 # Se envuelve la creación de la instancia en un bloque try/except para
