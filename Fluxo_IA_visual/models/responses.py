@@ -49,7 +49,7 @@ class CSF:
         entidad_federativa: Optional[str] = None
         vialidad: Optional[str] = None
         numero_interior: Optional[str] = None
-        numero_exterior: Optional[int] = None
+        numero_exterior: Optional[str] = None
         colonia: Optional[str] = None
         municipio: Optional[str] = None
 
