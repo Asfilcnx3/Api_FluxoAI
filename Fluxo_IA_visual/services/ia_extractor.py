@@ -1,28 +1,29 @@
 from .pdf_processor import convertir_pdf_a_imagenes
+from ..core.config import settings
 
 from fastapi import HTTPException
-from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from typing import List, Dict
 from io import BytesIO
 import json
 import base64
-import os
 
 
-load_dotenv()
+nomi_api = settings.OPENAI_API_KEY_NOMI.get_secret_value()
+fluxo_api = settings.OPENAI_API_KEY_FLUXO.get_secret_value()
+openrouter_api = settings.OPENROUTER_API_KEY.get_secret_value()
 
 client_gpt_nomi = AsyncOpenAI(
-    api_key=os.getenv("OPENAI_API_KEY_NOMI")
+    api_key=nomi_api
 )
 
 client_gpt_fluxo = AsyncOpenAI(
-    api_key=os.getenv("OPENAI_API_KEY_FLUXO")
+    api_key=fluxo_api
 )
 
 client_openrouter = AsyncOpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    base_url=os.getenv("OPENROUTER_BASE_URL"),
+    api_key=openrouter_api,
+    base_url=settings.OPENROUTER_BASE_URL,
     default_headers={
         "HTTP-Referer": "https://github.com/Asfilcnx3", 
         "X-Title": "Fluxo IA Test", 
