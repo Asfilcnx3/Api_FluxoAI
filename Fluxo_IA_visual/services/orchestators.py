@@ -104,16 +104,16 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
 
     # --- 5. QUINTO: Corregir el resultado de la IA y devolver ---
     # Usamos el banco que reconocimos por texto, que es más fiable.
-    if banco_estandarizado:
+    if banco_estandarizado is not None:
         datos_ia_reconciliados["banco"] = banco_estandarizado
-    if rfc_estandarizado:
+    if rfc_estandarizado is not None:
         datos_ia_reconciliados["rfc"] = rfc_estandarizado
-    if comisiones_estanarizadas:
+    if comisiones_estanarizadas is not None:
         datos_ia_reconciliados["comisiones"] = comisiones_estanarizadas
-    if depositos_estanarizadas:
+    if depositos_estanarizadas is not None:
         datos_ia_reconciliados["depositos"] = depositos_estanarizadas
     
-    return datos_ia_reconciliados, es_documento_digital
+    return datos_ia_reconciliados, es_documento_digital, texto_verificacion
 
 # ESTA FUNCIÓN ES PARA OBTENER LOS RESULTADOS DEL ANALISIS DE TPV CON REGEX
 def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str, Any]:

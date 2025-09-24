@@ -10,7 +10,7 @@ import io
 from ...models.responses import AnalisisTPV
 from ...core.exceptions import PDFCifradoError
 from ...services.orchestators import procesar_regex_generico, obtener_y_procesar_portada
-from ...services.pdf_processor import extraer_texto_de_pdf, extraer_texto_con_ocr
+from ...services.pdf_processor import extraer_texto_con_ocr
 from ...utils.helpers import total_depositos_verificacion, crear_objeto_resultado
 from ...utils.helpers_texto_fluxo import prompt_base_fluxo
 
@@ -80,8 +80,8 @@ async def procesar_pdf_api(
         )
     
     # ------- 1. ANÁLISIS DE LA PORTADA CON IA PARA DETERMINAR ENTRADAS Y SI ES DOCUMENTO ESCANEADO -------
+    logger.info("Analisis de Portada Inicializado")
     for doc in archivos_en_memoria:
-        logger.info("Analisis de Portada Inicializado")
         tarea = obtener_y_procesar_portada(prompt_base_fluxo, doc["content"])
         tareas_analisis.append(tarea)    
     try:
@@ -93,7 +93,6 @@ async def procesar_pdf_api(
 
     # Suma de depósitos y decisión
     logger.debug("--- RESULTADOS PORTADA ----")
-    logger.debug(resultados_portada)
     logger.info("Resultado de la portada obtenido -- Análisis finalizado")
     total_depositos_calculado, es_mayor = total_depositos_verificacion(resultados_portada)
 
@@ -105,8 +104,8 @@ async def procesar_pdf_api(
     # Creamos una lista final de resultados, pre-llenada para mantener el orden.
     resultados_finales: List[Union[AnalisisTPV.ResultadoExtraccion, None]] = [None] * len(archivos_en_memoria)
 
+    logger.info("Empezando la separación de documentos")
     for i, resultado_bruto in enumerate(resultados_portada):
-        logger.info("Empezando la separación de documentos")
         filename = archivos_en_memoria[i]["filename"]
         # VERIFICACIÓN 1: ¿La tarea falló por completo?
         if isinstance(resultado_bruto, Exception):
@@ -127,14 +126,13 @@ async def procesar_pdf_api(
                 )
             continue # Pasamos al siguiente archivo
         
-        logger.debug(resultado_bruto)
         # Si no hubo error, desempacamos los resultados
-        datos_ia, es_digital = resultado_bruto
+        datos_ia, es_digital, texto_inicial = resultado_bruto
         # Intenta procesar este archivo, preparado para cualquier error
         try:
             # Sea digital o escaneado se prepara para extracción
             if es_digital:
-                documentos_digitales.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia})
+                documentos_digitales.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia, "texto": texto_inicial})
             else:
                 documentos_escaneados.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia})
 
@@ -145,56 +143,64 @@ async def procesar_pdf_api(
             resultados_finales[i] = AnalisisTPV.ErrorRespuesta(
                 error=f"Error al procesar los datos de la extracción inicial en: '{filename}'. Vuelve a mandar este archivo."
             )
-
     logger.info("Separación finalizada")
-    # --- 3. PROCESAMIENTO OBLIGATORIO DE DOCUMENTOS DIGITALES ---
+    
+    # --- 3. PROCESAMIENTO CONCURRENTE Y CENTRALIZADO GENERAL ---
     loop = asyncio.get_running_loop()
-    tareas_extraccion = []
-    documentos_a_procesar_regex = []
-    procesar_ocr = es_mayor and len(documentos_escaneados) <= 15
 
-    # Añadir tareas de extracción digital
-    with ProcessPoolExecutor() as executor:
-        for doc in documentos_digitales:
-            tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_de_pdf, doc["content"]))
-            documentos_a_procesar_regex.append(doc) # Mantenemos el orden
+    # se comprueba que sea mayor a 250k, que haya escaneados, y que no sean más de 15
+    procesar_ocr = es_mayor and documentos_escaneados and len(documentos_escaneados) <= 15
 
-    # Añadir tareas de OCR condicionalmente
-        if procesar_ocr:
-            for doc in documentos_escaneados:
-                tareas_extraccion.append(loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"]))
-                documentos_a_procesar_regex.append(doc) # Mantenemos el orden
+    logger.info("Procesando documentos digitales...")
+    for doc_info in documentos_digitales:
+        filename = archivos_en_memoria[doc_info['index']]['filename']
+        try:
+            resultado_dict = procesar_regex_generico(doc_info["ia_data"], doc_info["texto"], "digital")
+            resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
 
-    # --- 4. EJECUCIÓN CONCURRENTE Y PROCESAMIENTO DE RESULTADOS ---
-    textos_extraidos_brutos = [] 
-    if tareas_extraccion:
-        # Ejecutamos todas las tareas pesadas en un solo lote
-        textos_extraidos_brutos = await asyncio.gather(*tareas_extraccion, return_exceptions=True)
+        except Exception as e:
+            logger.error(f"Fallo el regex en el documento digital: {filename}")
+            resultados_finales[doc_info["index"]] = crear_objeto_resultado({
+                **doc_info["ia_data"],
+                "error_transacciones": f"Fallo Regex en '{filename}': {e}"
+            })
+    logger.info("Procesamiento de documentos digitales finalizado.")
 
-        # *** El bucle de procesamiento ahora está DENTRO del 'if' ***
-        # Esto garantiza que solo se ejecute si 'textos_extraidos_brutos' tiene contenido.
-        for i, texto_o_error in enumerate(textos_extraidos_brutos):
-            doc_info = documentos_a_procesar_regex[i]
-            filename = archivos_en_memoria[doc_info['index']]['filename']
-
-            if isinstance(texto_o_error, Exception):
-                resultados_finales[doc_info["index"]] = crear_objeto_resultado({
+    if procesar_ocr:
+        logger.info("Procesamiento OCR habilitado para documentos escaneados.")
+        logger.debug("Iniciando lote de procesamiento con OCR.")
+        # Usamos ProcessPoolExecutor para evitar bloquear el event loop
+        with ProcessPoolExecutor() as executor:
+            # Creamos las tareas de OCR
+            tareas_ocr = [
+                loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"])
+                for doc in documentos_escaneados
+            ]
+            # Ejecutamos todas las tareas de OCR en paralelo
+            textos_ocr_brutos = await asyncio.gather(*tareas_ocr, return_exceptions=True)
+        
+            # Procesamos los resultados del OCR
+            for i, texto_o_error in enumerate(textos_ocr_brutos):
+                doc_info = documentos_escaneados[i]
+                if isinstance(texto_o_error, Exception):
+                    resultados_finales[doc_info["index"]] = crear_objeto_resultado({
                     **doc_info["ia_data"],
                     "error_transacciones": f"Fallo la extracción de texto en '{filename}': {texto_o_error}"
-                })
-                continue
+                    })
+                    continue
 
-            try:
-                resultado_dict = procesar_regex_generico(doc_info["ia_data"], texto_o_error, "digital" if doc_info in documentos_digitales else "ocr")
-                resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
-            
-            except Exception as e:
-                resultados_finales[doc_info["index"]] = crear_objeto_resultado({
+                try:
+                    resultado_dict = procesar_regex_generico(doc_info["ia_data"], texto_o_error, "ocr")
+                    resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
+
+                except Exception as e:
+                    resultados_finales[doc_info["index"]] = crear_objeto_resultado({
                     **doc_info["ia_data"],
                     "error_transacciones": f"Fallo Regex en '{filename}': {e}"
-                })
+                    })
+        logger.info("Procesamiento OCR finalizado.")
 
-    # --- 5. MANEJO DE ESCANEADOS OMITIDOS ---
+    # --- 4. MANEJO DE ESCANEADOS OMITIDOS ---
     if not procesar_ocr and documentos_escaneados:
         if len(documentos_escaneados) > 15:
             error_msg = "La cantidad de documentos escaneados supera el límite de 15."
@@ -212,7 +218,7 @@ async def procesar_pdf_api(
                 DetalleTransacciones=error_obj
             )
 
-    # --- 6. ENSAMBLE DE LA RESPUESTA FINAL ---
+    # --- 5. ENSAMBLE DE LA RESPUESTA FINAL ---
     resultados_limpios = [res for res in resultados_finales if res is not None]
 
     # Generamos la lista de resultados generales A PARTIR de la lista de resultados individuales con una simple y elegante comprensión de lista.
