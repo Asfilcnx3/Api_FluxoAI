@@ -243,7 +243,7 @@ def sanitizar_datos_ia(datos_crudos: Dict[str, Any]) -> Dict[str, Any]:
     return datos_limpios
 
 def total_depositos_verificacion(
-    resultados_portada: List[Union[Tuple[Dict, bool], Exception]]
+    resultados_portada: List[Union[Tuple[Dict, bool, str], Exception]]
 ) -> Tuple[float, bool]:
     """
     Suma los depósitos de una lista de resultados de análisis con IA.
@@ -251,7 +251,7 @@ def total_depositos_verificacion(
     total_depositos = 0.0
     for resultado in resultados_portada:
         if not isinstance(resultado, Exception):
-            datos_ia, _ = resultado
+            datos_ia, _, _ = resultado
             if datos_ia:
                 depo = datos_ia.get("depositos") or 0.0
                 total_depositos += float(depo)

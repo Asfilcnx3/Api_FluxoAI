@@ -237,8 +237,8 @@ def test_sanitizar_datos_float(monkeypatch):
 # ---- Pruebas para total_depositos_verificacion ----
 def test_total_depositos_normal():
     resultados = [
-        ({"depositos": 100000}, True),
-        ({"depositos": 200000}, True),
+        ({"depositos": 100000}, True, "texto de verificacion 1"),
+        ({"depositos": 200000}, True, "texto de verificacion 2"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 300000.0
@@ -246,8 +246,8 @@ def test_total_depositos_normal():
 
 def test_total_depositos_menor_al_umbral():
     resultados = [
-        ({"depositos": 50000}, True),
-        ({"depositos": 100000}, True),
+        ({"depositos": 50000}, True, "texto de verificacion 1"),
+        ({"depositos": 100000}, True, "texto de verificacion 2"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 150000.0
@@ -255,7 +255,7 @@ def test_total_depositos_menor_al_umbral():
 
 def test_total_depositos_con_none_y_excepcion():
     resultados = [
-        ({"depositos": None}, True),
+        ({"depositos": None}, True, "texto de verificacion 1"),
         Exception("error de IA"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
@@ -264,7 +264,7 @@ def test_total_depositos_con_none_y_excepcion():
 
 def test_total_depositos_diccionario_vacio():
     resultados = [
-        ({}, True),
+        ({}, True, "texto de verificacion 1"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 0.0

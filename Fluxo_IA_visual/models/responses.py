@@ -132,6 +132,8 @@ class NomiFlash:
         """Datos extraidos del análisis del recibo de Nómina."""
         datos_qr: Optional[str] = None
         nombre: Optional[str] = None
+        apellido_paterno: Optional[str] = None
+        apellido_materno: Optional[str] = None
         dependencia: Optional[str] = None
         secretaria: Optional[str] = None
         numero_empleado: Optional[str] = None

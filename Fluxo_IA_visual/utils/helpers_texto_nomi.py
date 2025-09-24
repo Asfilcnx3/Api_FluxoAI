@@ -16,7 +16,9 @@ Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumplien
 
 Campos a extraer:
 
-- nombre
+- nombre # unicamente el nombre del empleado
+- apellido_paterno # unicamente el primer apellido
+- apellido_materno # unicamente el segundo apellido
 - rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c", los primeros 10 caracteres del rfc y curp son iguales
 - curp # es un código de 4 letras, 6 números, 6 letras y 2 números
 - dependencia # Secretaría o institución pública
@@ -97,7 +99,7 @@ PATTERNS_COMPILADOS_RFC_CURP: Dict[str, Dict[str, re.Pattern]] = {
 CAMPOS_STR = [
     "nombre", "rfc", "curp", "dependencia", "secretaria", "numero_empleado", "puesto_cargo", "categoria", "periodo_inicio", "periodo_fin",
     "fecha_pago", "periodicidad", "clabe", "nombre_usuario", "numero_cuenta", "domicilio", "inicio_periodo", "fin_periodo", "banco",
-    "nombre_cliente", "clabe_interbancaria"
+    "nombre_cliente", "clabe_interbancaria", "apellido_paterno", "apellido_materno"
 ]
 
 CAMPOS_FLOAT = [

@@ -10,7 +10,7 @@ PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe"]
 
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
-    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup"
+    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup", "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal"
 ]
 
 CONFIGURACION_BANCOS = {
@@ -46,9 +46,9 @@ CONFIGURACION_BANCOS = {
     },
     "scotiabank": {
         "alias": ["scotiabank inverlat"],
-        "rfc_pattern": [r"r\.f\.c\.cliente\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
+        "rfc_pattern": [r"r\.*\s*f\.*\s*c\.*\s*cliente\s*([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
         "comisiones_pattern": [r"comisiones\s*cobradas\s*\$([\d,]+\.\d{2})"],
-        "depositos_pattern": [r"\(\+\)dep[óo]sitos\s*\$([\d,]+\.\d{2})"]
+        "depositos_pattern": [r"\(\+\)\s*dep[óo]sitos\s*\$([\d,]+\.\d{2})"]
     },
     "banregio": {
         "alias": ["banco regional"],
@@ -122,6 +122,12 @@ CONFIGURACION_BANCOS = {
         "comisiones_pattern": [r"comisiones efectivamente\s*([\d,]+\.\d{2})"],
         "depositos_pattern": [r"dep[éeóo]sitos\s*([\d,]+\.\d{2})"]
     },
+    "vepormas": {
+        "alias": ["grupo financiero ve por más", "grupo financiero ve por mas"],
+        "rfc_pattern": [r"r\.f\.c\.\s*([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "comisiones_pattern": [r"r\.f\.c\.\s*([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
+        "depositos_pattern": [r"dep[oó]sitos\s*([\d,]+\.\d{2})"]
+    }
 }
 
 ALIAS_A_BANCO_MAP = {}
@@ -198,6 +204,8 @@ frases_bancos = {
     "banamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)",
     # Azteca no tiene una para una línea
     "azteca": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
+    # vepormas no tiene una para una línea
+    "vepormas": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
 }
 
 # Unimos TODAS las alternativas (expresiones especificas y genéricas) en un solo grupo usando "|" (OR)
@@ -223,7 +231,7 @@ EXPRESIONES_REGEX = {
     "banbajío": {
         "descripcion": (
             r"(\d{1,2} [a-z]{3})\s*"  # Grupo 1: Fecha (ej: "15 jul")
-            r"(\d{7})\s*"             # Grupo 2: ID (ej: "1234567")
+            r"([^\s]*)\s*"           # Grupo 2: ID (ej: "1234567")
             r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("BanBajío") + # Grupo 3: La descripción completa. Captura todo el texto que contenga alguna palabra clave y que se encuentre entre el ID y el signo de dólar del monto.
             r"\$\s*([\d,]+\.\d{2})"    # Grupo 4: El monto
         ), # r"(\d{1,2} [a-z]{3}) (\d{7})(.*(?:iva |comision )?deposito negocios afiliados \(adquirente\)(?: optblue amex)?)\s\$\s*([\d,]+\.\d{2})"
@@ -262,14 +270,19 @@ EXPRESIONES_REGEX = {
             r"(\d{6,8})\s+([a-zA-Z0-9]{4,10})\s*" # Grupo 3: ID de la transacción
             r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
         ), # r'(\d{2})\.?\s+(transf rec hsbcnet dep tpv\s+\d{7})\s+([A-Za-z0-9]{8})?\s*\$\s*([\d,]+\.\d{2})',
+        "descripcion_clip_multilinea": (
+            r"([0-9a-zA-Z]{1,2})\.?\s*" # Grupo 1: Fecha
+            r"(%s)\s*" % construir_regex_descripcion("hsbc") + # Grupo 2: Expresión exacta y genericas
+            r"(\d{6,8})\s*" # Grupo 3: ID de la transacción
+            r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
+        )
     },
     "mifel": {
-        "descripcion": ( # esta descripción no funciona
+        "descripcion": (
             r"(\d{2}/\d{2}/\d{4})\s*" # Grupo 1: Fecha
-            r"([a-zA-Z]{3}\d{6}-\d)\s*" # Grupo 2: Referencia
-            r"(%s)\s+" % construir_regex_descripcion("mifel") + # Grupo 3: Palabras exactas a encontrar
-            r"(?:\s+\w+)?\s*" # Grupo 4: todo lo que está en las multiples lineas
-            r"([\d,]+\.\d{2})\s+[\d,]+\.\d{2}\s*\n(.+)" # Grupo 5: Monto
+            r"([a-zA-Z]{2,3}\d{4,6}-\d)\s*" # Grupo 2: Referencia
+            r"(%s)\s*" % construir_regex_descripcion("mifel") + # Grupo 3: Palabras exactas a encontrar
+            r"([\d,]+\.\d{2})\s+[\d,]+\.\d{2}\s*\n(.+)" # Grupo 4: Monto
         ), # r'(\d{2}/\d{2}/\d{4})\s+([a-zA-Z]{3}\d{6}-\d)\s+(vta\. (?:cre|deb)\s+\d{4}\s+\d{7})(?:\s+\w+)?\s+([\d,]+\.\d{2})\s+[\d,]+\.\d{2}\s*\n(.+)',
         "descripcion_clip_multilinea": ( # es vta. deb o cre
             r"(?m)^(\d{2}/\d{2}/\d{4})\s+(smf\d{6}-\d)\s+(vta\. (?:deb|cre).*?)(\d{1,3}(?:,\d{3})*\.\d{2}).*\n(.*)"
@@ -285,9 +298,8 @@ EXPRESIONES_REGEX = {
         "descripcion": (
             r"(\d{2}\s+[a-z]{3})\s*" # Grupo 1: Fecha que estamos buscando
             r"(%s)\s+" % construir_regex_descripcion("scotiabank") + # Grupo 2: Descipción que estamos buscando
-            r"\$([\d,]+\.\d{2})\s+\$[\d,]+\.\d{2}\s*" # Grupo 3: Monto a encontrar y monto a ignorar
-            r"\n((?:.*\n){6})" # Grupo 4: Lineas despues
-        ), #r'(\d{2}\s+[a-z]{3})\s+transf interbancaria spei\s+(\d{20})\s+\$([\d,]+\.\d{2})\s+\$[\d,]+\.\d{2}\s*\n((?:.*\n){6})',
+            r"[\s\S]*?\$([\d,]+\.\d{2})" # Grupo 3: Monto a encontrar
+        ),
         "descripcion_clip_multilinea": ( # spei pocket deposito bpu
             r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s*\d{20}\s*\$\s*([\d,]+\.\d{2})\s*\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,9}.*?deposito bpu.*?\n(?:.*?\n){1,5}.*?pocket de latinoamerica sapi.*?\n.*?\n)"
         # r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s+.*?\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2})"
@@ -310,9 +322,9 @@ EXPRESIONES_REGEX = {
     "santander": {
         "descripcion": (
             r"(\d{2}-[a-z]{3}-\d{4})\s*" # Grupo 1: Fecha
-            r"(?:\s*0){7}\s*" # Grupo 2: ID
+            r"(\d+)\s*" # Grupo 2: ID
             r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("santander") + # Grupo 3: Busqueda con regex
-            r"\.-(\d{9})\s*" # Grupo 4: Referencia
+            r"([\s\S]*?)\s*" # Grupo 4: Referencia
             r"([\d,]+\.\d{2})" # Grupo 5: Monto
         ),
         "descripcion_clip_multilinea": ( # Deposito BPU
@@ -324,7 +336,7 @@ EXPRESIONES_REGEX = {
             r"(\d{2}/[a-z]{3})\s*\d{2}/[a-z]{3}" # Grupo 1: Fecha
             r"(?:\s+[a-zA-Z]\d{2})?" # Grupo 2: Referencia
             r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("bbva") + # Grupo 3: Regex especifica
-            r"([\d,]+\.\d{2})\s*\n.*?(\d{9})" # Grupo 4 y 5: monto y ID
+            r"([\d,]+\.\d{2}).*?\n.*?(\d{4,9})" # Grupo 4 y 5: monto y ID
         ), # r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}(?:\s+[a-zA-Z]\d{2})?\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito|spei recibidobanorte|spei recibidosantander|spei recibidostp)\s+([\d,]+\.\d{2})\s*\n.*?(\d{9})',
         "descripcion_clip_multilinea": ( # es payclip, getnet o netpay (recibido santander y recibido banorte)
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte|stp|afirme))\s*([\d,]+\.\d{2})([\s\S]*?(?:gana|0000001af|0000001sq|deposito bpu|trans sr pago|dispersion sihay ref)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s|payclip s de rl de cv|pocket de latinoamerica sapi de cv|cobra online sapi de cv|kiwi bop sa de cv))"
@@ -340,7 +352,12 @@ EXPRESIONES_REGEX = {
         )
     },
     "multiva": {
-        "descripcion": r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito)\s+([\d,]+\.\d{2})\s*\n(\d{9})',
+        "descripcion": (
+            r"(\d{2}(?:/\d{2}/\d{4})?)\s*"  # Grupo 1: Fecha
+            r"(?:\s+[a-zA-Z]{2}\d{14})?" # Grupo 2: Referencia
+            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("multiva") + # Grupo 3: Regex especifica
+            r"[\d,]+\.\d{2}\s*([\d,]+\.\d{2})\s*([\d,]+\.\d{2})" # Grupo 4 y 5: monto ignorado y montos no ignorados
+        ),
         "descripcion_clip_multilinea": ( # venta tdd / venta tdc
             # grupo 1: referencia, grupo 2: concepto, grupo 3: monto, grupo 4: fecha
             r"(\d{2}(?:/\d{2}/\d{4})?)\s*"         # fecha
@@ -387,6 +404,11 @@ EXPRESIONES_REGEX = {
         ),
     },
     "inbursa": {
+        "descripcion": (
+            r"([a-z]{3}\.?\s*(?:\d{2})?)"  # Grupo 1 y 2 : Fecha y Referencia
+            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("inbursa") + # Grupo 3: Regex especifica
+            r"([\d,]+\.\d{2})\s*([\d,]+\.\d{2})" # Grupo 4 y 5: monto
+        ),
         "descripcion_clip_multilinea": ( # spei recibido stp
         r"([a-z]{3}\.?\s*(?:\d{2})?)\s*(\d{10}\s*deposito spei)\s*([\d,]+\.\d{2}).*?\n(.*?(?:kiwi international payment technologies|cobra online sapi de cv|operadora paypal de mexico s de rl)[\s\S]*?clave de rastreo.*)"
         ),
@@ -394,6 +416,11 @@ EXPRESIONES_REGEX = {
     "intercam": {
         "descripcion_clip_multilinea": ( # spei recibido stp
         r"(\d{1,2})\s+(\d{9}\s+recepcion spei\s*\|\s*(?:jp morgan|santander|banorte)\s*\|[\s\S]*?)(\d{1,3}(?:,\d{3})*\.\d{2})([\s\S]*?136180018635900157)"
+        ),
+    },
+    "vepormas": {
+        "descripcion_clip_traspaso": ( # En realidad no existe
+            r"(\d{1,2})\s+(\d{9}\s+recepcion spei\s*\|\s*(?:jp morgan|santander|banorte)\s*\|[\s\S]*?)(\d{1,3}(?:,\d{3})*\.\d{2})([\s\S]*?136180018635900157)"
         ),
     }
 }
