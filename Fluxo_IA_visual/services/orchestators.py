@@ -8,7 +8,7 @@ from .ia_extractor import (
     analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia
 )
 from ..utils.helpers_texto_fluxo import (
-    REGEX_COMPILADAS, PALABRAS_EXCLUIDAS
+    REGEX_COMPILADAS, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO
 )
 from ..utils.helpers_texto_nomi import (
     PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA
@@ -168,6 +168,7 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
 
     if not transacciones_matches:
         resultados["transacciones"] = []
+        resultados["depositos_en_efectivo"] = 0.0
         resultados["entradas_TPV_bruto"] = 0.0
         resultados["entradas_TPV_neto"] = 0.0
         # Probamos el nuevo campo de error
@@ -176,21 +177,38 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
     else:
         # CASO B: Sí se encontraron transacciones, procesamos normalmente
         transacciones_filtradas = []
-        total_entradas = 0
+        # Acumuladores
+        total_depositos_efectivo = 0.0
+        total_entradas_tpv = 0.0
+
         for transaccion in transacciones_matches:
             descripcion, monto_str = construir_descripcion_optimizado(transaccion, banco)
-            if all(palabra not in descripcion for palabra in PALABRAS_EXCLUIDAS):
-                total_entradas += sumar_lista_montos([monto_str])
-                transacciones_filtradas.append({
-                    "fecha": transaccion[0],
-                    "descripcion": limpiar_y_normalizar_texto(descripcion.strip()),
-                    "monto": monto_str
-                })
+            descripcion_limpia = limpiar_y_normalizar_texto(descripcion.strip())
+
+            # Convertimos el monto a float una sola vez para usarlo en las sumas
+            monto_float = sumar_lista_montos([monto_str])
+
+            # 1. Primero, verificamos si es una transacción de efectivo
+            if any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_EFECTIVO):
+                total_depositos_efectivo += monto_float
+            
+            # 2. Luego, verificamos si es una transacción TPV válida (no excluida)
+            elif all(palabra not in descripcion_limpia.lower() for palabra in PALABRAS_EXCLUIDAS):
+                total_entradas_tpv += monto_float
+
+            # 3. Siempre añadimos la transacción a la lista para que el usuario la vea
+            transacciones_filtradas.append({
+                "fecha": transaccion[0],
+                "descripcion": descripcion_limpia,
+                "monto": monto_str
+            })
+        print(total_depositos_efectivo)
         
         resultados["transacciones"] = transacciones_filtradas
-        resultados["entradas_TPV_bruto"] = total_entradas
+        resultados["depositos_en_efectivo"] = total_depositos_efectivo
+        resultados["entradas_TPV_bruto"] = total_entradas_tpv
         comisiones = resultados.get("comisiones") or 0.0
-        resultados["entradas_TPV_neto"] = total_entradas - comisiones
+        resultados["entradas_TPV_neto"] = total_entradas_tpv - comisiones
         resultados["error_transacciones"] = None # Nos aseguramos de que no haya mensaje de error
 
     # El resto de los datos de la IA ya están en 'resultados', por lo que se conservan.

@@ -106,6 +106,7 @@ class AnalisisTPV:
         depositos: Optional[float] = None
         cargos: Optional[float] = None
         saldo_promedio: Optional[float] = None
+        depositos_en_efectivo: Optional[float] = None
         entradas_TPV_bruto: Optional[float] = None
         entradas_TPV_neto: Optional[float] = None
 
