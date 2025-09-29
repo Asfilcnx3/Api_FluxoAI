@@ -393,9 +393,16 @@ class DummyComprobante:
         self.fin_periodo = fin_periodo
 
 class DummyNomina:
-    def __init__(self, rfc=None, curp=None):
+    def __init__(self, rfc=None, curp=None, datos_qr=None):
         self.rfc = rfc
         self.curp = curp
+        self.datos_qr = datos_qr
+
+class DummySegundaNomina:
+    def __init__(self, rfc=None, curp=None, datos_qr=None):
+        self.rfc = rfc
+        self.curp = curp
+        self.datos_qr = datos_qr
 
 class DummyEstado:
     def __init__(self, rfc=None, curp=None):
@@ -403,9 +410,10 @@ class DummyEstado:
         self.curp = curp
 
 class DummyResultadoConsolidado:
-    def __init__(self, Comprobante=None, Nomina=None, Estado=None):
+    def __init__(self, Comprobante=None, Nomina=None, SegundaNomina=None, Estado=None):
         self.Comprobante = Comprobante
         self.Nomina = Nomina
+        self.SegundaNomina = SegundaNomina
         self.Estado = Estado
         self.es_menor_a_3_meses = None
         self.el_rfc_es_igual = None
@@ -441,6 +449,20 @@ def test_aplicar_reglas_de_negocio_rfc_diferentes():
     resultado = DummyResultadoConsolidado(Nomina=nomina, Estado=estado)
     resultado = aplicar_reglas_de_negocio(resultado)
     assert resultado.el_rfc_es_igual is False
+
+def test_aplicar_reglas_de_negocio_qr_coinciden():
+    nomina_1 = DummyNomina(datos_qr="Datos dentro de QR")
+    nomina_2 = DummyNomina(datos_qr="Datos dentro de QR")
+    resultado = DummyResultadoConsolidado(Nomina=nomina_1, SegundaNomina=nomina_2)
+    resultado = aplicar_reglas_de_negocio(resultado)
+    assert resultado.el_qr_es_igual is True
+
+def test_aplicar_reglas_de_negocio_qr_diferentes():
+    nomina_1 = DummyNomina(datos_qr="Datos dentro de primer QR")
+    nomina_2 = DummyNomina(datos_qr="Datos dentro de segundo QR")
+    resultado = DummyResultadoConsolidado(Nomina=nomina_1, SegundaNomina=nomina_2)
+    resultado = aplicar_reglas_de_negocio(resultado)
+    assert resultado.el_qr_es_igual is False
 
 def test_aplicar_reglas_de_negocio_objeto_none():
     resultado = None
