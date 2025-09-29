@@ -6,7 +6,7 @@ PALABRAS_CLAVE_VERIFICACION = re.compile(
 )
 
 # Creamos la lista e palabras excluidas
-PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe"]
+PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe", "imss"]
 
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
