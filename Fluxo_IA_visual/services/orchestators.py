@@ -11,7 +11,7 @@ from ..utils.helpers_texto_fluxo import (
     REGEX_COMPILADAS, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO
 )
 from ..utils.helpers_texto_nomi import (
-    PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA
+    PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA, SEGUNDO_PROMPT_NOMINA
 )
 from ..utils.helpers_texto_csf import (
     PATRONES_CONSTANCIAS_COMPILADO
@@ -188,25 +188,29 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
             # Convertimos el monto a float una sola vez para usarlo en las sumas
             monto_float = sumar_lista_montos([monto_str])
 
-            # 1. Primero, verificamos si es una transacción de efectivo
-            if any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_EFECTIVO):
-                total_depositos_efectivo += monto_float
-            
-            # 2. Luego, verificamos si es una transacción TPV válida (no excluida)
-            elif all(palabra not in descripcion_limpia.lower() for palabra in PALABRAS_EXCLUIDAS):
-                total_entradas_tpv += monto_float
-
-            # 3. Siempre añadimos la transacción a la lista para que el usuario la vea
-            transacciones_filtradas.append({
-                "fecha": transaccion[0],
-                "descripcion": descripcion_limpia,
-                "monto": monto_str
-            })
+            # Ignoramos completamente las transacciones excluidas.
+            if all(palabra not in descripcion_limpia.lower() for palabra in PALABRAS_EXCLUIDAS):
+                
+                # Si la transacción pasó el filtro, ahora la clasificamos.
+                if any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_EFECTIVO):
+                    # Es un depósito en efectivo
+                    total_depositos_efectivo += monto_float
+                else:
+                    # Si no es excluida y no es efectivo, es una entrada TPV.
+                    total_entradas_tpv += monto_float
+                
+                # 3. AGREGAR: Solo añadimos a la lista final las transacciones que pasaron el filtro.
+                transacciones_filtradas.append({
+                    "fecha": transaccion[0],
+                    "descripcion": descripcion_limpia,
+                    "monto": monto_str
+                })
         print(total_depositos_efectivo)
         
         resultados["transacciones"] = transacciones_filtradas
         resultados["depositos_en_efectivo"] = total_depositos_efectivo
         resultados["entradas_TPV_bruto"] = total_entradas_tpv
+        
         comisiones = resultados.get("comisiones") or 0.0
         resultados["entradas_TPV_neto"] = total_entradas_tpv - comisiones
         resultados["error_transacciones"] = None # Nos aseguramos de que no haya mensaje de error
@@ -267,6 +271,57 @@ async def procesar_nomina(archivo: UploadFile) -> NomiFlash.RespuestaNomina:
     except Exception as e:
         # Error por procesamiento
         return NomiFlash.RespuestaNomina(error_lectura_nomina=f"Error procesando '{archivo.filename}': {e}")
+    
+async def procesar_segunda_nomina(archivo: UploadFile) -> NomiFlash.SegundaRespuestaNomina:
+    """
+    Función auxiliar que procesa los archivos de la segunda nómina siguiendo lógica de negocio interna.
+    Tiene comprobación interna con regex para más precisión (RFC Y CURP)
+    Devuelve un objeto SegundaRespuestaNomina en caso de éxito o error_lectura_nomina en caso de fallo.
+    """
+    try:
+        # Leer contenido. Si falla, la excepción será capturada.
+        pdf_bytes = await archivo.read()
+
+        # --- Lógica de negocio específica para Nómina ---
+        # 1. Extraemos texto para la validación con regex
+        texto_inicial = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
+        rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, "nomina")
+
+        # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
+        loop = asyncio.get_running_loop()
+
+        imagen_buffers = await loop.run_in_executor(
+            None, convertir_pdf_a_imagenes, pdf_bytes
+        )
+
+        if not imagen_buffers:
+            raise ValueError("No se pudieron generar imágenes del PDF.")
+
+        # 2.5 Leemos el QR de las imágenes (lógica condicional aquí)
+        datos_qr = await loop.run_in_executor(
+            None, leer_qr_de_imagenes, imagen_buffers
+        )
+        
+        # 3. Analizamos con la IA usando el prompt de nómina y las mismas imagenes
+        respuesta_gpt = await analizar_gpt_nomi(SEGUNDO_PROMPT_NOMINA, imagen_buffers)
+        datos_crudos = extraer_json_del_markdown(respuesta_gpt)
+        datos_listos = sanitizar_datos_ia(datos_crudos)
+
+        # --- Lógica de corrección específica para Nómina ---
+        # 3. Sobrescribimos los datos de la IA con los de la regex (más fiables)
+        if datos_qr:
+            datos_listos["datos_qr"] = datos_qr
+        if rfc:
+            datos_listos["rfc"] = rfc[-1]
+        if curp:
+            datos_listos["curp"] = curp[-1]
+        
+        # Si todo fue exitoso, devuelve los datos.
+        return NomiFlash.SegundaRespuestaNomina(**datos_listos)
+
+    except Exception as e:
+        # Error por procesamiento
+        return NomiFlash.SegundaRespuestaNomina(error_lectura_nomina=f"Error procesando '{archivo.filename}': {e}")
     
 # --- PROCESADOR PARA ESTADO DE CUENTA ---
 async def procesar_estado_cuenta(archivo: UploadFile) -> NomiFlash.RespuestaEstado:

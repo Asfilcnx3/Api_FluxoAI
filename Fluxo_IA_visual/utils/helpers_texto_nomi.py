@@ -39,6 +39,30 @@ Ignora cualquier otra parte del documento. No infieras ni estimes valores.
 En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_nomina" un "Documento sin coincidencias" 
 """
 
+SEGUNDO_PROMPT_NOMINA = """
+Esta imágen es de la primera página de un recibo de nómina, pueden venir gráficos o tablas.
+
+En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
+
+Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumpliendo estas reglas:
+
+- Los valores tipo string deben estar completamente en MAYÚSCULAS.
+- Los valores numéricos deben devolverse como número sin símbolos ni comas (por ejemplo, "$31,001.00" debe devolverse como 31001.00).
+- Si hay varios RFC, el válido es el que aparece junto al nombre y dirección del cliente.
+
+Campos a extraer:
+
+- nombre # unicamente el nombre del empleado
+- apellido_paterno # unicamente el primer apellido
+- apellido_materno # unicamente el segundo apellido
+- rfc # captura el que esté cerca del nombre, normalmente aparece como "r.f.c", los primeros 10 caracteres del rfc y curp son iguales
+- curp # es un código de 4 letras, 6 números, 6 letras y 2 números
+- error_lectura_nomina # Null por defecto
+
+Ignora cualquier otra parte del documento. No infieras ni estimes valores.
+En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_nomina" un "Documento sin coincidencias" 
+"""
+
 PROMPT_ESTADO_CUENTA = """
 Estas son las primeras 2 páginas de un recibo de cuenta, pueden venir gráficos o tablas.
 

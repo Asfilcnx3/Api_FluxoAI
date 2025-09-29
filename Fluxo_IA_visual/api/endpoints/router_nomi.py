@@ -7,7 +7,7 @@ import openai
 from ...models.responses import NomiFlash
 from ...utils.helpers import aplicar_reglas_de_negocio
 from ...services.orchestators import (
-    procesar_nomina, procesar_comprobante, procesar_estado_cuenta
+    procesar_nomina, procesar_comprobante, procesar_estado_cuenta, procesar_segunda_nomina
 )
 
 
@@ -21,6 +21,7 @@ router = APIRouter()
 )
 async def procesar_documentos_consolidados(
     recibo_de_nomina: Optional[UploadFile] = File(None),
+    segundo_recibo_de_nomina: Optional[UploadFile] = File(None),
     estado_de_cuenta: Optional[UploadFile] = File(None),
     comprobante_de_domicilio: Optional[UploadFile] = File(None)
 
@@ -38,6 +39,9 @@ async def procesar_documentos_consolidados(
         # 1. Creamos las tareas llamando a la función procesadora correcta para cada archivo
         if recibo_de_nomina:
             tasks.append(procesar_nomina(recibo_de_nomina))
+        
+        if segundo_recibo_de_nomina:
+            tasks.append(procesar_segunda_nomina(segundo_recibo_de_nomina))
 
         if estado_de_cuenta:
             tasks.append(procesar_estado_cuenta(estado_de_cuenta))
@@ -65,6 +69,8 @@ async def procesar_documentos_consolidados(
             # Asignamos el resultado a su campo correspondiente
             if isinstance(res, NomiFlash.RespuestaNomina):
                 resultado_final.Nomina = res
+            elif isinstance(res, NomiFlash.SegundaRespuestaNomina):
+                resultado_final.SegundaNomina = res
             elif isinstance(res, NomiFlash.RespuestaEstado):
                 resultado_final.Estado = res
             elif isinstance(res, NomiFlash.RespuestaComprobante):
