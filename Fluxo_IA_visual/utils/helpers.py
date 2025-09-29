@@ -373,10 +373,10 @@ def aplicar_reglas_de_negocio(resultado: NomiFlash.ResultadoConsolidado) -> Nomi
     if (resultado.Nomina and resultado.Nomina.rfc and resultado.Estado and resultado.Estado.rfc):
         resultado.el_rfc_es_igual = (resultado.Nomina.rfc.upper() == resultado.Estado.rfc.upper())
 
-    # # --- Regla X: Verificación de coincidencia de CURP ---
-    # # Se ejecuta solo si tenemos los datos de Nómina y Estado, y ambos tienen un CURP.
-    # if (resultado.Nomina and resultado.Nomina.curp and resultado.Estado and resultado.Estado.curp):
-    #     resultado.el_curp_es_igual = (resultado.Nomina.curp.upper() == resultado.Estado.curp.upper())
+    # # --- Regla 3: Verificación de coincidencia de QR ---
+    # Se ejecuta solo si tenemos los datos de Nómina y Estado, y ambos tienen un CURP.
+    if (resultado.Nomina and resultado.Nomina.datos_qr and resultado.SegundaNomina and resultado.SegundaNomina.datos_qr):
+        resultado.el_qr_es_igual = (resultado.Nomina.datos_qr.upper() == resultado.SegundaNomina.datos_qr.upper())
             
     return resultado
 

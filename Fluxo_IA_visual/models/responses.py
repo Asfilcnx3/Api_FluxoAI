@@ -148,6 +148,11 @@ class NomiFlash:
         fecha_pago: Optional[str] = None
         periodicidad: Optional[str] = None
         error_lectura_nomina: Optional[str] = None
+    
+    class SegundaRespuestaNomina(ContribuyenteBaseFisica):
+        datos_qr: Optional[str] = None
+        nombre: Optional[str] = None
+        error_lectura_nomina: Optional[str] = None
 
     class RespuestaEstado(BaseModel):
         """Datos extraidos del análisis del Estado de Cuenta."""
@@ -170,7 +175,9 @@ class NomiFlash:
     class ResultadoConsolidado(BaseModel):
         """Representa la respuesta exitosa del analisis de estados de cuenta final."""
         Nomina: Optional["NomiFlash.RespuestaNomina"] = None
+        SegundaNomina: Optional["NomiFlash.SegundaRespuestaNomina"] = None
         Estado: Optional["NomiFlash.RespuestaEstado"] = None
         Comprobante: Optional["NomiFlash.RespuestaComprobante"] = None
         es_menor_a_3_meses: Optional[bool] = None   # -> Representa lógica interna
         el_rfc_es_igual: Optional[bool] = None      # -> Representa lógica interna
+        el_qr_es_igual: Optional[bool] = None       # -> Representa lógica interna
