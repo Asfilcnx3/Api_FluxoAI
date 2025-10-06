@@ -8,7 +8,7 @@ from .ia_extractor import (
     analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia
 )
 from ..utils.helpers_texto_fluxo import (
-    REGEX_COMPILADAS, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO
+    REGEX_COMPILADAS, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS
 )
 from ..utils.helpers_texto_nomi import (
     PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA, SEGUNDO_PROMPT_NOMINA
@@ -157,7 +157,8 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         "descripcion_clip_multilinea",
         "descripcion_traspaso_multilinea",
         "descripcion_amex_multilinea",
-        "descripción_jpmorgan_multilinea"
+        "descripción_jpmorgan_multilinea",
+        "descripción_traspasoentrecuentas_multilinea"
     ]
 
     transacciones_matches = []
@@ -179,6 +180,7 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         transacciones_filtradas = []
         # Acumuladores
         total_depositos_efectivo = 0.0
+        total_traspaso_entre_cuentas = 0.0
         total_entradas_tpv = 0.0
 
         for transaccion in transacciones_matches:
@@ -195,8 +197,11 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
                 if any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_EFECTIVO):
                     # Es un depósito en efectivo
                     total_depositos_efectivo += monto_float
+                elif any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                    # Es un traspaso entre cuentas
+                    total_traspaso_entre_cuentas += monto_float
                 else:
-                    # Si no es excluida y no es efectivo, es una entrada TPV.
+                    # Si no es excluida, no es efectivo ni traspaso, es una entrada TPV.
                     total_entradas_tpv += monto_float
                 
                 # 3. AGREGAR: Solo añadimos a la lista final las transacciones que pasaron el filtro.
@@ -209,6 +214,7 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         
         resultados["transacciones"] = transacciones_filtradas
         resultados["depositos_en_efectivo"] = total_depositos_efectivo
+        resultados["traspaso_entre_cuentas"] = total_traspaso_entre_cuentas
         resultados["entradas_TPV_bruto"] = total_entradas_tpv
         
         comisiones = resultados.get("comisiones") or 0.0

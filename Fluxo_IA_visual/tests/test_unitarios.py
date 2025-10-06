@@ -193,7 +193,7 @@ def test_reconciliar_resultados_campos_texto():
     res_gemini = {"nombre": "Pedro"}
     
     resultado = reconciliar_resultados_ia(res_gpt, res_gemini)
-    assert resultado["nombre"] == "Juan"  # Prioriza GPT
+    assert resultado["nombre"] == "Pedro"  # Prioriza la más larga
 
 def test_reconciliar_resultados_con_none():
     res_gpt = {"saldo_promedio": None, "observaciones": None}

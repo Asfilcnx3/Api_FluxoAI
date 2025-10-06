@@ -81,11 +81,11 @@ async def analizar_gemini_fluxo(prompt: str, pdf_bytes: bytes, paginas_a_procesa
             "type": "image_url",
             "image_url": {
                 "url": f"data:image/png;base64,{encoded_image}",
-                "detail": "auto"
+                "detail": "high"
                 },
             })
     response = await client_openrouter.chat.completions.create(
-        model="google/gemini-flash-1.5",
+        model="qwen/qwen3-vl-235b-a22b-instruct", # CAMBIAR AL MODELO QUE SE QUIERA USAR
         messages=[{"role": "user","content": content}],
     )
 

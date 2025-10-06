@@ -185,7 +185,8 @@ def construir_descripcion_optimizado(transaccion: Tuple, banco: str) -> Tuple[st
 
 def reconciliar_resultados_ia(res_gpt: dict, res_gemini:dict) -> dict:
     """
-    Compara dos diccionarios de resultados de la IA y devuelve el mejor consolidado.
+    Compara dos diccionarios de resultados de la IA y devuelve el mejor consolidado
+    con una lógica de reconciliación inteligente.
     """
     resultado_final = {}
     # Una forma más limpia de obtener todos los campos únicos de ambos diccionarios
@@ -204,16 +205,29 @@ def reconciliar_resultados_ia(res_gpt: dict, res_gemini:dict) -> dict:
             # Aseguramos que los valores sean numéricos, convirtiendo None a 0.0 para la comparación.
             num_gpt = valor_gpt if valor_gpt is not None else 0.0
             num_gemini = valor_gemini if valor_gemini is not None else 0.0
-            
             resultado_final[campo] = max(num_gpt, num_gemini)
+
         else:
-            # Lógica original para campos de texto y otros tipos: priorizar el que no sea nulo.
-            # Damos preferencia a GPT si ambos modelos devuelven un valor.
-            if valor_gpt is not None:
-                resultado_final[campo] = valor_gpt
-            elif valor_gemini is not None:
-                resultado_final[campo] = valor_gemini
+            # 1. Limpiar y normalizar los valores: convertir strings vacíos a None
+            v_gpt = valor_gpt.strip() if isinstance(valor_gpt, str) and valor_gpt.strip() else None
+            v_gemini = valor_gemini.strip() if isinstance(valor_gemini, str) and valor_gemini.strip() else None
+            
+            # 2. Decidir cuál es el mejor valor
+            if v_gpt and v_gemini:
+                # Si ambos tienen un valor, elegimos el más largo (más completo)
+                # Como desempate, preferimos GPT.
+                if len(v_gpt) >= len(v_gemini):
+                    resultado_final[campo] = v_gpt
+                else:
+                    resultado_final[campo] = v_gemini
+            elif v_gpt:
+                # Si solo GPT tiene un valor, lo usamos
+                resultado_final[campo] = v_gpt
+            elif v_gemini:
+                # Si solo Gemini tiene un valor, lo usamos
+                resultado_final[campo] = v_gemini
             else:
+                # Si ninguno tiene un valor, el resultado es None
                 resultado_final[campo] = None
     
     return resultado_final
@@ -311,6 +325,7 @@ def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
             cargos=datos_dict.get("cargos"),
             saldo_promedio=datos_dict.get("saldo_promedio"),
             depositos_en_efectivo=datos_dict.get("depositos_en_efectivo"),
+            traspaso_entre_cuentas=datos_dict.get("traspaso_entre_cuentas"),
             entradas_TPV_bruto=datos_dict.get("entradas_TPV_bruto"),
             entradas_TPV_neto=datos_dict.get("entradas_TPV_neto"),
         )
