@@ -127,5 +127,5 @@ CAMPOS_STR = [
 ]
 
 CAMPOS_FLOAT = [
-    "salario_neto", "total_percepciones", "total_deducciones", "saldo_promedio", "comisiones", "depositos", "cargos"
+    "salario_neto", "total_percepciones", "total_deducciones", "saldo_promedio", "comisiones", "depositos", "cargos", "depositos_en_efectivo", "entradas_TPV_bruto", "entradas_TPV_neto"
 ]

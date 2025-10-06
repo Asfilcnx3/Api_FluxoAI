@@ -10,12 +10,16 @@ PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe", "im
 
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
-    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup", "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal"
+    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup", "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal", "traspaso entre cuentas"
 ]
 
 PALABRAS_EFECTIVO = [
     "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal"
 ]
+
+PALABRAS_TRASPASO_ENTRE_CUENTAS = [
+    "traspaso entre cuentas", "traspaso cuentas propias", "traspaso entre cuentas propias"
+]   
 
 CONFIGURACION_BANCOS = {
     "banorte": {
@@ -164,30 +168,45 @@ for nombre_str, config in CONFIGURACION_BANCOS.items():
 
 # Creamos el prompt del modelo a utilizar
 prompt_base_fluxo = """
-Estas imágenes son de las primeras páginas de un estado de cuenta bancario, pueden venir gráficos o tablas.
+Eres un experto extractor de datos de estados de cuenta bancarios. Analiza las imágenes y extrae EXACTAMENTE los siguientes datos.
+- Estas imágenes son de las primeras páginas de un estado de cuenta bancario, pueden venir gráficos o tablas.
+- En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
 
-En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
+INSTRUCCIONES CRÍTICAS (CAMPOS A EXTRAER):
+1. **NOMBRE DEL BANCO**: Busca cerca de "Banco:", "Institución:", o en el encabezado. Debe ser el nombre corto, por ejemplo, "banco del bajío" es banbajío.
+2. **NOMBRE DEL CLIENTE**: Busca cerca de "Titular:", "Cliente:", o "Razón Social:". Es el texto en mayúsculas después de estas palabras.
+3. **CLABE**: Son EXACTAMENTE 18 dígitos consecutivos. Busca cerca de "CLABE", "Clabe Interbancaria" o en la sección de datos de cuenta.
+4. **RFC**: Son 12-13 caracteres alfanuméricos. Busca cerca de "RFC:", "R.F.C." o después del nombre.
+5. **PERIODO DE INICIO**: La primera fecha del periodo en formato "YYYY-MM-DD".
+6. **PERIODO DE FIN**: La segunda fecha del periodo en formato "YYYY-MM-DD".
+7. **COMISIONES**: Busca "Comisiones", "Cargos por servicio", o "Total comisiones". Toma el valor numérico más grande.
+8. **CARGOS**: Busca "Cargos", "Retiros", o "Total cargos". Toma el valor numérico más grande.
+9. **DEPÓSITOS**: Busca "Depósitos", "Abonos", o "Total depósitos". Toma el valor numérico más grande.
+10. **SALDO PROMEDIO**: Busca "Saldo promedio", "Saldo medio", o "Saldo promedio del periodo".
 
-Extrae los siguientes campos si los ves y devuelve únicamente un JSON, cumpliendo estas reglas:
+FORMATO DE RESPUESTA (JSON):
+```json
+{
+    "banco": "NOMBRE_BANCO",
+    "nombre_cliente": "NOMBRE COMPLETO EN MAYUSCULAS",
+    "clabe_interbancaria": "012345678901234567",
+    "rfc": "XXX000000XXX",
+    "periodo_inicio": "YYYY-MM-DD",
+    "periodo_fin": "YYYY-MM-DD",
+    "comisiones": 123.45,
+    "cargos": 123.45,
+    "depositos": 123456.78,
+    "saldo_promedio": 123456.78
+}
+```
 
-- Los valores tipo string deben estar completamente en MAYÚSCULAS.
-- Los valores numéricos deben devolverse como número sin símbolos ni comas (por ejemplo, "$31,001.00" debe devolverse como 31001.00).
+REGLAS IMPORTANTES:
+- Ignora cualquier otra parte del documento. No infieras ni estimes valores. Si NO encuentras un dato, usa null (no inventes).
+- Extrae los campos si los ves y devuelve únicamente un JSON.
+- Para fechas, usa formato YYYY-MM-DD.
+- Los valores tipo string deben de estar COMPLETO y en MAYÚSCULAS.
+- Para montos, solo números con decimales (por ejemplo, "$31,001.00" debe devolverse como 31001.00).
 - Si hay varios RFC, el válido es el que aparece junto al nombre y dirección del cliente.
-
-Campos a extraer:
-
-- banco # debe ser el nombre corto, por ejemplo, "banco del bajío" es banbajío
-- nombre_cliente
-- clabe_interbancaria # puede aparecer como clabe
-- rfc # estructura válida del RFC o "Registro Federal de Contribuyentes": 3 o 4 letras, seguido de 6 números y 3 caracteres alfanuméricos (por ejemplo: ABC950422QA9 o ABCD950422QA9). Asegúrate de que sea exactamente igual al que aparece visualmente junto a la palabra "RFC".
-- periodo_inicio # Devuelve en formato "2025-12-25"
-- periodo_fin # Devuelve en formato "2025-12-25"
-- comisiones # aparece como comisiones o comisiones efectivamente cobradas, toma el más grande solamente
-- cargos # aparece como "cargos", "retiros" u "otros retiros", toma el más grande solamente
-- depositos # aparece como "depositos" o "abonos", toma el más grande solamente
-- saldo_promedio
-
-Ignora cualquier otra parte del documento. No infieras ni estimes valores.
 """
 
 # Hacemos un dict con las palabras especificas que se buscan por banco
@@ -255,6 +274,9 @@ EXPRESIONES_REGEX = {
         "descripcion_amex_multilinea": ( # spei recibido amexco
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
         ),
+        "descripción_traspasoentrecuentas_multilinea": ( # traspaso entre cuentas
+            r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?traspaso (?:entre )?cuentas propias(?:.*\n){1}.*))'
+        ),
     },
     "afirme": {
         "descripcion": (
@@ -296,7 +318,10 @@ EXPRESIONES_REGEX = {
         ),
         "descripcion_amex_multilinea": ( # transferencia kiwi international
             r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(dispersion de fondos)"
-        )
+        ),
+        "descripción_traspasoentrecuentas_multilinea": ( # transpaso entre cuentas
+            r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei entre)\s*((?:\d{1,3}(?:,\d{3})*)\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(cuentas)\n"
+        ),
     },
     "scotiabank": {
         "descripcion": (
@@ -334,6 +359,9 @@ EXPRESIONES_REGEX = {
         "descripcion_clip_multilinea": ( # Deposito BPU
             r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n\s*recibido de stp.*?\n[\s\S]*?deposito bpu)"
         ),
+        "descripción_traspasoentrecuentas_multilinea": ( # Deposito BPU
+            r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n.*?\n\s*de la cuenta.*?\n.*?\n.*?\n.*?\n.*?traspaso entre cuentas)"
+        ),
     },
     "bbva": {
         "descripcion": (
@@ -353,7 +381,10 @@ EXPRESIONES_REGEX = {
         ),
         "descripción_jpmorgan_multilinea": (
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidojp morgan)\s*([\d,]+\.\d{2})((?:.*?\n){1,18}.*?zettle by paypal(?:.*?\n){1,5}.*?)"
-        )
+        ),
+        "descripción_traspasoentrecuentas_multilinea": ( # Traspaso entre cuentas
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|hsbc))\s*([\d,]+\.\d{2})((?:.*?\n).*?traspaso (?:entre )?cuentas propias(?:.*?\n){3})"
+        ),
     },
     "multiva": {
         "descripcion": (
@@ -440,3 +471,13 @@ for banco, patrones_banco in EXPRESIONES_REGEX.items():
         flags = 0
         # Compilamos el patrón. Asumimos que el patrón está escrito para texto en minúsculas.
         REGEX_COMPILADAS[banco][clave] = re.compile(patron_texto, flags)
+
+# Definimos los campos esperados y sus tipos (No funcionan aún)
+CAMPOS_STR = [
+    "banco", "rfc", "nombre_cliente", "clabe_interbancaria", "periodo_inicio", "periodo_fin"
+    
+]
+
+CAMPOS_FLOAT = [
+    "comisiones", "depositos", "cargos", "saldo_promedio", "depositos_en_efectivo", "entradas_TPV_bruto", "entradas_TPV_neto"
+]
