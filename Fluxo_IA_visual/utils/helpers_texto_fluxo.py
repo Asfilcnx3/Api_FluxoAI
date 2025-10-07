@@ -385,6 +385,9 @@ EXPRESIONES_REGEX = {
         "descripción_traspasoentrecuentas_multilinea": ( # Traspaso entre cuentas
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|hsbc))\s*([\d,]+\.\d{2})((?:.*?\n).*?traspaso (?:entre )?cuentas propias(?:.*?\n){3})"
         ),
+        "descripción_traspasoentrecuentas_corta": ( # Traspaso entre cuentas corta
+            r"(\d{2}/[a-z]{3})\s*(traspaso (:?entre )?cuentas propias)\s*([\d,]+\.\d{2}).*\r?\n(.*)"
+        ),
     },
     "multiva": {
         "descripcion": (
