@@ -326,6 +326,7 @@ def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
             saldo_promedio=datos_dict.get("saldo_promedio"),
             depositos_en_efectivo=datos_dict.get("depositos_en_efectivo"),
             traspaso_entre_cuentas=datos_dict.get("traspaso_entre_cuentas"),
+            total_entradas_financiamiento=datos_dict.get("total_entradas_financiamiento"),
             entradas_TPV_bruto=datos_dict.get("entradas_TPV_bruto"),
             entradas_TPV_neto=datos_dict.get("entradas_TPV_neto"),
         )

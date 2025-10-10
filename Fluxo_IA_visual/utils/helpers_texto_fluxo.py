@@ -21,6 +21,10 @@ PALABRAS_TRASPASO_ENTRE_CUENTAS = [
     "traspaso entre cuentas", "traspaso cuentas propias", "traspaso entre cuentas propias"
 ]   
 
+PALABRAS_TRASPASO_FINANCIAMIENTO = [
+    "prestamo"
+]
+
 CONFIGURACION_BANCOS = {
     "banorte": {
         "alias": ["banco mercantil del norte"],
@@ -387,6 +391,12 @@ EXPRESIONES_REGEX = {
         ),
         "descripción_traspasoentrecuentas_corta": ( # Traspaso entre cuentas corta
             r"(\d{2}/[a-z]{3})\s*(traspaso (:?entre )?cuentas propias)\s*([\d,]+\.\d{2}).*\r?\n(.*)"
+        ),
+        "descripcion_wuzi_multilinea": ( # liquidación wuzi y pw online
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})([\s\S]*?liquidacion wuzi[\s\S]*?pw online mexico sapi de cv)"
+        ),
+        "descripcion_prestamo_multilinea": (
+            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidosantander)\s*([\d,]+\.\d{2})((?:.*?\n).*?prestamo(?:.*?\n){3})"
         ),
     },
     "multiva": {
