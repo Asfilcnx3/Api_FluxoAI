@@ -265,7 +265,7 @@ def total_depositos_verificacion(
     total_depositos = 0.0
     for resultado in resultados_portada:
         if not isinstance(resultado, Exception):
-            datos_ia, _, _ = resultado
+            datos_ia, _, _, _ = resultado
             if datos_ia:
                 depo = datos_ia.get("depositos") or 0.0
                 total_depositos += float(depo)

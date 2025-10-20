@@ -278,7 +278,7 @@ EXPRESIONES_REGEX = {
         "descripcion_amex_multilinea": ( # spei recibido amexco
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
         ),
-        "descripción_traspasoentrecuentas_multilinea": ( # traspaso entre cuentas
+        "descripcion_traspasoentrecuentas_multilinea": ( # traspaso entre cuentas
             r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?traspaso (?:entre )?cuentas propias(?:.*\n){1}.*))'
         ),
     },
@@ -323,7 +323,7 @@ EXPRESIONES_REGEX = {
         "descripcion_amex_multilinea": ( # transferencia kiwi international
             r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(dispersion de fondos)"
         ),
-        "descripción_traspasoentrecuentas_multilinea": ( # transpaso entre cuentas
+        "descripcion_traspasoentrecuentas_multilinea": ( # transpaso entre cuentas
             r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei entre)\s*((?:\d{1,3}(?:,\d{3})*)\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(cuentas)\n"
         ),
     },
@@ -363,7 +363,7 @@ EXPRESIONES_REGEX = {
         "descripcion_clip_multilinea": ( # Deposito BPU
             r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n\s*recibido de stp.*?\n[\s\S]*?deposito bpu)"
         ),
-        "descripción_traspasoentrecuentas_multilinea": ( # Deposito BPU
+        "descripcion_traspasoentrecuentas_multilinea": ( # Deposito BPU
             r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n.*?\n\s*de la cuenta.*?\n.*?\n.*?\n.*?\n.*?traspaso entre cuentas)"
         ),
     },
@@ -383,13 +383,13 @@ EXPRESIONES_REGEX = {
         "descripcion_amex_multilinea": ( # bmrcash
             r"(\d{2}/[a-z]{3})\s*((?:w41|w02)\s*(?:traspaso entre cuentas|deposito de tercero))\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
         ),
-        "descripción_jpmorgan_multilinea": (
+        "descripcion_jpmorgan_multilinea": (
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidojp morgan)\s*([\d,]+\.\d{2})((?:.*?\n){1,18}.*?zettle by paypal(?:.*?\n){1,5}.*?)"
         ),
-        "descripción_traspasoentrecuentas_multilinea": ( # Traspaso entre cuentas
+        "descripcion_traspasoentrecuentas_multilinea": ( # Traspaso entre cuentas
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|hsbc))\s*([\d,]+\.\d{2})((?:.*?\n).*?traspaso (?:entre )?cuentas propias(?:.*?\n){3})"
         ),
-        "descripción_traspasoentrecuentas_corta": ( # Traspaso entre cuentas corta
+        "descripcion_traspasoentrecuentas_corta": ( # Traspaso entre cuentas corta
             r"(\d{2}/[a-z]{3})\s*(traspaso (:?entre )?cuentas propias)\s*([\d,]+\.\d{2}).*\r?\n(.*)"
         ),
         "descripcion_wuzi_multilinea": ( # liquidación wuzi y pw online

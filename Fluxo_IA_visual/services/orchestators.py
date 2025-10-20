@@ -1,3 +1,4 @@
+import math
 from ..utils.helpers import (
     es_escaneado_o_no, extraer_datos_por_banco, extraer_json_del_markdown, construir_descripcion_optimizado, 
     limpiar_monto, sumar_lista_montos, limpiar_y_normalizar_texto, sanitizar_datos_ia, reconciliar_resultados_ia,
@@ -17,7 +18,7 @@ from ..utils.helpers_texto_csf import (
     PATRONES_CONSTANCIAS_COMPILADO
 )
 
-from .pdf_processor import extraer_texto_de_pdf, extraer_rfc_curp_por_texto, convertir_pdf_a_imagenes, leer_qr_de_imagenes
+from .pdf_processor import extraer_movimientos_con_posiciones, extraer_texto_de_pdf, extraer_rfc_curp_por_texto, convertir_pdf_a_imagenes, leer_qr_de_imagenes
 from ..models.responses import NomiFlash, CSF
 
 from typing import Dict, Any, Tuple, Optional
@@ -32,22 +33,34 @@ logger = logging.getLogger(__name__)
 # ----- FUNCIONES ORQUESTADORAS DE FLUXO -----
 
 # ESTA FUNCIÓN ES PARA OBTENER Y PROCESAR LAS PORTADAS DE LOS PDF
-async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool]:
+async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool, str, Dict[int, Any]]:
     """
     Orquesta el proceso de forma secuencial siguiendo el siguiente roadmap:
     1. Extrae texto inicial.
+    1.5 Extrae los movimientos por coordenadas.
     2. Reconoce el banco.
     3. Decide qué páginas enviar a la IA.
     4. Llama a la IA con las páginas correctas
     5. corrige su respuesta.
     """
     loop = asyncio.get_running_loop()
+
     # --- 1. PRIMERO: Extraer texto inicial y determinar si es digital --- La ejecutamos en un hilo separado para no bloquear el programa.
     texto_verificacion = await loop.run_in_executor(
         None,  # Usa el executor de hilos por defecto
         extraer_texto_de_pdf, 
         pdf_bytes
     )
+
+    # --- 1.5 Extraer los movimientos con posiciones ---
+    # Se ejecuta en un hilo para no bloquear el bucle de eventos.
+    movimientos_por_pagina = await loop.run_in_executor(
+        None,
+        extraer_movimientos_con_posiciones,
+        pdf_bytes
+    )
+
+    # Determinamos si es escaneado o digital
     es_documento_digital = es_escaneado_o_no(texto_verificacion)
 
     # --- 2. SEGUNDO: Reconocer el banco y el RFC a partir del texto (con regex) ---
@@ -113,20 +126,35 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     if depositos_estanarizadas is not None:
         datos_ia_reconciliados["depositos"] = depositos_estanarizadas
     
-    return datos_ia_reconciliados, es_documento_digital, texto_verificacion
+    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina
 
 # ESTA FUNCIÓN ES PARA OBTENER LOS RESULTADOS DEL ANALISIS DE TPV CON REGEX
-def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str, Any]:
+def procesar_regex_generico(
+        resultados: dict, 
+        texto:str, 
+        tipo: str, 
+        posiciones: Dict[int, Any]
+    ) -> Dict[str, Any]:
     """
-    Aplica expresiones regulares definidas por banco y retorna resultados.
+    Aplica expresiones regulares definidas por banco y retorna resultados. 
+    Combinando la extracción de IA con regex y la clasificación por posiciones con coordenadas.
 
     Args:
         resultados (dict): El diccionario de los datos encontrados por el modelo.
         texto (str): El texto a procesar.
+        tipo (str): El tipo de análisis (ej. "estado" o "comprobante").
+        posiciones (Dict[int, Any]): Las posiciones de los movimientos en el texto.
 
     Returns:
         Dict[str, Any]: Un diccionario con los resultados.
     """
+
+    # --- ZONA HARDCODEADA ---
+    # Aquí defines qué claves de regex SIEMPRE deben ser de un tipo específico.
+    SIEMPRE_ABONO_KEYS = ["descripcion"]
+    # SIEMPRE_CARGO_KEYS = ["descripcion_clip_multilinea", "descripcion_clip_traspaso"] <- ejemplos
+    # ------------------------------------
+
     # Detectamos el banco
     banco = resultados.get("banco")
     
@@ -147,91 +175,90 @@ def procesar_regex_generico(resultados: dict, texto:str, tipo: str) -> Dict[str,
         return resultados
     logger.debug("config encontrada")
 
-    datos_crudos = {}
+    # --- 2. VINCULACIÓN DE COORDENADAS Y CLASIFICACIÓN CARGO/ABONO ---
+    transacciones_enriquecidas = []
+    datos_posicionales_copia = {k: list(v) for k, v in posiciones.items()}
+    
+    # Buscamos todas las transacciones de todas las regex de descripción
     for clave, patron_compilado in config_compilada.items():
-        datos_crudos[clave] = patron_compilado.findall(texto)
+        if clave.startswith("descripcion"):
+            print(f"Procesando transacciones con patrón: {clave}")
+            for transaccion_raw in patron_compilado.findall(texto):
+                descripcion, monto_str = construir_descripcion_optimizado(transaccion_raw, banco)
+                monto_float = sumar_lista_montos([monto_str])
 
-    # Creamos un for para encontrar todas las coincidencias en la lista de posibles descripciones
-    regex_claves = [
-        "descripcion",
-        "descripcion_clip_multilinea",
-        "descripcion_traspaso_multilinea",
-        "descripcion_amex_multilinea",
-        "descripción_jpmorgan_multilinea",
-        "descripción_traspasoentrecuentas_multilinea",
-        "descripción_traspasoentrecuentas_corta",
-        "descripcion_wuzi_multilinea", 
-        "descripcion_prestamo_multilinea"
-    ]
-
-    transacciones_matches = []
-    for clave in regex_claves:
-        if clave in datos_crudos:
-            transacciones_matches += datos_crudos[clave]
-
-
-    if not transacciones_matches:
-        resultados["transacciones"] = []
-        resultados["depositos_en_efectivo"] = 0.0
-        resultados["entradas_TPV_bruto"] = 0.0
-        resultados["entradas_TPV_neto"] = 0.0
-        # Probamos el nuevo campo de error
-        resultados["error_transacciones"] = "Sin coincidencias, el documento no contiene transacciones TPV."
-
-    else:
-        # CASO B: Sí se encontraron transacciones, procesamos normalmente
-        transacciones_filtradas = []
-        # Acumuladores
-        total_depositos_efectivo = 0.0
-        total_traspaso_entre_cuentas = 0.0
-        total_entradas_financiamiento = 0.0
-        total_entradas_tpv = 0.0
-
-        for transaccion in transacciones_matches:
-            descripcion, monto_str = construir_descripcion_optimizado(transaccion, banco)
-            descripcion_limpia = limpiar_y_normalizar_texto(descripcion.strip())
-
-            # Convertimos el monto a float una sola vez para usarlo en las sumas
-            monto_float = sumar_lista_montos([monto_str])
-
-            # Ignoramos completamente las transacciones excluidas.
-            if all(palabra not in descripcion_limpia.lower() for palabra in PALABRAS_EXCLUIDAS):
+                # Vinculamos con el mapa de coordenadas para obtener el tipo provisional
+                tipo_provisional = "indefinido"
+                match_encontrado = False
+                for _, movimientos in datos_posicionales_copia.items():
+                    for mov in movimientos:
+                        if math.isclose(mov['monto'], monto_float, rel_tol=1e-5):
+                            tipo_provisional = mov['tipo']
+                            movimientos.remove(mov)
+                            match_encontrado = True
+                            break
+                    if match_encontrado:
+                        break
                 
-                # Si la transacción pasó el filtro, ahora la clasificamos.
-                if any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_EFECTIVO):
-                    # Es un depósito en efectivo
-                    total_depositos_efectivo += monto_float
-
-                elif any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
-                    # Es un traspaso entre cuentas
-                    total_traspaso_entre_cuentas += monto_float
-
-                elif any(palabra in descripcion_limpia.lower() for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
-                    # Es una entrada por financiamiento
-                    total_entradas_financiamiento += monto_float
-
-                else:
-                    # Si no es excluida, no es efectivo ni traspaso, es una entrada TPV.
-                    total_entradas_tpv += monto_float
+                # Aplicamos la regla de hardcoding para obtener el tipo final
+                tipo_final = tipo_provisional
+                if clave in SIEMPRE_ABONO_KEYS:
+                    tipo_final = "abono"
                 
-                # 3. AGREGAR: Solo añadimos a la lista final las transacciones que pasaron el filtro.
-                transacciones_filtradas.append({
-                    "fecha": transaccion[0],
-                    "descripcion": descripcion_limpia,
-                    "monto": monto_str
+                # Guardamos la transacción con toda la información necesaria
+                transacciones_enriquecidas.append({
+                    "raw_data": transaccion_raw,
+                    "descripcion": descripcion,
+                    "monto_str": monto_str,
+                    "monto_float": monto_float,
+                    "tipo": tipo_final
                 })
-        print("Total entradas por financiamiento:")
-        print(total_entradas_financiamiento)
+
+    # --- 3. CLASIFICACIÓN FINAL Y CÁLCULO DE TOTALES ---
+    if not transacciones_enriquecidas:
+        resultados.update({
+            "transacciones": [], "depositos_en_efectivo": 0.0, "entradas_TPV_bruto": 0.0, 
+            "entradas_TPV_neto": 0.0, "traspaso_entre_cuentas": 0.0, "total_entradas_financiamiento": 0.0,
+            "error_transacciones": "Sin coincidencias, el documento no contiene transacciones TPV."
+        })
+        return resultados
+
+    # CASO B: Sí se encontraron transacciones, procesamos normalmente
+    transacciones_filtradas = []
+    # Acumuladores
+    total_depositos_efectivo, total_traspaso_entre_cuentas, total_entradas_financiamiento, total_entradas_tpv = 0.0, 0.0, 0.0, 0.0
+
+    for transaccion in transacciones_enriquecidas:
+        descripcion_limpia = limpiar_y_normalizar_texto(transaccion["descripcion"].strip())
         
-        resultados["transacciones"] = transacciones_filtradas
-        resultados["depositos_en_efectivo"] = total_depositos_efectivo
-        resultados["traspaso_entre_cuentas"] = total_traspaso_entre_cuentas
-        resultados["total_entradas_financiamiento"] = total_entradas_financiamiento
-        resultados["entradas_TPV_bruto"] = total_entradas_tpv
+        if all(p not in descripcion_limpia.lower() for p in PALABRAS_EXCLUIDAS):
+            # Aquí puedes usar transaccion["tipo"] si necesitas diferenciar cargos de abonos en tu lógica
+            # Por ejemplo: if transaccion["tipo"] == "abono":
+            if any(p in descripcion_limpia.lower() for p in PALABRAS_EFECTIVO):
+                total_depositos_efectivo += transaccion["monto_float"]
+            elif any(p in descripcion_limpia.lower() for p in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                total_traspaso_entre_cuentas += transaccion["monto_float"]
+            elif any(p in descripcion_limpia.lower() for p in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                total_entradas_financiamiento += transaccion["monto_float"]
+            else:
+                total_entradas_tpv += transaccion["monto_float"]
+            
+            transacciones_filtradas.append({
+                "fecha": transaccion["raw_data"][0],
+                "descripcion": descripcion_limpia,
+                "monto": transaccion["monto_str"],
+                "tipo": transaccion["tipo"] # Añadimos el tipo al resultado final
+            })
         
-        comisiones = resultados.get("comisiones") or 0.0
-        resultados["entradas_TPV_neto"] = total_entradas_tpv - comisiones
-        resultados["error_transacciones"] = None # Nos aseguramos de que no haya mensaje de error
+    resultados["transacciones"] = transacciones_filtradas
+    resultados["depositos_en_efectivo"] = total_depositos_efectivo
+    resultados["traspaso_entre_cuentas"] = total_traspaso_entre_cuentas
+    resultados["total_entradas_financiamiento"] = total_entradas_financiamiento
+    resultados["entradas_TPV_bruto"] = total_entradas_tpv
+    
+    comisiones = resultados.get("comisiones") or 0.0
+    resultados["entradas_TPV_neto"] = total_entradas_tpv - comisiones
+    resultados["error_transacciones"] = None # Nos aseguramos de que no haya mensaje de error
 
     # El resto de los datos de la IA ya están en 'resultados', por lo que se conservan.
     return resultados

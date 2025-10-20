@@ -127,12 +127,15 @@ async def procesar_pdf_api(
             continue # Pasamos al siguiente archivo
         
         # Si no hubo error, desempacamos los resultados
-        datos_ia, es_digital, texto_inicial = resultado_bruto
+        datos_ia, es_digital, texto_inicial, movimientos_pagina = resultado_bruto
         # Intenta procesar este archivo, preparado para cualquier error
         try:
             # Sea digital o escaneado se prepara para extracción
             if es_digital:
-                documentos_digitales.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia, "texto": texto_inicial})
+                documentos_digitales.append({
+                    "index": i, 
+                    "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia, "texto": texto_inicial, "movimientos": movimientos_pagina
+                })
             else:
                 documentos_escaneados.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia})
 
@@ -155,7 +158,12 @@ async def procesar_pdf_api(
     for doc_info in documentos_digitales:
         filename = archivos_en_memoria[doc_info['index']]['filename']
         try:
-            resultado_dict = procesar_regex_generico(doc_info["ia_data"], doc_info["texto"], "digital")
+            resultado_dict = procesar_regex_generico(
+                resultados=doc_info["ia_data"], 
+                texto=doc_info["texto"], 
+                tipo="digital",
+                posiciones=doc_info["movimientos"]
+            )
             resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
 
         except Exception as e:
@@ -169,6 +177,11 @@ async def procesar_pdf_api(
     if procesar_ocr:
         logger.info("Procesamiento OCR habilitado para documentos escaneados.")
         logger.debug("Iniciando lote de procesamiento con OCR.")
+        # Lógica de timeout para OCR
+        OCR_TIMEOUT_SECONDS = 13 * 60  # 13 minutos
+        ocr_timed_out = False
+        textos_ocr_brutos = []
+
         # Usamos ProcessPoolExecutor para evitar bloquear el event loop
         with ProcessPoolExecutor() as executor:
             # Creamos las tareas de OCR
@@ -176,29 +189,56 @@ async def procesar_pdf_api(
                 loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"])
                 for doc in documentos_escaneados
             ]
-            # Ejecutamos todas las tareas de OCR en paralelo
-            textos_ocr_brutos = await asyncio.gather(*tareas_ocr, return_exceptions=True)
-        
-            # Procesamos los resultados del OCR
-            for i, texto_o_error in enumerate(textos_ocr_brutos):
-                doc_info = documentos_escaneados[i]
-                if isinstance(texto_o_error, Exception):
-                    resultados_finales[doc_info["index"]] = crear_objeto_resultado({
-                    **doc_info["ia_data"],
-                    "error_transacciones": f"Fallo la extracción de texto en '{filename}': {texto_o_error}"
-                    })
-                    continue
+            try:
+                # Ejecutamos todas las tareas de OCR en paralelo CON TIMEOUT
+                logger.info(f"Iniciando {len(tareas_ocr)} tareas de OCR con un límite de {OCR_TIMEOUT_SECONDS}s.")
+                textos_ocr_brutos = await asyncio.wait_for(
+                    asyncio.gather(*tareas_ocr, return_exceptions=True),
+                    timeout=OCR_TIMEOUT_SECONDS
+                )
+            
+            except asyncio.TimeoutError:
+                ocr_timed_out = True
+                logger.warning(f"El procesamiento OCR superó el límite de {OCR_TIMEOUT_SECONDS}s y fue cancelado.")
+                logger.warning("Algunos procesos de OCR pueden continuar ejecutándose en segundo plano.")
+                
+                error_msg = f"El procesamiento OCR fue cancelado por exceder el límite de {OCR_TIMEOUT_SECONDS} segundos."
+                error_obj = AnalisisTPV.ErrorRespuesta(error=error_msg)
 
-                try:
-                    resultado_dict = procesar_regex_generico(doc_info["ia_data"], texto_o_error, "ocr")
-                    resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
+                # Llenamos los resultados finales con los datos iniciales de la IA y el error de timeout
+                for doc_info in documentos_escaneados:
+                    resultados_finales[doc_info["index"]] = AnalisisTPV.ResultadoExtraccion(
+                        AnalisisIA=doc_info["ia_data"],
+                        DetalleTransacciones=error_obj
+                    )
 
-                except Exception as e:
-                    resultados_finales[doc_info["index"]] = crear_objeto_resultado({
-                    **doc_info["ia_data"],
-                    "error_transacciones": f"Fallo Regex en '{filename}': {e}"
-                    })
-        logger.info("Procesamiento OCR finalizado.")
+            # Procesamos los resultados del OCR SÓLO SI NO HUBO TIMEOUT
+            if not ocr_timed_out:
+                # Procesamos los resultados del OCR
+                for i, texto_o_error in enumerate(textos_ocr_brutos):
+                    doc_info = documentos_escaneados[i]
+                    if isinstance(texto_o_error, Exception):
+                        resultados_finales[doc_info["index"]] = crear_objeto_resultado({
+                        **doc_info["ia_data"],
+                        "error_transacciones": f"Fallo la extracción de texto en '{filename}': {texto_o_error}"
+                        })
+                        continue
+
+                    try:
+                        resultado_dict = procesar_regex_generico(
+                            resultados=doc_info["ia_data"], 
+                            texto=texto_o_error, 
+                            tipo="ocr",
+                            posiciones={} # No tenemos posiciones en OCR
+                        )
+                        resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
+    
+                    except Exception as e:
+                        resultados_finales[doc_info["index"]] = crear_objeto_resultado({
+                        **doc_info["ia_data"],
+                        "error_transacciones": f"Fallo Regex en '{filename}': {e}"
+                        })
+            logger.info("Procesamiento OCR finalizado.")
 
     # --- 4. MANEJO DE ESCANEADOS OMITIDOS ---
     if not procesar_ocr and documentos_escaneados:

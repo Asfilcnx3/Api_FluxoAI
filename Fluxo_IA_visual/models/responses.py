@@ -88,6 +88,7 @@ class AnalisisTPV:
         fecha: str
         descripcion: str
         monto: str
+        tipo: str
     
     class ResultadoTPV(BaseModel):
         """Representa todas las transacciones TPV encontadas dentro del documento."""
