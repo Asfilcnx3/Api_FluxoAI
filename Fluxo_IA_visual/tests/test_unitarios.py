@@ -237,8 +237,8 @@ def test_sanitizar_datos_float(monkeypatch):
 # ---- Pruebas para total_depositos_verificacion ----
 def test_total_depositos_normal():
     resultados = [
-        ({"depositos": 100000}, True, "texto de verificacion 1"),
-        ({"depositos": 200000}, True, "texto de verificacion 2"),
+        ({"depositos": 100000}, True, "texto de verificacion 1", "fuente 1"),
+        ({"depositos": 200000}, True, "texto de verificacion 2", "fuente 2"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 300000.0
@@ -246,8 +246,8 @@ def test_total_depositos_normal():
 
 def test_total_depositos_menor_al_umbral():
     resultados = [
-        ({"depositos": 50000}, True, "texto de verificacion 1"),
-        ({"depositos": 100000}, True, "texto de verificacion 2"),
+        ({"depositos": 50000}, True, "texto de verificacion 1", "fuente 1"),
+        ({"depositos": 100000}, True, "texto de verificacion 2", "fuente 2"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 150000.0
@@ -255,7 +255,7 @@ def test_total_depositos_menor_al_umbral():
 
 def test_total_depositos_con_none_y_excepcion():
     resultados = [
-        ({"depositos": None}, True, "texto de verificacion 1"),
+        ({"depositos": None}, True, "texto de verificacion 1", "fuente 1"),
         Exception("error de IA"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
@@ -264,7 +264,7 @@ def test_total_depositos_con_none_y_excepcion():
 
 def test_total_depositos_diccionario_vacio():
     resultados = [
-        ({}, True, "texto de verificacion 1"),
+        ({}, True, "texto de verificacion 1", "fuente 1"),
     ]
     total, es_mayor = total_depositos_verificacion(resultados)
     assert total == 0.0
@@ -316,13 +316,17 @@ def test_crear_objeto_resultado_completo():
         "depositos": 10000.50,
         "cargos": 2000.75,
         "saldo_promedio": 5000.00,
+        "depositos_en_efectivo": 3000.00,
+        "traspaso_entre_cuentas": 1500.00,
+        "total_entradas_financiamiento": 2500.00,
         "entradas_TPV_bruto": 12000.00,
         "entradas_TPV_neto": 11876.55,
         "transacciones": [
             {
                 "fecha": "2024-01-15", 
                 "descripcion": "VENTA COMERCIO", 
-                "monto": "500.00"
+                "monto": "500.00",
+                "tipo": "cargo"
             }
         ],
         "error_transacciones": None,
@@ -334,6 +338,13 @@ def test_crear_objeto_resultado_completo():
     assert resultado.AnalisisIA.banco == "BANORTE"
     assert resultado.AnalisisIA.rfc == "ABC123456XYZ"
     assert resultado.AnalisisIA.depositos == 10000.50
+    assert resultado.AnalisisIA.cargos == 2000.75
+    assert resultado.AnalisisIA.saldo_promedio == 5000.00
+    assert resultado.AnalisisIA.depositos_en_efectivo == 3000.00
+    assert resultado.AnalisisIA.traspaso_entre_cuentas == 1500.00
+    assert resultado.AnalisisIA.total_entradas_financiamiento == 2500.00
+    assert resultado.AnalisisIA.entradas_TPV_bruto == 12000.00
+    assert resultado.AnalisisIA.entradas_TPV_neto == 11876.55
 
     assert resultado.DetalleTransacciones is not None
     assert isinstance(resultado.DetalleTransacciones.transacciones[0], AnalisisTPV.Transaccion)
