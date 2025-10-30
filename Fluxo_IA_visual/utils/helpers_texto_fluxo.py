@@ -399,7 +399,7 @@ EXPRESIONES_REGEX = {
             r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})([\s\S]*?liquidacion wuzi[\s\S]*?pw online mexico sapi de cv)"
         ),
         "descripcion_prestamo_multilinea": (
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidosantander)\s*([\d,]+\.\d{2})((?:.*?\n).*?(?:prestamo|anticipo)(?:.*?\n){3})"
+            r"(\d{2}/[a-z]{3})\s*((?:t20|w02)\s*spei recibidosantander)\s*([\d,]+\.\d{2})((?:.*?\n).*?(?:prestamo|anticipo)(?:.*?\n){3})"
         ),
     },
     "multiva": {
