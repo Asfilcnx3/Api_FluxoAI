@@ -1,9 +1,11 @@
 from ..models.responses import AnalisisTPV, NomiFlash
-from .helpers_texto_fluxo import BANCO_DETECTION_REGEX, ALIAS_A_BANCO_MAP, PATRONES_COMPILADOS, PALABRAS_CLAVE_VERIFICACION
+from .helpers_texto_fluxo import (
+    BANCO_DETECTION_REGEX, ALIAS_A_BANCO_MAP, PATRONES_COMPILADOS, PALABRAS_CLAVE_VERIFICACION, PROMPT_GENERICO, PROMPT_OCR_INSTRUCCIONES_BASE, PROMPT_TEXTO_INSTRUCCIONES_BASE, PROMPTS_POR_BANCO
+)
 from .helpers_texto_nomi import CAMPOS_FLOAT, CAMPOS_STR
 
 from dateutil.relativedelta import relativedelta
-from typing import Tuple, List, Any, Dict, Union, Optional
+from typing import Tuple, List, Any, Dict, Union, Optional, Literal
 import json
 from datetime import datetime
 import logging
@@ -265,7 +267,7 @@ def total_depositos_verificacion(
     total_depositos = 0.0
     for resultado in resultados_portada:
         if not isinstance(resultado, Exception):
-            datos_ia, _, _, _ = resultado
+            datos_ia, _, _, _, _ = resultado
             if datos_ia:
                 depo = datos_ia.get("depositos") or 0.0
                 total_depositos += float(depo)
@@ -305,6 +307,79 @@ def limpiar_y_normalizar_texto(texto: str) -> str:
     # Reemplaza secuencias de 2 o más espacios/tabs con un solo espacio.
     texto_normalizado = re.sub(r'[ \t]{2,}', ' ', texto)
     return texto_normalizado.strip()
+
+def crear_chunks_con_superposicion(
+    texto_por_pagina: Dict[int, str], 
+    paginas_con_movimientos: List[int], 
+    tamano_chunk: int = 5, 
+    superposicion: int = 1
+) -> List[Tuple[str, List[int]]]:
+    """
+    Crea chunks de texto con superposición, usando solo las páginas que 
+    sabemos que tienen movimientos para no procesar portadas.
+    """
+    chunks = []
+    # Filtramos las páginas para procesar solo las que tienen movimientos
+    paginas_a_procesar = sorted([p_num for p_num in texto_por_pagina.keys() if p_num in paginas_con_movimientos])
+    
+    if not paginas_a_procesar:
+        return []
+
+    i = 0
+    while i < len(paginas_a_procesar):
+        # Define el inicio y fin del chunk
+        inicio_idx = i
+        fin_idx = i + tamano_chunk
+        
+        # Obtiene los números de página para este chunk
+        paginas_en_chunk = paginas_a_procesar[inicio_idx:fin_idx]
+        
+        if not paginas_en_chunk:
+            break
+            
+        # Crea el contenido de texto para el chunk
+        texto_chunk = "".join([texto_por_pagina[p_num] for p_num in paginas_en_chunk])
+        
+        chunks.append((texto_chunk, paginas_en_chunk))
+        
+        # Avanza para el siguiente chunk, retrocediendo la superposición
+        i += (tamano_chunk - superposicion)
+        
+    return chunks
+
+def _crear_prompt_agente_unificado(
+        banco: str, 
+        tipo: Literal["texto", "vision"]
+    ) -> str:
+    """
+    Genera el prompt de sistema para el agente de extracción de TPV,
+    combinando las instrucciones específicas del banco con la base de 
+    instrucciones correcta (texto o visión).
+    """
+    banco_key = banco.lower().strip()
+    
+    # 1. Seleccionar la Introducción y las Instrucciones Base según el tipo
+    if tipo == "texto":
+        intro = f"Eres un agente de IA experto en analizar TEXTO de estados de cuenta del banco {banco}."
+        instrucciones_base = PROMPT_TEXTO_INSTRUCCIONES_BASE
+    else: # tipo == "vision"
+        intro = f"Eres un agente de IA experto en analizar IMÁGENES de estados de cuenta escaneados del banco {banco}."
+        instrucciones_base = PROMPT_OCR_INSTRUCCIONES_BASE
+        
+    # 2. Buscar las pistas específicas del banco
+    # Si no se encuentra, simplemente no se añaden pistas extra.
+    pistas_especificas = PROMPTS_POR_BANCO.get(banco_key, PROMPT_GENERICO)
+
+    # 3. Construir el prompt final
+    prompt_final = f"""
+    {intro}
+    Tu tarea es analizar el documento y extraer TODAS las transacciones de ingresos TPV, depósitos en efectivo o traspasos.
+
+    {pistas_especificas}
+
+    {instrucciones_base}
+    """
+    return prompt_final.strip()
 
 def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
     """
