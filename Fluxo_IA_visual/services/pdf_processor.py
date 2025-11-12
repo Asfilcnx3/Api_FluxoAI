@@ -126,60 +126,62 @@ def extraer_texto_de_pdf(pdf_bytes: bytes, num_paginas: Optional[int] = None) ->
     return texto_extraido
 
 # --- FUNCIÓN PARA EXTRAER MOVIMIENTOS CON POSICIONES ---
-def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Dict[int, List[Dict[str, Any]]]:
+def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[int, str]]:
     """
-    Extrae todos los movimientos del PDF. Para cada página, intenta identificar las
-    columnas de 'cargos' y 'abonos' primero por encabezados y, si falla,
-    mediante un análisis estadístico de los grupos de montos.
+    Extrae todos los movimientos Y el texto de cada página en una sola pasada.
+
+    Devuelve:
+        - Un diccionario de movimientos por página.
+        - Un diccionario con el texto de TODAS las páginas.
     """
     resultados_por_pagina = {}
+    texto_por_pagina = {}
+
     CARGOS_KEYWORDS = ["cargos", "retiros", "retiros/cargos"]
-    ABONOS_KEYWORDS = ["abonos", "depositos", "depósitos", "depósitos/abonos"]
+    ABONOS_KEYWORDS = ["abonos", "depositos", "depósito", "depósitos/abonos", "depositos/abonos"]
 
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             for page_index, page in enumerate(doc):
                 page_num = page_index + 1
-                resultados_por_pagina[page_num] = []
-                words = page.get_text("words")
 
+                # Extraemos el texto y las palabras de la página UNA SOLA VEZ
+                page_text = page.get_text("text").lower()
+                words = page.get_text("words")
+                
+                texto_por_pagina[page_num] = page_text # Guardamos el texto
+                resultados_por_pagina[page_num] = []
+                
                 zona_cargos, zona_abonos = None, None
 
-                # --- PASO 1: INTENTAR UBICAR POR ENCABEZADOS ---
+                # --- PASO 1: UBICAR POR ENCABEZADOS ---
                 cargos_header_x, abonos_header_x = None, None
                 for w in words:
                     word_text = w[4].lower().strip()
                     if word_text in CARGOS_KEYWORDS:
-                        cargos_header_x = (w[0] + w[2]) / 2 # Centro del encabezado
+                        cargos_header_x = (w[0] + w[2]) / 2
                     elif word_text in ABONOS_KEYWORDS:
-                        abonos_header_x = (w[0] + w[2]) / 2 # Centro del encabezado
+                        abonos_header_x = (w[0] + w[2]) / 2
 
                 if cargos_header_x and abonos_header_x:
                     logging.info(f"Página {page_num}: Columnas identificadas por encabezados.")
-                    # Define las zonas como un rango alrededor del centro del encabezado
                     zona_cargos = (cargos_header_x - 50, cargos_header_x + 50)
                     zona_abonos = (abonos_header_x - 50, abonos_header_x + 50)
 
                 # --- PASO 2: SI FALLA, USAR ESTADÍSTICA DE GRUPOS ---
                 if not (zona_cargos and zona_abonos):
                     logging.info(f"Página {page_num}: No se encontraron encabezados. Usando análisis estadístico.")
-
                     montos_con_coords = [
                         {"centro_x": (w[0] + w[2]) / 2, "monto": float(w[4].replace(',', '')), "coords": w[:4]}
                         for w in words if re.fullmatch(r'[\d,]+\.\d{2}', w[4].strip())
                     ]
-
+                    
                     if len(montos_con_coords) > 1:
-                        # Ordenar los montos por su posición X
                         montos_con_coords.sort(key=lambda item: item['centro_x'])
-
-                        # Encontrar la brecha más grande para separar los grupos
                         brechas = [montos_con_coords[i+1]['centro_x'] - montos_con_coords[i]['centro_x'] for i in range(len(montos_con_coords)-1)]
-
+                        
                         if brechas:
-                            brecha_maxima = max(brechas)
-                            umbral_columna = brecha_maxima * 0.7 # Un umbral para definir qué es un "salto de columna"
-
+                            umbral_columna = max(brechas) * 0.7
                             columnas = []
                             columna_actual = [montos_con_coords[0]]
                             for i in range(len(brechas)):
@@ -188,20 +190,18 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Dict[int, List[Dict[
                                     columna_actual = []
                                 columna_actual.append(montos_con_coords[i+1])
                             columnas.append(columna_actual)
-
+                            
                             logging.info(f"Página {page_num}: Se detectaron {len(columnas)} columnas de montos.")
 
                             if len(columnas) >= 2:
-                                # Tomar las dos columnas más a la izquierda
-                                columna_cargos = columnas[0]
-                                columna_abonos = columnas[1]
-                                # Definir las zonas basadas en el rango de cada columna
+                                columna_cargos = columnas[-2]
+                                columna_abonos = columnas[-1]
                                 zona_cargos = (min(m['centro_x'] for m in columna_cargos) - 10, max(m['centro_x'] for m in columna_cargos) + 10)
                                 zona_abonos = (min(m['centro_x'] for m in columna_abonos) - 10, max(m['centro_x'] for m in columna_abonos) + 10)
 
                 # --- CLASIFICACIÓN FINAL ---
                 if not (zona_cargos and zona_abonos):
-                    logging.warning(f"Página {page_num}: No se pudieron definir las zonas. Clasificación podría ser incorrecta.")
+                    logging.warning(f"Página {page_num}: No se pudieron definir las zonas.")
                     continue
 
                 all_montos_on_page = [
@@ -215,15 +215,17 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Dict[int, List[Dict[
                         tipo = "cargo"
                     elif zona_abonos[0] <= monto_info["centro_x"] <= zona_abonos[1]:
                         tipo = "abono"
-
-                    resultados_por_pagina[page_num].append({
-                        "monto": monto_info["monto"], "tipo": tipo, "coords": monto_info["coords"]
-                    })
-
+                    
+                    # Solo guardamos movimientos que pudimos clasificar
+                    if tipo != "indefinido":
+                        resultados_por_pagina[page_num].append({
+                            "monto": monto_info["monto"], "tipo": tipo, "coords": monto_info["coords"]
+                        })
+                            
     except Exception as e:
         logging.error(f"Error al procesar posiciones en documento: {e}", exc_info=True)
-
-    return resultados_por_pagina
+        
+    return resultados_por_pagina, texto_por_pagina
 
 # --- FUNCIÓN PARA EXTRAER RFC Y CURP DE TEXTO ---
 def extraer_rfc_curp_por_texto(texto: str, tipo_doc: str) -> Tuple[List[str], List[str]]:

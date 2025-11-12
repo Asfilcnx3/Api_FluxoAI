@@ -3,6 +3,12 @@ control_versiones
 
 # variables de entorno 
 .env
+.venv
 
 # cache de los pytest
 .pytest_cache
+
+.github
+__pycache__
+
+deprecated

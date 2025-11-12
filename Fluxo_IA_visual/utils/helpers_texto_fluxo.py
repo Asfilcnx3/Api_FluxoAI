@@ -10,7 +10,7 @@ PALABRAS_EXCLUIDAS = ["comision", "iva", "com.", "-com x", "cliente stripe", "im
 
 # Creamos la lista de palabras clave generales (quitamos mit y american express)
 palabras_clave_generales = [
-    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup", "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal", "traspaso entre cuentas"
+    "evopay", "evopayments", "psm payment services mexico sa de cv", "deposito bpu3057970600", "cobra online s.a.p.i. de c.v.", "sr. pago", "por favor paguen a tiempo, s.a. de c.v.", "por favor paguen a tiempo", "pagofácil", "netpay s.a.p.i. de c.v.", "netpay", "deremate.com de méxico, s. de r.l. de  c.v.", "mercadolibre s de rl de cv", "mercado lending, s.a de c.v", "deremate.com de méxico, s. de r.l de c.v", "first data merchant services méxico s. de r.l. de c.v", "adquira méxico, s.a. de c.v", "flap", "mercadotecnia ideas y tecnología, sociedad anónima de capital variable", "mit s.a. de c.v.", "payclip, s. de r.l. de c.v", "grupo conektame s.a de c.v.", "conekta", "conektame", "pocket de latinoamérica, s.a.p.i de c.v.", "billpocket", "pocketgroup", "banxol de méxico, s.a. de c.v.", "banwire", "promoción y operación, s.a. de c.v.", "evo payments", "prosa", "net pay sa de cv", "net pay sapi de cv", "izettle méxico, s. de r.l. de c.v.", "izettle mexico s de rl de cv", "pocket de latinoamerica sapi de cv", "bn-nts", "izettle mexico s de rl", "first data merc", "cobra online sapi de cv", "payclip s de rl de cv", "evopaymx", "izettle", "refbntc00017051", "pocket de", "sofimex", "actnet", "exce cca", "venta nal. amex", "pocketgroup", "deposito efectivo", "deposito en efectivo", "dep.efectivo", "deposito efectivo corresponsal", "traspaso entre cuentas", "anticipo de ventas", "anticipo de venta", "financiamiento", "credito"
 ]
 
 PALABRAS_EFECTIVO = [
@@ -22,7 +22,21 @@ PALABRAS_TRASPASO_ENTRE_CUENTAS = [
 ]   
 
 PALABRAS_TRASPASO_FINANCIAMIENTO = [
-    "prestamo"
+    "prestamo", "anticipo de ventas", "anticipo de venta", "financiamiento", "credito"
+]
+
+PALABRAS_TRASPASO_MORATORIO = [ # Faltan ejemplos
+    "cargo por moratorio", "intereses moratorios", "mora", "recargo", "recargos", "penalización", "pena", "penalizaciones", "pena convencional", "penalizacion", "penalizaciones convencionales", "cargo por moratorios", "interes moratorio"
+]
+
+# Definimos los campos esperados y sus tipos (No funcionan aún)
+CAMPOS_STR = [
+    "banco", "rfc", "nombre_cliente", "clabe_interbancaria", "periodo_inicio", "periodo_fin"
+    
+]
+
+CAMPOS_FLOAT = [
+    "comisiones", "depositos", "cargos", "saldo_promedio", "depositos_en_efectivo", "entradas_TPV_bruto", "entradas_TPV_neto"
 ]
 
 CONFIGURACION_BANCOS = {
@@ -177,16 +191,16 @@ Eres un experto extractor de datos de estados de cuenta bancarios. Analiza las i
 - En caso de que reconozcas gráficos, extrae únicamente los valores que aparecen en la leyenda numerada.
 
 INSTRUCCIONES CRÍTICAS (CAMPOS A EXTRAER):
-1. **NOMBRE DEL BANCO**: Busca cerca de "Banco:", "Institución:", o en el encabezado. Debe ser el nombre corto, por ejemplo, "banco del bajío" es banbajío.
-2. **NOMBRE DEL CLIENTE**: Busca cerca de "Titular:", "Cliente:", o "Razón Social:". Es el texto en mayúsculas después de estas palabras.
-3. **CLABE**: Son EXACTAMENTE 18 dígitos consecutivos. Busca cerca de "CLABE", "Clabe Interbancaria" o en la sección de datos de cuenta.
-4. **RFC**: Son 12-13 caracteres alfanuméricos. Busca cerca de "RFC:", "R.F.C." o después del nombre.
-5. **PERIODO DE INICIO**: La primera fecha del periodo en formato "YYYY-MM-DD".
-6. **PERIODO DE FIN**: La segunda fecha del periodo en formato "YYYY-MM-DD".
-7. **COMISIONES**: Busca "Comisiones", "Cargos por servicio", o "Total comisiones". Toma el valor numérico más grande.
-8. **CARGOS**: Busca "Cargos", "Retiros", o "Total cargos". Toma el valor numérico más grande.
-9. **DEPÓSITOS**: Busca "Depósitos", "Abonos", o "Total depósitos". Toma el valor numérico más grande.
-10. **SALDO PROMEDIO**: Busca "Saldo promedio", "Saldo medio", o "Saldo promedio del periodo".
+1. NOMBRE DEL BANCO: Busca cerca de "Banco:", "Institución:", o en el encabezado. Debe ser el nombre corto, por ejemplo, "banco del bajío" es banbajío.
+2. NOMBRE DEL CLIENTE: Busca cerca de "Titular:", "Cliente:", o "Razón Social:". Es el texto en mayúsculas después de estas palabras.
+3. CLABE: Son EXACTAMENTE 18 dígitos consecutivos. Busca cerca de "CLABE", "Clabe Interbancaria" o en la sección de datos de cuenta.
+4. RFC: Son 12-13 caracteres alfanuméricos. Busca cerca de "RFC:", "R.F.C." o después del nombre.
+5. PERIODO DE INICIO: La primera fecha del periodo en formato "YYYY-MM-DD".
+6. PERIODO DE FIN: La segunda fecha del periodo en formato "YYYY-MM-DD".
+7. COMISIONES: Busca "Comisiones", "Cargos por servicio", o "Total comisiones". Toma el valor numérico más grande.
+8. CARGOS: Busca "Cargos", "Retiros", o "Total cargos". Toma el valor numérico más grande.
+9. DEPÓSITOS: Busca "Depósitos", "Abonos", o "Total depósitos". Toma el valor numérico más grande.
+10. SALDO PROMEDIO: Busca "Saldo promedio", "Saldo medio", o "Saldo promedio del periodo".
 
 FORMATO DE RESPUESTA (JSON):
 ```json
@@ -213,287 +227,397 @@ REGLAS IMPORTANTES:
 - Si hay varios RFC, el válido es el que aparece junto al nombre y dirección del cliente.
 """
 
-# Hacemos un dict con las palabras especificas que se buscan por banco
-frases_bancos = {
-    "banbajío": r"(?:iva |comision )?deposito negocios afiliados \(adquirente\)(?: optblue amex)?",
-    "banorte": r".*?\d{8}[cd]",
-    #          r"[a-zA-Z][a-zA-Z ]*?\s+\d{8}[cd]",
-    "afirme": r"venta tpv(?:cr|db)",
-    "hsbc": r"transf[\s~]*rec[\s~]*hsbcnet[\s~]*tpv[\s~]*(?:db|cr)?|transf[\s~]*rec[\s~]*hsbcnet[\s~]*dep[\s~]*tpv|deposito[\s~]*bpu\d{10}",
-    "mifel": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
-    # Scotiabank no tiene una para una línea
-    "scotiabank": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
-    "banregio": r"tra\s+\d{7}-abono ventas\s+(?:tdd|tdc)",
-    "santander": "deposito ventas del dia afil",
-    "bbva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
-    "multiva": r"ventas tarjetas|ventas tdc inter|ventas credito|ventas debito",
-    "citibanamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)",
-    "banamex": r"(?:deposito ventas netas(?:.|\n)*?por evopaymx)",
-    # Azteca no tiene una para una línea
-    "azteca": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
-    # vepormas no tiene una para una línea
-    "vepormas": r"vta\. (?:cre|deb)\s+\d{4}\s*\d{7}",
-}
+PROMPT_TEXTO_INSTRUCCIONES_BASE = """
+INSTRUCCIONES CLAVE DE PROCESAMIENTO:
+1. Ignora el inicio si está incompleto: Si el texto comienza a mitad de una transacción (por ejemplo, sin una fecha o referencia clara), ignora esa primera transacción incompleta. El fragmento anterior ya la procesó.
+2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
+3. Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información. Si un dato no está, déjalo como null.
+4. Formato de Salida Obligatorio: Devuelve tu respuesta como un ÚNICO objeto JSON válido dentro de un bloque markdown (```json ... ```).
+    El objeto JSON debe tener una sola clave: "transacciones".
+    El valor debe ser una LISTA de objetos, donde cada objeto represente una transacción.
 
-# Unimos TODAS las alternativas (expresiones especificas y genéricas) en un solo grupo usando "|" (OR)
-# Así, el motor de regex busca cualquiera de estas opciones.
-def construir_regex_descripcion(banco_id: str):
+ejemplo de estructura de salida, SIEMPRE EN MINUSCULAS:
+```json
+{{
+    "transacciones": [
+    {{
+        "fecha": "05/may",
+        "descripcion": "ventas tarjetas 123456789",
+        "monto": 15200.50,
+        "tipo": "abono"
+    }},
+    {{
+        "fecha": "06/may",
+        "descripcion": "deposito en efectivo 98765",
+        "monto": 5000.00,
+        "tipo": "abono"
+    }}
+    ]
+}}```
+
+Si no encuentras absolutamente ninguna transacción, devuelve:
+
+```json
+{{
+    "transacciones": []
+}}```
+"""
+
+PROMPT_OCR_INSTRUCCIONES_BASE = """
+INSTRUCCIONES CLAVE DE PROCESAMIENTO:
+1.  Analiza las Imágenes de forma horizontal: Las siguientes imágenes son páginas de un estado de cuenta escaneado. Tu tarea es actuar como un OCR experto y un analista financiero analizano línea por línea los estados.
+2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
+3.  Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información, si no ves campos es porque no los hay, dejalos como null.
+4.  procesamiento secuencial obligatorio: Estás recibiendo múltiples imágenes. Debes extraer los datos de la Imagen 1, luego de la Imagen 2, etc., hasta terminar con todas. NO TE SALTES NINGUNA IMAGEN. Tu objetivo es transcribir CADA transacción visible. Si hay 50 transacciones en una página, debes generar 50 objetos en el JSON. No resumas.
+5.  Formato de Salida Obligatorio: Devuelve tu respuesta como un ÚNICO objeto JSON válido dentro de un bloque markdown (```json ... ```).
+    El objeto JSON debe tener una sola clave: "transacciones".
+    El valor debe ser una LISTA de objetos, donde cada objeto represente una transacción.
+
+ejemplo de estructura de salida, SIEMPRE EN MINUSCULAS:
+```json
+{{
+    "transacciones": [
+    {{
+        "fecha": "05/may",
+        "descripcion": "ventas tarjetas 123456789",
+        "monto": 15200.50,
+        "tipo": "abono"
+    }},
+    {{
+        "fecha": "06/may",
+        "descripcion": "deposito en efectivo 98765",
+        "monto": 5000.00,
+        "tipo": "abono"
+    }}
+    ]
+}}```
+
+Si no encuentras absolutamente ninguna transacción, devuelve:
+
+```json
+{{
+    "transacciones": []
+}}```
+"""
+
+PROMPT_GENERICO = """
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción, puede ser una o varias líneas:
+        - evopay
+        - evopayments
+        - psm payment services mexico sa de cv
+        - deposito bpu3057970600
+        - cobra online s.a.p.i. de c.v.
+        - sr. pago
+        - por favor paguen a tiempo, s.a. de c.v.
+        - por favor paguen a tiempo
+        - pagofácil
+        - netpay s.a.p.i. de c.v.
+        - netpay
+        - deremate.com de méxico, s. de r.l. de  c.v.
+        - mercadolibre s de rl de cv
+        - mercado lending, s.a de c.v
+        - deremate.com de méxico, s. de r.l de c.v
+        - first data merchant services méxico s. de r.l. de c.v
+        - adquira méxico, s.a. de c.v
+        - flap
+        - mercadotecnia ideas y tecnología, sociedad anónima de capital variable
+        - mit s.a. de c.v.
+        - payclip, s. de r.l. de c.v
+        - grupo conektame s.a de c.v.
+        - conekta
+        - conektame
+        - pocket de latinoamérica, s.a.p.i de c.v.
+        - billpocket
+        - pocketgroup
+        - banxol de méxico, s.a. de c.v.
+        - banwire
+        - promoción y operación, s.a. de c.v.
+        - evo payments
+        - prosa
+        - net pay sa de cv
+        - net pay sapi de cv
+        - izettle méxico, s. de r.l. de c.v.
+        - izettle mexico s de rl de cv
+        - pocket de latinoamerica sapi de cv
+        - bn-nts
+        - izettle mexico s de rl
+        - first data merc
+        - cobra online sapi de cv
+        - payclip s de rl de cv
+        - evopaymx
+        - izettle
+        - refbntc00017051
+        - pocket de
+        - sofimex
+        - actnet
+        - exce cca
+        - venta nal. amex
+        - pocketgroup
+        - deposito efectivo
+        - deposito en efectivo
+        - dep.efectivo
+        - deposito efectivo corresponsal
+        - traspaso entre cuentas
+        - anticipo de ventas
+        - anticipo de venta
+        - financiamiento
+        - credito
     """
-    Construye una regex uniendo las frases específicas de un banco con las palabras clave generales.
-    """
-    banco_id = banco_id.lower() # Aseguramos que la clave esté en minúsculas
 
-    # Obtenemos la frase del banco si existe
-    frase_especifica = frases_bancos.get(banco_id)
+PROMPTS_POR_BANCO = {
+    "bbva": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea: 
+        - venta tarjetas
+        - venta tdc inter
+        - ventas crédito
+        - ventas débito 
+        - deposito efectivo
+        - deposito en efectivo
+        - dep.efectivo 
+        - deposito efectivo corresponsal 
+        - traspaso entre cuentas 
+        - traspaso cuentas propias
+        - anticipo de ventas
+        - anticipo de venta
+        - financiamiento
+        - credito
+        - ventas nal. amex
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - t20 spei recibido santander, banorte, stp, afirme, hsbc, citi mexico
+        - spei recibido banorte
+        - t20 spei recibidostp
+        - w02 spei recibidosantander
+        - traspaso ntre cuentas
+        - deposito de tercero
+        - t20 spei recibido jpmorgan
+        - traspaso entre cuentas propias
+        - traspaso cuentas propias
+        las demás líneas pueden contener:
+        - deposito bpu
+        - mp agregador s de rl de cv 
+        - anticipo rr belleza
+        - haycash sapi de cv
+        - gana
+        - 0000001af
+        - 0000001sq
+        - trans sr pago
+        - dispersion sihay ref
+        - net pay sapi de cv
+        - getnet mexico servicios de adquirencia s
+        - payclip s de rl de cv
+        - pocket de latinoamerica sapi de cv
+        - cobra online sapi de cv
+        - kiwi bop sa de cv
+        - kiwi international payment technologies
+        - traspaso entre cuentas
+        - deposito de tercero
+        - bmrcash ref
+        - zettle by paypal
+        - pw online mexico sapi de cv
+        - liquidacion wuzi
+        - prestamo
+        - anticipo
+    """,
 
-    # Creamos una lista de todas las frases a buscar
-    todas_las_alternativas = list(palabras_clave_generales)
-    if frase_especifica:
-        todas_las_alternativas.insert(0, frase_especifica)
+    "banbajío": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea: 
+        - deposito negocios afiliados 
+        - deposito negocios afiliados adquiriente
+        - deposito negocios afiliados adquiriente optblue amex
+    """,
 
-    return "|".join(todas_las_alternativas)
+    "banorte": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea: 
+        - 8 numeros y luego una c
+        - 8 numeros y luego una d
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - spei recibido
+        - traspaso de cta
+        - spei recibido edl cliente red amigo
+        - pago recibido de banorte por
+        las demás líneas pueden contener:
+        - ganancias clip
+        - clip
+        - amexco
+        - orden de netpay sapi de cv
+        - traspaso cuentas propias
+        - traspaso entre cuentas propias
+        - prestamo
+        - dal sapi de cv
+    """,
 
-# Mejoramos el diccionario de expresiones
-EXPRESIONES_REGEX = {
-    "banbajío": {
-        "descripcion": (
-            r"(\d{1,2} [a-z]{3})\s*"  # Grupo 1: Fecha (ej: "15 jul")
-            r"([^\s]*)\s*"           # Grupo 2: ID (ej: "1234567")
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("BanBajío") + # Grupo 3: La descripción completa. Captura todo el texto que contenga alguna palabra clave y que se encuentre entre el ID y el signo de dólar del monto.
-            r"\$\s*([\d,]+\.\d{2})"    # Grupo 4: El monto
-        ), # r"(\d{1,2} [a-z]{3}) (\d{7})(.*(?:iva |comision )?deposito negocios afiliados \(adquirente\)(?: optblue amex)?)\s\$\s*([\d,]+\.\d{2})"
-    },
-    "banorte": {
-        "descripcion": (
-            r"(\d{2}-[a-z]{3}-\d{2})\s*" # Grupo 1: Fecha ("ej: ")
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("Banorte") + # Grupo 3: Descripción completa
-            r"\s*([\d,]+\.\d{2})" # Grupo 3: Monto
-        ), # r'(\d{2}-[a-z]{3}-\d{2})([a-zA-Z][a-zA-Z ]*?)\s+(\d{8}[cd])\s+([\d,]+\.\d{2})',
-        "descripcion_clip_multilinea": ( # spei recibido ganancias clip
-            r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2}).*?\n(?:.*\n){1}.*?ganancias clip(?:.*\n){1}.*))'
-        ),
-        "descripcion_traspaso_multilinea": ( # traspaso de cta clip
-            r'(\d{2}-[a-z]{3}-\d{2}).*?((traspaso de cta.*?([\d,]+\.\d{2}).*\n.*?clip.*))'
-        ),
-        "descripcion_amex_multilinea": ( # spei recibido amexco
-            r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?amexco(?:.*\n){1}.*))'
-        ),
-        "descripcion_traspasoentrecuentas_multilinea": ( # traspaso entre cuentas
-            r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?([\d,]+\.\d{2})(?:.*\n){2}.*?traspaso (?:entre )?cuentas propias(?:.*\n){1}.*))'
-        ),
-        "descripcion_prestamo_multilinea": (
-            r'(\d{2}-[a-z]{3}-\d{2}).*?((spei recibido.*?del cliente red amigo.*?([\d,]+\.\d{2})(?:.*\n){2}.*?dal sapi de cv(?:.*\n){1}.*))'
-        ),
-    },
-    "afirme": {
-        "descripcion": (
-            r"(\d{2})" # Grupo 1: Fecha
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("Afirme") + # Grupo 2: Descripción completa
-            r"(\d{6})(?: \d{7})?\s*" # Grupo 3: ID
-            r"\$\s*([\d,]+\.\d{2})" # Grupo 4: Monto
-        ), # r'(\d{2}) (venta tpv(?:cr|db)) (\d{6})(?: \d{7})? \$\s*([\d,]+\.\d{2})',
-        "descripcion_clip_multilinea": ( # venta tdd / venta tdc (una línea pero diferente forma de arquitectura)
-            r"(venta tpv(?:cr|db)\s*\d{8})\s+(\d{2}/\d{2}/\d{2})\s+\d{7,8}\s+\$\d{1,3}(?:,\d{3})*\.\d{2}\s+\$([\d,]+\.\d{2})"
-        ),
-    },
-    "hsbc": {
-        "descripcion": (
-            r"([0-9a-zA-Z]{1,2})\.?\s*" # Grupo 1: Fecha
-            r"(%s)\s*" % construir_regex_descripcion("hsbc") + # Grupo 2: Expresión exacta y genericas
-            r"(\d{6,8})\s+([a-zA-Z0-9]{4,10})\s*" # Grupo 3: ID de la transacción
-            r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
-        ), # r'(\d{2})\.?\s+(transf rec hsbcnet dep tpv\s+\d{7})\s+([A-Za-z0-9]{8})?\s*\$\s*([\d,]+\.\d{2})',
-        "descripcion_clip_multilinea": (
-            r"([0-9a-zA-Z]{1,2})\.?\s*" # Grupo 1: Fecha
-            r"(%s)\s*" % construir_regex_descripcion("hsbc") + # Grupo 2: Expresión exacta y genericas
-            r"(\d{6,8})\s*" # Grupo 3: ID de la transacción
-            r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
-        )
-    },
-    "mifel": {
-        "descripcion": (
-            r"(\d{2}/\d{2}/\d{4})\s*" # Grupo 1: Fecha
-            r"([a-zA-Z]{2,3}\d{4,6}-\d)\s*" # Grupo 2: Referencia
-            r"(%s)\s*" % construir_regex_descripcion("mifel") + # Grupo 3: Palabras exactas a encontrar
-            r"([\d,]+\.\d{2})\s+[\d,]+\.\d{2}\s*\n(.+)" # Grupo 4: Monto
-        ), # r'(\d{2}/\d{2}/\d{4})\s+([a-zA-Z]{3}\d{6}-\d)\s+(vta\. (?:cre|deb)\s+\d{4}\s+\d{7})(?:\s+\w+)?\s+([\d,]+\.\d{2})\s+[\d,]+\.\d{2}\s*\n(.+)',
-        "descripcion_clip_multilinea": ( # es vta. deb o cre
-            r"(?m)^(\d{2}/\d{2}/\d{4})\s+(smf\d{6}-\d)\s+(vta\. (?:deb|cre).*?)(\d{1,3}(?:,\d{3})*\.\d{2}).*\n(.*)"
-        ),
-        "descripcion_traspaso_multilinea": ( # es transferencia spei bn
-            r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei bn)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n(.*)"
-        ),
-        "descripcion_amex_multilinea": ( # transferencia kiwi international
-            r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei)\s*(\d{1,3}(?:,\d{3})*\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(dispersion de fondos)"
-        ),
-        "descripcion_traspasoentrecuentas_multilinea": ( # transpaso entre cuentas
-            r"(\d{2}/\d{2}/\d{4})\s*(smf\d{6}-\d)\s*(transferencia spei entre)\s*((?:\d{1,3}(?:,\d{3})*)\.\d{2})\s*[\d,]+\.\d{2}\s*\n\s*(cuentas)\n"
-        ),
-    },
-    "scotiabank": {
-        "descripcion": (
-            r"(\d{2}\s+[a-z]{3})\s*" # Grupo 1: Fecha que estamos buscando
-            r"(%s)\s+" % construir_regex_descripcion("scotiabank") + # Grupo 2: Descipción que estamos buscando
-            r"[\s\S]*?\$([\d,]+\.\d{2})" # Grupo 3: Monto a encontrar
-        ),
-        "descripcion_clip_multilinea": ( # spei pocket deposito bpu
-            r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s*\d{20}\s*\$\s*([\d,]+\.\d{2})\s*\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,9}.*?deposito bpu.*?\n(?:.*?\n){1,5}.*?pocket de latinoamerica sapi.*?\n.*?\n)"
-        # r"(\d{2}\s+[a-z]{3})\s*(transf interbancaria spei\s+.*?\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2})"
-        ),
-        "descripcion_traspaso_multilinea": ( # spei first data dep
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\n\s*transf interbancaria spei(?:.*?\n){1,3}.*?dep.*?\n(?:.*?\n)*?.*?first data merchant services m)"
-        # r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\s*\n(?:.*?\n){1,10}.*?dep.*?\n(?:.*?\n){1,5}.*?first data merchant services m.*?\n.*?\n)"
-        ),
-        "descripcion_amex_multilinea": ( # spei american express amexco
-            r"(\d{2}\s+[a-z]{3})\s+(transf interbancaria spei\s+\d{20}\s+\$\s*([\d,]+\.\d{2})\s+\$\s*[\d,]+\.\d{2}\n\s*transf interbancaria spei(?:.*?\n){1,3}.*?.*?amexco se.*?\n(?:.*?\n)*?.*?american express company mexic)"
-        ),
-    },
-    "banregio": {
-        "descripcion": (
-            r"(\d{2})" # Grupo 1: Fecha
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("banregio") + # Grupo 2: Regex a buscar junto con las genericas
-            r"([\d,]+\.\d{2})" # Grupo 3: Monto
-        ), # r'(\d{2})\s+(tra\s+\d{7}-abono ventas\s+(?:tdd|tdc))\s+([\d,]+\.\d{2})',
-    },
-    "santander": {
-        "descripcion": (
-            r"(\d{2}-[a-z]{3}-\d{4})\s*" # Grupo 1: Fecha
-            r"(\d+)\s*" # Grupo 2: ID
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("santander") + # Grupo 3: Busqueda con regex
-            r"([\s\S]*?)\s*" # Grupo 4: Referencia
-            r"([\d,]+\.\d{2})" # Grupo 5: Monto
-        ),
-        "descripcion_clip_multilinea": ( # Deposito BPU
-            r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n\s*recibido de stp.*?\n[\s\S]*?deposito bpu)"
-        ),
-        "descripcion_traspasoentrecuentas_multilinea": ( # Deposito BPU
-            r"(\d{2}-[a-z]{3}-\d{4})\s*(\d{7})\s*(abono transferencia spei hora\s+\d{2}:\d{2}:\d{2}\s*([\d,]+\.\d{2}).*?\n.*?\n\s*de la cuenta.*?\n.*?\n.*?\n.*?\n.*?traspaso entre cuentas)"
-        ),
-    },
-    "bbva": {
-        "descripcion": (
-            r"(\d{2}/[a-z]{3})\s*\d{2}/[a-z]{3}" # Grupo 1: Fecha
-            r"(?:\s+[a-zA-Z]\d{2})?" # Grupo 2: Referencia
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("bbva") + # Grupo 3: Regex especifica
-            r"([\d,]+\.\d{2}).*?\n.*?(\d{4,9})" # Grupo 4 y 5: monto y ID
-        ), # r'(\d{2}/[a-z]{3})\s+\d{2}/[a-z]{3}(?:\s+[a-zA-Z]\d{2})?\s+(ventas tarjetas|ventas tdc inter|ventas credito|ventas debito|spei recibidobanorte|spei recibidosantander|spei recibidostp)\s+([\d,]+\.\d{2})\s*\n.*?(\d{9})',
-        "descripcion_clip_multilinea": ( # es payclip, getnet o netpay (recibido santander y recibido banorte)
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|banorte|stp|afirme))\s*([\d,]+\.\d{2})([\s\S]*?(?:gana|0000001af|0000001sq|deposito bpu|trans sr pago|dispersion sihay ref)[\s\S]*?(?:net pay sapi de cv|getnet mexico servicios de adquirencia s|payclip s de rl de cv|pocket de latinoamerica sapi de cv|cobra online sapi de cv|kiwi bop sa de cv))"
-        ),
-        "descripcion_traspaso_multilinea": ( # es billpocket
-            r"(\d{2}/[a-z]{3})\s*(spei recibidobanorte)\s*([\d,]+\.\d{2})([\s\S]*?00072180012119359724[\s\S]*?kiwi international payment technologies)"
-        ),
-        "descripcion_amex_multilinea": ( # bmrcash
-            r"(\d{2}/[a-z]{3})\s*((?:w41|w02)\s*(?:traspaso entre cuentas|deposito de tercero))\s*([\d,]+\.\d{2})([\s\S]*?bmrcash ref)"
-        ),
-        "descripcion_jpmorgan_multilinea": (
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidojp morgan)\s*([\d,]+\.\d{2})((?:.*?\n){1,18}.*?zettle by paypal(?:.*?\n){1,5}.*?)"
-        ),
-        "descripcion_traspasoentrecuentas_multilinea": ( # Traspaso entre cuentas
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibido(?:santander|hsbc))\s*([\d,]+\.\d{2})((?:.*?\n).*?traspaso (?:entre )?cuentas propias(?:.*?\n){3})"
-        ),
-        "descripcion_traspasoentrecuentas_corta": ( # Traspaso entre cuentas corta
-            r"(\d{2}/[a-z]{3})\s*(traspaso (:?entre )?cuentas propias)\s*([\d,]+\.\d{2}).*\r?\n(.*)"
-        ),
-        "descripcion_wuzi_multilinea": ( # liquidación wuzi y pw online
-            r"(\d{2}/[a-z]{3})\s*(t20\s*spei recibidostp)\s*([\d,]+\.\d{2})([\s\S]*?liquidacion wuzi[\s\S]*?pw online mexico sapi de cv)"
-        ),
-        "descripcion_prestamo_multilinea": (
-            r"(\d{2}/[a-z]{3})\s*((?:t20|w02)\s*spei recibidosantander)\s*([\d,]+\.\d{2})((?:.*?\n).*?(?:prestamo|anticipo)(?:.*?\n){3})"
-        ),
-    },
-    "multiva": {
-        "descripcion": (
-            r"(\d{2}(?:/\d{2}/\d{4})?)\s*"  # Grupo 1: Fecha
-            r"(?:\s+[a-zA-Z]{2}\d{14})?" # Grupo 2: Referencia
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("multiva") + # Grupo 3: Regex especifica
-            r"[\d,]+\.\d{2}\s*([\d,]+\.\d{2})\s*([\d,]+\.\d{2})" # Grupo 4 y 5: monto ignorado y montos no ignorados
-        ),
-        "descripcion_clip_multilinea": ( # venta tdd / venta tdc
-            # grupo 1: referencia, grupo 2: concepto, grupo 3: monto, grupo 4: fecha
-            r"(\d{2}(?:/\d{2}/\d{4})?)\s*"         # fecha
-            r"(ft\d{14})\s*"                       # referencia
-            r"(ventas tpvs \d{7} venta t(?:dd|dc))\s*" # concepto
-            r"[\d,]+\.\d{2}\s*"                    # Primer monto (ignorado)
-            r"([\d,]+\.\d{2})\s*"                  # Segundo monto (capturado)
-            r"\d{1,3}(?:,\d{3})*\.\d{2}\s*"        # Tercer monto (ignorado)
-            r"\n\s*(\d{4}-\d{2}-\d{2})"               # fecha para descripción
-        ),
-        "descripcion_traspaso_multilinea": ( # spei recibido stp
-        r"(\d{2}(?:/\d{2}/\d{4})?)\s*(ft\d{14})\s*(spei recibido stp)\s*[\d,]+\.\d{2}\s*([\d,]+\.\d{2})(.*?\n.*?\n.*?latinoamerica sapi de cv[\s\S]*?bpu2437419281)"
-        ),
-    },
-    "citibanamex": {
-        "descripcion": (
-            r"(\d{2}\s*[a-z]{3})\s*" # Grupo 1: Fecha
-            r"(%s)\s*" % construir_regex_descripcion("banamex") + # Grupo 2: Descripción exacta
-            r"([\d,]+\.\d{2})" # Grupo 3: Monto
-        ), # r"(\d{2}\s+[a-z]{3})\s*(deposito ventas netas(?:.|\n)*?por evopaymx)\s*([\d,]+\.\d{2})",
-        "descripcion_clip_multilinea": ( # evopay (ventas netas amex y d tar)
-            r"(\d{2}\s*[a-z]{3})\s*(deposito ventas netas (?:d tar|amex)[\s\S]*?por evopay[\s\S]*?suc\s*\d{4})\s*([\d,]+\.\d{2})"
-        ),
-    },
-    "banamex": {
-        "descripcion": (
-            r"(\d{2}\s*[a-z]{3})\s*" # Grupo 1: Fecha
-            r"(%s)\s*" % construir_regex_descripcion("banamex") + # Grupo 2: Descripción exacta
-            r"([\d,]+\.\d{2})" # Grupo 3: Monto
-        ), # r"(\d{2}\s+[a-z]{3})\s*(deposito ventas netas(?:.|\n)*?por evopaymx)\s*([\d,]+\.\d{2})",
-        "descripcion_clip_multilinea": ( # evopay (ventas netas amex y d tar)
-            r"(\d{2}\s*[a-z]{3})\s*(deposito ventas netas (?:d tar|amex)[\s\S]*?por evopay[\s\S]*?suc\s*\d{4})\s*([\d,]+\.\d{2})"
-        ),
-    },
-    "azteca": {
-        "descripcion": (
-            r"([0-9a-zA-Z]{1,2})\.?\s*" # Grupo 1: Fecha
-            r"(%s)\s*" % construir_regex_descripcion("azteca") + # Grupo 2: Expresión exacta y genericas
-            r"(\d{6,8})\s+([a-zA-Z0-9]{4,10})\s*" # Grupo 3: ID de la transacción
-            r"\$?\s*([\d,]+\.\d{2})" # Grupo 4: Monto
-        ),
-        "descripcion_clip_multilinea": ( # monto, descr 1, monto, descr 2
-            r"(\d{2}/\d{2}/\d{4})\s+(transferencia spei a su favor)\s+\(\+\)\s*\$([\d,]+\.\d{2})\s*spei(\n\s*emisor:\s*(?:banorte|santander)\n.+?\n.+?payclip s de rl decv[\s\S]*?gananciasclip)"
-        ),
-    },
-    "inbursa": {
-        "descripcion": (
-            r"([a-z]{3}\.?\s*(?:\d{2})?)"  # Grupo 1 y 2 : Fecha y Referencia
-            r"((?:.*?)(?:%s)(?:.*?))\s*" % construir_regex_descripcion("inbursa") + # Grupo 3: Regex especifica
-            r"([\d,]+\.\d{2})\s*([\d,]+\.\d{2})" # Grupo 4 y 5: monto
-        ),
-        "descripcion_clip_multilinea": ( # spei recibido stp
-        r"([a-z]{3}\.?\s*(?:\d{2})?)\s*(\d{10}\s*deposito spei)\s*([\d,]+\.\d{2}).*?\n(.*?(?:kiwi international payment technologies|cobra online sapi de cv|operadora paypal de mexico s de rl)[\s\S]*?clave de rastreo.*)"
-        ),
-    },
-    "intercam": {
-        "descripcion_clip_multilinea": ( # spei recibido stp
-        r"(\d{1,2})\s+(\d{9}\s+recepcion spei\s*\|\s*(?:jp morgan|santander|banorte)\s*\|[\s\S]*?)(\d{1,3}(?:,\d{3})*\.\d{2})([\s\S]*?136180018635900157)"
-        ),
-    },
-    "vepormas": {
-        "descripcion_clip_traspaso": ( # En realidad no existe
-            r"(\d{1,2})\s+(\d{9}\s+recepcion spei\s*\|\s*(?:jp morgan|santander|banorte)\s*\|[\s\S]*?)(\d{1,3}(?:,\d{3})*\.\d{2})([\s\S]*?136180018635900157)"
-        ),
-    }
+    "afirme": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea: 
+        - venta tpv cr
+        - venta tpv db
+        - venta tpvcr
+        - venta tpvdb
+    """,
+
+    "hsbc": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea: 
+        - transf rec hsbcnet tpv db
+        - transf rec hsbcnet tpv cr
+        - transf rec hsbcnet dep tpv
+        - deposito bpu y 10 numeros
+        - transf rec hsbcnet dep tpv (comnibaciones de numeros)
+        - deposito bpu (varias combinaciones)
+    """,
+
+    "mifel": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - vta. cre y 2 secciones de numeros
+        - vta. deb y 2 secciones de numeros
+        - vta cre y 2 secciones de numeros
+        - vta deb y 2 secciones de numeros
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - vta deb
+        - vta cre
+        - transferencia spei
+        - transferencia spei bn
+        - transferencia spei entre
+        las demás líneas pueden contener:
+        - dispersion ed fondos
+        - cuentas
+    """,
+
+    "scotiabank": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - transf interbancaria spei
+        la segunda línea pueden contener:
+        - transf interbancaria spei
+        - deposito bpu
+        - amexco se
+        - dep
+        la tercera línea puede contener:
+        - pocket de latinoamerica sapi
+        - first data merchant services m
+        - american express company mexic
+    """,
+
+    "banregio": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - abono ventas tdd 
+        - abono ventas tdc
+    """,
+
+    "santander": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - deposito ventas del dia afil
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - abono transferencia spei hora
+        la segunda línea pueden contener:
+        - de la cuenta
+        - recibido de stp
+        las demás líneas pueden contener:
+        - deposito bpu
+        - traspaso entre cuentas
+    """,
+
+    "multiva": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - ventas tpvs 
+        - venta tdd
+        - venta tdc
+        - ventas tarjetas
+        - ventas tdc inter
+        - ventas credito 
+        - ventas debito
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - spei recibido stp
+        las demás líneas pueden contener:
+        - latinoamerica sapi de cv
+        - bpu2437419281
+    """,
+
+    "citibanamex": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - deposito ventas netas por evopaymx
+        - deposito ventas netas
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - deposito ventas netas d tar
+        - deposito ventas netas d amex
+        las demás líneas pueden contener:
+        - por evopay
+        - suc
+    """,
+
+    "banamex": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción de una línea:
+        - deposito ventas netas por evopaymx
+        - deposito ventas netas
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - deposito ventas netas d tar
+        - deposito ventas netas d amex
+        las demás líneas pueden contener:
+        - por evopay
+        - suc
+    """,
+
+    "azteca": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - transferencia spei a su favor
+        las demás líneas pueden contener:
+        - emisor: banorte
+        - emisor: santander
+        - payclip s de rl decv
+        - gananciasclip
+    """,
+
+    "inbursa": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - deposito spei
+        las demás líneas pueden contener:
+        - kiwi international payment technologies
+        - cobra online sapi de cv
+        - operadora paypal de mexico s de rl
+        - clave de rastreo
+    """,
+
+    "intercam": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - recepcion spei jp morgan
+        - recepcion spei santander
+        - recepcion spei banorte
+        la última línea debe contener:
+        - 136180018635900157
+    """,
+
+    "vepormas": """ 
+    Las transacciones TPV válidas contienen lo siguiente en su concepto:
+    Reglas de la extracción multilinea:
+        la primer línea puede contener:
+        - recepcion spei jp morgan
+        - recepcion spei santander
+        - recepcion spei banorte
+        la última línea debe contener:
+        - 136180018635900157
+    """,
 }
-
-# Creamos un nuevo diccionario para guardar los patrones compilados.
-REGEX_COMPILADAS = {}
-
-# Iteramos sobre el diccionario original de bancos y patrones.
-for banco, patrones_banco in EXPRESIONES_REGEX.items():
-    REGEX_COMPILADAS[banco] = {}
-    for clave, patron_texto in patrones_banco.items():
-        # sin flags
-        flags = 0
-        # Compilamos el patrón. Asumimos que el patrón está escrito para texto en minúsculas.
-        REGEX_COMPILADAS[banco][clave] = re.compile(patron_texto, flags)
-
-# Definimos los campos esperados y sus tipos (No funcionan aún)
-CAMPOS_STR = [
-    "banco", "rfc", "nombre_cliente", "clabe_interbancaria", "periodo_inicio", "periodo_fin"
-    
-]
-
-CAMPOS_FLOAT = [
-    "comisiones", "depositos", "cargos", "saldo_promedio", "depositos_en_efectivo", "entradas_TPV_bruto", "entradas_TPV_neto"
-]

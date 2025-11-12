@@ -6,12 +6,10 @@ import asyncio
 import zipfile
 import io
 
-
 from ...models.responses import AnalisisTPV
 from ...core.exceptions import PDFCifradoError
-from ...services.orchestators import procesar_regex_generico, obtener_y_procesar_portada
-from ...services.pdf_processor import extraer_texto_con_ocr
-from ...utils.helpers import total_depositos_verificacion, crear_objeto_resultado
+from ...services.orchestators import obtener_y_procesar_portada, procesar_digital_worker_sync, procesar_ocr_worker_sync
+from ...utils.helpers import total_depositos_verificacion
 from ...utils.helpers_texto_fluxo import prompt_base_fluxo
 
 router = APIRouter()
@@ -79,30 +77,30 @@ async def procesar_pdf_api(
             detail="No subiste ningun archivo PDF válido."
         )
     
-    # ------- 1. ANÁLISIS DE LA PORTADA CON IA PARA DETERMINAR ENTRADAS Y SI ES DOCUMENTO ESCANEADO -------
-    logger.info("Analisis de Portada Inicializado")
+    # --- 1. ANÁLISIS DE LA PORTADA CON IA PARA DETERMINAR ENTRADAS Y SI ES DOCUMENTO ESCANEADO ---
+    logger.info("Analisis de Portada Inicializado para todos los documentos")
     for doc in archivos_en_memoria:
+        # 'obtener_y_procesar_portada' solo hace el análisis inicial de IA y extracción de texto/posiciones
         tarea = obtener_y_procesar_portada(prompt_base_fluxo, doc["content"])
         tareas_analisis.append(tarea)    
+    
     try:
-        # Ejecutamos todas las llamadas a la IA al mismo tiempo
         resultados_portada = await asyncio.gather(*tareas_analisis, return_exceptions=True)
     except Exception as e:
-        # En caso de que la llamada de la IA falle de forma masiva, detenemos todo.
-        raise HTTPException(status_code=500, detail=f"Error crítico durante el análisis con IA: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error crítico durante la Etapa 1 (Análisis IA): {str(e)}")
 
-    # Suma de depósitos y decisión
-    logger.debug("--- RESULTADOS PORTADA ----")
-    logger.info("Resultado de la portada obtenido -- Análisis finalizado")
-    total_depositos_calculado, es_mayor = total_depositos_verificacion(resultados_portada)
+    logger.info("Etapa 1: Análisis de portada finalizado.")
 
-    # --- 2. SEPARACIÓN DE DOCUMENTOS DIGITALES Y ESCANEADOS ---
+    # --- 2. SEPARACIÓN DE DOCUMENTOS DIGITALES Y ESCANEADOS (Y CALCULOS TOTALES) ---
     # Preparamos las listas para el siguiente paso.
     documentos_digitales = []
     documentos_escaneados = []
 
     # Creamos una lista final de resultados, pre-llenada para mantener el orden.
     resultados_finales: List[Union[AnalisisTPV.ResultadoExtraccion, None]] = [None] * len(archivos_en_memoria)
+
+    # Obtenemos el total de depósitos para la decisión de OCR
+    total_depositos_calculado, es_mayor = total_depositos_verificacion(resultados_portada) # la primer variable puede ser usada en el futuro
 
     logger.info("Empezando la separación de documentos")
     for i, resultado_bruto in enumerate(resultados_portada):
@@ -127,148 +125,174 @@ async def procesar_pdf_api(
             continue # Pasamos al siguiente archivo
         
         # Si no hubo error, desempacamos los resultados
-        datos_ia, es_digital, texto_inicial, movimientos_pagina = resultado_bruto
+        datos_ia, es_digital, texto_inicial, movimientos_pagina, texto_por_pagina = resultado_bruto
         # Intenta procesar este archivo, preparado para cualquier error
         try:
             # Sea digital o escaneado se prepara para extracción
             if es_digital:
                 documentos_digitales.append({
                     "index": i, 
-                    "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia, "texto": texto_inicial, "movimientos": movimientos_pagina
+                    "filename": filename,
+                    "ia_data": datos_ia, 
+                    "texto_por_pagina": texto_por_pagina, 
+                    "movimientos": movimientos_pagina
                 })
             else:
-                documentos_escaneados.append({"index": i, "content": archivos_en_memoria[i]["content"], "ia_data": datos_ia})
+                documentos_escaneados.append({
+                    "index": i, 
+                    "filename": filename,
+                    "content": archivos_en_memoria[i]["content"], 
+                    "ia_data": datos_ia
+                })
 
         # Red de validación
         except Exception as e:
-            logger.error("La separación de documentos falló.")
+            logger.error("La separación de documentos falló durante la etapa 2.")
             # Si algo falla en el 'try' (como una ValidationError de Pydantic), se capturamos.
             resultados_finales[i] = AnalisisTPV.ErrorRespuesta(
                 error=f"Error al procesar los datos de la extracción inicial en: '{filename}'. Vuelve a mandar este archivo."
             )
-    logger.info("Separación finalizada")
+    logger.info(f"Separación finalizada. Digitales: {len(documentos_digitales)}, Escaneados: {len(documentos_escaneados)}")
     
-    # --- 3. PROCESAMIENTO CONCURRENTE Y CENTRALIZADO GENERAL ---
+    # --- ETAPA 3: PROCESAMIENTO PRINCIPAL (CPU PESADO) ---
     loop = asyncio.get_running_loop()
+    
+    # Listas para guardar las tareas y sus índices originales
+    tareas_digitales = [] # (index, task)
+    tareas_ocr = []       # (index, task)
 
-    # se comprueba que sea mayor a 250k, que haya escaneados, y que no sean más de 15
+    # Decisión de OCR
     procesar_ocr = es_mayor and documentos_escaneados and len(documentos_escaneados) <= 15
-
-    logger.info("Procesando documentos digitales...")
-    for doc_info in documentos_digitales:
-        filename = archivos_en_memoria[doc_info['index']]['filename']
-        try:
-            resultado_dict = procesar_regex_generico(
-                resultados=doc_info["ia_data"], 
-                texto=doc_info["texto"], 
-                tipo="digital",
-                posiciones=doc_info["movimientos"]
+    
+    logger.info(f"Etapa 3: Iniciando ProcessPoolExecutor. (Procesar OCR: {procesar_ocr})")
+    
+    with ProcessPoolExecutor() as executor:
+        # 3.A - Despachar tareas de Agentes LLM (Digitales)
+        for doc_info in documentos_digitales:
+            tarea = loop.run_in_executor(
+                executor,
+                procesar_digital_worker_sync, # Worker para digitales
+                doc_info["ia_data"],
+                doc_info["texto_por_pagina"],
+                doc_info["movimientos"],
+                doc_info["filename"]
             )
-            resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
+            tareas_digitales.append((doc_info["index"], tarea))
 
-        except Exception as e:
-            logger.error(f"Fallo el regex en el documento digital: {filename}")
-            resultados_finales[doc_info["index"]] = crear_objeto_resultado({
-                **doc_info["ia_data"],
-                "error_transacciones": f"Fallo Regex en '{filename}': {e}"
-            })
-    logger.info("Procesamiento de documentos digitales finalizado.")
-
-    if procesar_ocr:
-        logger.info("Procesamiento OCR habilitado para documentos escaneados.")
-        logger.debug("Iniciando lote de procesamiento con OCR.")
-        # Lógica de timeout para OCR
-        OCR_TIMEOUT_SECONDS = 13 * 60  # 13 minutos
-        ocr_timed_out = False
-        textos_ocr_brutos = []
-
-        # Usamos ProcessPoolExecutor para evitar bloquear el event loop
-        with ProcessPoolExecutor() as executor:
-            # Creamos las tareas de OCR
-            tareas_ocr = [
-                loop.run_in_executor(executor, extraer_texto_con_ocr, doc["content"])
-                for doc in documentos_escaneados
-            ]
-            try:
-                # Ejecutamos todas las tareas de OCR en paralelo CON TIMEOUT
-                logger.info(f"Iniciando {len(tareas_ocr)} tareas de OCR con un límite de {OCR_TIMEOUT_SECONDS}s.")
-                textos_ocr_brutos = await asyncio.wait_for(
-                    asyncio.gather(*tareas_ocr, return_exceptions=True),
-                    timeout=OCR_TIMEOUT_SECONDS
+        # 3.B - Despachar tareas de OCR (Escaneados)
+        if procesar_ocr:
+            for doc_info in documentos_escaneados:
+                tarea = loop.run_in_executor(
+                    executor,
+                    procesar_ocr_worker_sync, # Worker para OCR
+                    doc_info["ia_data"],
+                    doc_info["content"],
+                    doc_info["filename"]
                 )
-            
-            except asyncio.TimeoutError:
-                ocr_timed_out = True
-                logger.warning(f"El procesamiento OCR superó el límite de {OCR_TIMEOUT_SECONDS}s y fue cancelado.")
-                logger.warning("Algunos procesos de OCR pueden continuar ejecutándose en segundo plano.")
+                tareas_ocr.append((doc_info["index"], tarea))
+        else:
+            # 3.C - Manejo de OCR Omitidos (Tu lógica anterior)
+            if documentos_escaneados:
+                if len(documentos_escaneados) > 15:
+                    error_msg = "La cantidad de documentos escaneados supera el límite de 15."
+                elif not es_mayor:
+                    error_msg = "Este documento es escaneado y el total de depósitos no supera los $250,000."
+                else:
+                    error_msg = "El procesamiento OCR fue omitido por seguridad."
                 
-                error_msg = f"El procesamiento OCR fue cancelado por exceder el límite de {OCR_TIMEOUT_SECONDS} segundos."
-                error_obj = AnalisisTPV.ErrorRespuesta(error=error_msg)
-
-                # Llenamos los resultados finales con los datos iniciales de la IA y el error de timeout
                 for doc_info in documentos_escaneados:
+                    error_obj = AnalisisTPV.ErrorRespuesta(error=error_msg)
                     resultados_finales[doc_info["index"]] = AnalisisTPV.ResultadoExtraccion(
                         AnalisisIA=doc_info["ia_data"],
                         DetalleTransacciones=error_obj
                     )
 
-            # Procesamos los resultados del OCR SÓLO SI NO HUBO TIMEOUT
-            if not ocr_timed_out:
-                # Procesamos los resultados del OCR
-                for i, texto_o_error in enumerate(textos_ocr_brutos):
-                    doc_info = documentos_escaneados[i]
-                    if isinstance(texto_o_error, Exception):
-                        resultados_finales[doc_info["index"]] = crear_objeto_resultado({
-                        **doc_info["ia_data"],
-                        "error_transacciones": f"Fallo la extracción de texto en '{filename}': {texto_o_error}"
-                        })
-                        continue
+        # 3.D - Esperar a que los workers terminen (EN DOS GRUPOS SEPARADOS)
+        
+        # Grupo 1: Digitales (sin timeout)
+        resultados_brutos_digitales = []
+        if tareas_digitales:
+            logger.info(f"Esperando que {len(tareas_digitales)} tareas digitales terminen...")
+            resultados_brutos_digitales = await asyncio.gather(*[t[1] for t in tareas_digitales], return_exceptions=True)
+            logger.info("Tareas digitales finalizadas.")
 
-                    try:
-                        resultado_dict = procesar_regex_generico(
-                            resultados=doc_info["ia_data"], 
-                            texto=texto_o_error, 
-                            tipo="ocr",
-                            posiciones={} # No tenemos posiciones en OCR
-                        )
-                        resultados_finales[doc_info["index"]] = crear_objeto_resultado(resultado_dict)
+        # Grupo 2: OCR (CON timeout)
+        resultados_brutos_ocr = []
+        ocr_timed_out = False
+        if tareas_ocr:
+            OCR_TIMEOUT_SECONDS = 13 * 60  # 13 minutos
+            logger.info(f"Iniciando {len(tareas_ocr)} tareas de OCR con un límite de {OCR_TIMEOUT_SECONDS}s.")
+            try:
+                # Ejecutamos las tareas de OCR en paralelo CON TIMEOUT
+                resultados_brutos_ocr = await asyncio.wait_for(
+                    asyncio.gather(*[t[1] for t in tareas_ocr], return_exceptions=True),
+                    timeout=OCR_TIMEOUT_SECONDS
+                )
+                logger.info("Tareas OCR finalizadas.")
+            
+            except asyncio.TimeoutError:
+                ocr_timed_out = True
+                logger.warning(f"El procesamiento OCR superó el límite de {OCR_TIMEOUT_SECONDS}s y fue cancelado.")
+                
+                error_msg = f"El procesamiento OCR fue cancelado por exceder el límite de {OCR_TIMEOUT_SECONDS} segundos."
+                error_obj = AnalisisTPV.ErrorRespuesta(error=error_msg)
+                
+                # Llenamos los resultados finales con los datos iniciales de la IA y el error de timeout
+                for index, _ in tareas_ocr:
+                    # Buscamos el doc_info original que corresponde a esta tarea
+                    doc_info = next(doc for doc in documentos_escaneados if doc["index"] == index)
+                    resultados_finales[index] = AnalisisTPV.ResultadoExtraccion(
+                        AnalisisIA=doc_info["ia_data"],
+                        DetalleTransacciones=error_obj
+                    )
+    logger.info("Etapa 3: Todos los procesos han terminado.")
+
+    # --- 4. RECOLECTAR Y ENSAMBLAR RESULTADOS ---
+    logger.info("Etapa 4: Ensamblando respuesta final.")
     
-                    except Exception as e:
-                        resultados_finales[doc_info["index"]] = crear_objeto_resultado({
-                        **doc_info["ia_data"],
-                        "error_transacciones": f"Fallo Regex en '{filename}': {e}"
-                        })
-            logger.info("Procesamiento OCR finalizado.")
-
-    # --- 4. MANEJO DE ESCANEADOS OMITIDOS ---
-    if not procesar_ocr and documentos_escaneados:
-        if len(documentos_escaneados) > 15:
-            error_msg = "La cantidad de documentos escaneados supera el límite de 15."
-        elif not es_mayor:
-            error_msg = "Este documento es escaneado y el total de depósitos no supera los $250,000."
-        else:
-            # Caso improbable, pero es bueno tener un fallback
-            error_msg = "El procesamiento OCR fue omitido por seguridad."
-
-        # Asignamos el mismo error a todos los documentos escaneados omitidos
-        for doc_info in documentos_escaneados:
-            error_obj = AnalisisTPV.ErrorRespuesta(error=error_msg)
-            resultados_finales[doc_info["index"]] = AnalisisTPV.ResultadoExtraccion(
-                AnalisisIA=doc_info["ia_data"],
-                DetalleTransacciones=error_obj
+    # Recolectar resultados digitales
+    for i, (index, _) in enumerate(tareas_digitales):
+        resultado = resultados_brutos_digitales[i]
+        filename = archivos_en_memoria[index]["filename"]
+        
+        if isinstance(resultado, Exception):
+            error_msg = f"Fallo el procesamiento completo (Digital) de '{filename}': {str(resultado)}"
+            resultados_finales[index] = AnalisisTPV.ResultadoExtraccion(
+                AnalisisIA=None, # Asumimos que si el worker falla, no hay datos fiables
+                DetalleTransacciones=AnalisisTPV.ErrorRespuesta(error=error_msg)
             )
-
+        else:
+            resultados_finales[index] = resultado
+            
+    # Recolectar resultados OCR (solo si no hubo timeout)
+    if not ocr_timed_out:
+        for i, (index, _) in enumerate(tareas_ocr):
+            resultado = resultados_brutos_ocr[i]
+            filename = archivos_en_memoria[index]["filename"]
+            
+            if isinstance(resultado, Exception):
+                error_msg = f"Fallo el procesamiento completo (OCR) de '{filename}': {str(resultado)}"
+                resultados_finales[index] = AnalisisTPV.ResultadoExtraccion(
+                    AnalisisIA=None,
+                    DetalleTransacciones=AnalisisTPV.ErrorRespuesta(error=error_msg)
+                )
+            else:
+                resultados_finales[index] = resultado
+            
     # --- 5. ENSAMBLE DE LA RESPUESTA FINAL ---
     resultados_limpios = [res for res in resultados_finales if res is not None]
-
-    # Generamos la lista de resultados generales A PARTIR de la lista de resultados individuales con una simple y elegante comprensión de lista.
-    resultados_generales = [
-        res.AnalisisIA for res in resultados_limpios if res.AnalisisIA is not None
-    ]
+    resultados_generales = [res.AnalisisIA for res in resultados_limpios if res.AnalisisIA is not None]
+    
+    # Recalculamos el total de depósitos basado en los resultados exitosos
+    total_depositos_final = sum(
+        res.AnalisisIA.depositos for res in resultados_limpios 
+        if res.AnalisisIA and res.AnalisisIA.depositos
+    )
+    es_mayor_final = total_depositos_final > 250000
 
     return AnalisisTPV.ResultadoTotal(
-        total_depositos = total_depositos_calculado,
-        es_mayor_a_250 = es_mayor,
+        total_depositos = total_depositos_final, # Usamos el total recalculado
+        es_mayor_a_250 = es_mayor_final, # Usamos la decisión final
         resultados_generales = resultados_generales,
         resultados_individuales = resultados_limpios
     )

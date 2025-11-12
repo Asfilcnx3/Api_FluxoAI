@@ -1,15 +1,13 @@
-import math
 from ..utils.helpers import (
-    es_escaneado_o_no, extraer_datos_por_banco, extraer_json_del_markdown, construir_descripcion_optimizado, 
-    limpiar_monto, sumar_lista_montos, limpiar_y_normalizar_texto, sanitizar_datos_ia, reconciliar_resultados_ia,
-    detectar_tipo_contribuyente
+    es_escaneado_o_no, extraer_datos_por_banco, extraer_json_del_markdown, limpiar_monto, sanitizar_datos_ia, 
+    reconciliar_resultados_ia, detectar_tipo_contribuyente, crear_chunks_con_superposicion, crear_objeto_resultado
     
 )
 from .ia_extractor import (
-    analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia
+    analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia, llamar_agente_tpv, llamar_agente_ocr_vision
 )
 from ..utils.helpers_texto_fluxo import (
-    REGEX_COMPILADAS, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO
+    PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO
 )
 from ..utils.helpers_texto_nomi import (
     PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA, SEGUNDO_PROMPT_NOMINA
@@ -18,10 +16,12 @@ from ..utils.helpers_texto_csf import (
     PATRONES_CONSTANCIAS_COMPILADO
 )
 
-from .pdf_processor import extraer_movimientos_con_posiciones, extraer_texto_de_pdf, extraer_rfc_curp_por_texto, convertir_pdf_a_imagenes, leer_qr_de_imagenes
-from ..models.responses import NomiFlash, CSF
+from .pdf_processor import (
+    extraer_movimientos_con_posiciones, extraer_texto_de_pdf, extraer_rfc_curp_por_texto, convertir_pdf_a_imagenes, leer_qr_de_imagenes
+)
+from ..models.responses import NomiFlash, CSF, AnalisisTPV
 
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, Union
 from fastapi import UploadFile
 from io import BytesIO
 import logging
@@ -36,29 +36,23 @@ logger = logging.getLogger(__name__)
 async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool, str, Dict[int, Any]]:
     """
     Orquesta el proceso de forma secuencial siguiendo el siguiente roadmap:
-    1. Extrae texto inicial.
-    1.5 Extrae los movimientos por coordenadas.
+    1. Extrae texto por página Y movimientos con coordenadas.
     2. Reconoce el banco.
     3. Decide qué páginas enviar a la IA.
-    4. Llama a la IA con las páginas correctas
-    5. corrige su respuesta.
+    4. Llama a la IA con las páginas correctas.
+    5. Corrige su respuesta.
     """
     loop = asyncio.get_running_loop()
 
-    # --- 1. PRIMERO: Extraer texto inicial y determinar si es digital --- La ejecutamos en un hilo separado para no bloquear el programa.
-    texto_verificacion = await loop.run_in_executor(
-        None,  # Usa el executor de hilos por defecto
-        extraer_texto_de_pdf, 
-        pdf_bytes
-    )
-
-    # --- 1.5 Extraer los movimientos con posiciones ---
-    # Se ejecuta en un hilo para no bloquear el bucle de eventos.
-    movimientos_por_pagina = await loop.run_in_executor(
+    # --- 1. PRIMERO: Extraer Texto Y Movimientos en una sola llamada --- La ejecutamos en un hilo separado para no bloquear el programa.
+    movimientos_por_pagina, texto_por_pagina = await loop.run_in_executor(
         None,
         extraer_movimientos_con_posiciones,
         pdf_bytes
     )
+
+    # Construimos el texto de verificación completo a partir de las páginas
+    texto_verificacion = "\n".join(texto_por_pagina.values())
 
     # Determinamos si es escaneado o digital
     es_documento_digital = es_escaneado_o_no(texto_verificacion)
@@ -126,142 +120,323 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     if depositos_estanarizadas is not None:
         datos_ia_reconciliados["depositos"] = depositos_estanarizadas
     
-    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina
-
-# ESTA FUNCIÓN ES PARA OBTENER LOS RESULTADOS DEL ANALISIS DE TPV CON REGEX
-def procesar_regex_generico(
-        resultados: dict, 
-        texto:str, 
-        tipo: str, 
-        posiciones: Dict[int, Any]
-    ) -> Dict[str, Any]:
-    """
-    Aplica expresiones regulares definidas por banco y retorna resultados. 
-    Combinando la extracción de IA con regex y la clasificación por posiciones con coordenadas.
-
-    Args:
-        resultados (dict): El diccionario de los datos encontrados por el modelo.
-        texto (str): El texto a procesar.
-        tipo (str): El tipo de análisis (ej. "estado" o "comprobante").
-        posiciones (Dict[int, Any]): Las posiciones de los movimientos en el texto.
-
-    Returns:
-        Dict[str, Any]: Un diccionario con los resultados.
-    """
-
-    # --- ZONA HARDCODEADA ---
-    # Aquí defines qué claves de regex SIEMPRE deben ser de un tipo específico.
-    SIEMPRE_ABONO_KEYS = ["descripcion"]
-    # SIEMPRE_CARGO_KEYS = ["descripcion_clip_multilinea", "descripcion_clip_traspaso"] <- ejemplos
-    # ------------------------------------
-
-    # Detectamos el banco
-    banco = resultados.get("banco")
+    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina, texto_por_pagina
     
-    # Limpiamos los montos que vengan del json extractor por si vienen mal
-    resultados["comisiones"] = limpiar_monto(resultados.get('comisiones', '0.0'))
-    resultados["depositos"] = limpiar_monto(resultados.get('depositos', '0.0'))
-    resultados["cargos"] = limpiar_monto(resultados.get('cargos', '0.0'))
-    resultados["saldo_promedio"] = limpiar_monto(resultados.get('saldo_promedio', '0.0'))
-
-    if not banco:
-        resultados["error_transacciones"] = "El nombre del banco no fue proporcionado por el análisis inicial."
-        return resultados
-    logger.debug("banco encontrado")
-
-    config_compilada = REGEX_COMPILADAS.get(banco.lower())
-    if not config_compilada:
-        resultados["error_transacciones"] = f"Estamos trabajando para dar soporte al banco: '{banco}'."
-        return resultados
-    logger.debug("config encontrada")
-
-    # --- 2. VINCULACIÓN DE COORDENADAS Y CLASIFICACIÓN CARGO/ABONO ---
-    transacciones_enriquecidas = []
-    datos_posicionales_copia = {k: list(v) for k, v in posiciones.items()}
+async def procesar_documento_con_agentes_async(
+    ia_data: dict, 
+    texto_por_pagina: Dict[int, str], 
+    movimientos_por_pagina: Dict[int, Any],
+    filename: str, # Para logging
+) -> Dict[str, Any]:
+    """
+    Orquesta el procesamiento de un documento digital usando Agentes LLM.
+    Crea chunks, llama a los agentes en paralelo, deduplica y calcula los totales.
+    """
+    logger.info(f"Iniciando procesamiento con Agentes LLM para: {filename}")
     
-    # Buscamos todas las transacciones de todas las regex de descripción
-    for clave, patron_compilado in config_compilada.items():
-        if clave.startswith("descripcion"):
-            print(f"Procesando transacciones con patrón: {clave}")
-            for transaccion_raw in patron_compilado.findall(texto):
-                descripcion, monto_str = construir_descripcion_optimizado(transaccion_raw, banco)
-                monto_float = sumar_lista_montos([monto_str])
+    # --- 1. Preparación ---
+    banco = ia_data.get("banco", "generico")
+    
+    # --- 2. Crear Chunks ---
+    # Obtenemos solo las páginas que tienen movimientos para ser eficientes
+    paginas_con_movimientos = list(movimientos_por_pagina.keys())
+    
+    chunks_de_texto = crear_chunks_con_superposicion(
+        texto_por_pagina=texto_por_pagina,
+        paginas_con_movimientos=paginas_con_movimientos,
+        tamano_chunk=7,  # Procesará en lotes de 10 páginas
+        superposicion=1 # Con 1 página de superposición
+    )
+    
+    if not chunks_de_texto:
+        logger.warning(f"No se generaron chunks para {filename}, no hay páginas con movimientos.")
+        return {
+            **ia_data, 
+            "transacciones": [], 
+            "error_transacciones": "No se encontraron páginas con transacciones."
+        }
 
-                # Vinculamos con el mapa de coordenadas para obtener el tipo provisional
-                tipo_provisional = "indefinido"
-                match_encontrado = False
-                for _, movimientos in datos_posicionales_copia.items():
-                    for mov in movimientos:
-                        if math.isclose(mov['monto'], monto_float, rel_tol=1e-5):
-                            tipo_provisional = mov['tipo']
-                            movimientos.remove(mov)
-                            match_encontrado = True
-                            break
-                    if match_encontrado:
-                        break
-                
-                # Aplicamos la regla de hardcoding para obtener el tipo final
-                tipo_final = tipo_provisional
-                if clave in SIEMPRE_ABONO_KEYS:
-                    tipo_final = "abono"
-                
-                # Guardamos la transacción con toda la información necesaria
-                transacciones_enriquecidas.append({
-                    "raw_data": transaccion_raw,
-                    "descripcion": descripcion,
-                    "monto_str": monto_str,
-                    "monto_float": monto_float,
-                    "tipo": tipo_final
-                })
+    # --- 3. Llamar Agentes en Paralelo (Sin Semáforo) ---
+    tareas_agente = []
 
-    # --- 3. CLASIFICACIÓN FINAL Y CÁLCULO DE TOTALES ---
-    if not transacciones_enriquecidas:
-        resultados.update({
-            "transacciones": [], "depositos_en_efectivo": 0.0, "entradas_TPV_bruto": 0.0, 
-            "entradas_TPV_neto": 0.0, "traspaso_entre_cuentas": 0.0, "total_entradas_financiamiento": 0.0,
-            "error_transacciones": "Sin coincidencias, el documento no contiene transacciones TPV."
+    for texto_chunk, paginas in chunks_de_texto:
+        # Llamamos directamente a la función del agente
+        tareas_agente.append(
+            llamar_agente_tpv(banco, texto_chunk, paginas)
+        )
+        
+    # 'gather' lanzará todas las tareas del chunk en paralelo (dentro de este proceso)
+    resultados_chunks = await asyncio.gather(*tareas_agente, return_exceptions=True)
+    
+    # --- 4. Consolidar y Deduplicar ---
+    transacciones_totales_crudas = []
+    ids_unicos = set()
+    logger.debug(f"Procesando {len(resultados_chunks)} chunks para {filename}...") 
+
+    for i, resultado in enumerate(resultados_chunks):
+        logger.debug(f"Contenido del Chunk {i} para {filename}: {resultado}")
+
+        if isinstance(resultado, Exception):
+            logger.warning(f"Un chunk falló para {filename}: {resultado}")
+            continue
+        
+        # 'resultado' es la List[Dict] de la función llamar_agente_tpv
+        for trx in resultado: 
+            fecha = trx.get("fecha")
+            monto = trx.get("monto")
+            # ID único robusto para deduplicar
+            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:20]}" 
+            if id_trx not in ids_unicos:
+                transacciones_totales_crudas.append(trx)
+                ids_unicos.add(id_trx)
+
+    # --- 5. Lógica de Negocio y Cálculo de Totales ---
+    if not transacciones_totales_crudas:
+        logger.error(f"¡Error de lógica! 'transacciones_totales_crudas' está vacía para {filename} a pesar de que los chunks terminaron.")
+
+        ia_data.update({
+            "transacciones": [], 
+            "depositos_en_efectivo": 0.0, 
+            "entradas_TPV_bruto": 0.0, 
+            "entradas_TPV_neto": 0.0, 
+            "traspaso_entre_cuentas": 0.0, 
+            "total_entradas_financiamiento": 0.0,
+            "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
         })
-        return resultados
+        return ia_data
 
-    # CASO B: Sí se encontraron transacciones, procesamos normalmente
-    transacciones_filtradas = []
-    # Acumuladores
-    total_depositos_efectivo, total_traspaso_entre_cuentas, total_entradas_financiamiento, total_entradas_tpv = 0.0, 0.0, 0.0, 0.0
+    total_depositos_efectivo = 0.0
+    total_traspaso_entre_cuentas = 0.0
+    total_entradas_financiamiento = 0.0
+    total_entradas_tpv = 0.0
+    transacciones_clasificadas = []
 
-    for transaccion in transacciones_enriquecidas:
-        descripcion_limpia = limpiar_y_normalizar_texto(transaccion["descripcion"].strip())
+    for trx in transacciones_totales_crudas:
+        monto_float = trx.get("monto", 0.0)
+        if not isinstance(monto_float, (int, float)):
+            monto_float = limpiar_monto(str(monto_float))
         
-        if all(p not in descripcion_limpia.lower() for p in PALABRAS_EXCLUIDAS):
-            # Aquí puedes usar transaccion["tipo"] si necesitas diferenciar cargos de abonos en tu lógica
-            # Por ejemplo: if transaccion["tipo"] == "abono":
-            if any(p in descripcion_limpia.lower() for p in PALABRAS_EFECTIVO):
-                total_depositos_efectivo += transaccion["monto_float"]
-            elif any(p in descripcion_limpia.lower() for p in PALABRAS_TRASPASO_ENTRE_CUENTAS):
-                total_traspaso_entre_cuentas += transaccion["monto_float"]
-            elif any(p in descripcion_limpia.lower() for p in PALABRAS_TRASPASO_FINANCIAMIENTO):
-                total_entradas_financiamiento += transaccion["monto_float"]
+        descripcion_limpia = trx.get("descripcion", "").lower()
+        
+        if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
+            if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
+                total_depositos_efectivo += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                total_traspaso_entre_cuentas += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                total_entradas_financiamiento += monto_float
             else:
-                total_entradas_tpv += transaccion["monto_float"]
+                total_entradas_tpv += monto_float
             
-            transacciones_filtradas.append({
-                "fecha": transaccion["raw_data"][0],
-                "descripcion": descripcion_limpia,
-                "monto": transaccion["monto_str"],
-                "tipo": transaccion["tipo"] # Añadimos el tipo al resultado final
+            transacciones_clasificadas.append({
+                "fecha": trx.get("fecha"),
+                "descripcion": trx.get("descripcion"),
+                "monto": f"{monto_float:,.2f}", # Formateamos como string
+                "tipo": trx.get("tipo", "abono") 
             })
-        
-    resultados["transacciones"] = transacciones_filtradas
-    resultados["depositos_en_efectivo"] = total_depositos_efectivo
-    resultados["traspaso_entre_cuentas"] = total_traspaso_entre_cuentas
-    resultados["total_entradas_financiamiento"] = total_entradas_financiamiento
-    resultados["entradas_TPV_bruto"] = total_entradas_tpv
-    
-    comisiones = resultados.get("comisiones") or 0.0
-    resultados["entradas_TPV_neto"] = total_entradas_tpv - comisiones
-    resultados["error_transacciones"] = None # Nos aseguramos de que no haya mensaje de error
 
-    # El resto de los datos de la IA ya están en 'resultados', por lo que se conservan.
-    return resultados
+    # --- 6. Ensamblar Resultado Final ---
+    comisiones_str = ia_data.get("comisiones", "0.0")
+    comisiones = limpiar_monto(comisiones_str)
+    entradas_TPV_neto = total_entradas_tpv - comisiones
+
+    resultado_final = {
+        **ia_data,
+        "transacciones": transacciones_clasificadas,
+        "depositos_en_efectivo": total_depositos_efectivo,
+        "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
+        "total_entradas_financiamiento": total_entradas_financiamiento,
+        "entradas_TPV_bruto": total_entradas_tpv,
+        "entradas_TPV_neto": entradas_TPV_neto,
+        "error_transacciones": None
+    }
+    
+    return resultado_final
+
+async def procesar_documento_escaneado_con_agentes_async(
+    ia_data: dict, 
+    pdf_bytes: bytes, 
+    filename: str
+) -> Dict[str, Any]:
+    """
+    Orquesta el procesamiento de un documento escaneado usando Agentes LLM de Visión.
+    Crea chunks de PÁGINAS, llama a los agentes en paralelo, deduplica y calcula los totales.
+    """
+    logger.info(f"Iniciando procesamiento con Agentes de Visión para: {filename}")
+    
+    # --- 1. Preparación ---
+    banco = ia_data.get("banco", "generico")
+    
+    try:
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            total_paginas = len(doc)
+    except Exception as e:
+        logger.error(f"No se pudo abrir el PDF escaneado '{filename}' para contar páginas: {e}")
+        return {**ia_data, "error_transacciones": "No se pudo leer el PDF para procesar con OCR."}
+
+    # --- 2. Crear Chunks de Números de Página ---
+    TAMANO_CHUNK = 1  # 1 página por llamada de IA
+    SUPERPOSICION = 0 # 0 páginas de superposición (DEMO)
+    
+    chunks_de_paginas = []
+    i = 0
+    while i < total_paginas:
+        # Los números de página de fitz son 0-indexados, pero los nuestros son 1-indexados
+        paginas_chunk = list(range(i + 1, min(i + TAMANO_CHUNK, total_paginas) + 1))
+        if not paginas_chunk:
+            break
+        chunks_de_paginas.append(paginas_chunk)
+        i += (TAMANO_CHUNK - SUPERPOSICION)
+
+    if not chunks_de_paginas:
+        return {
+            **ia_data, 
+            "transacciones": [], 
+            "error_transacciones": 
+            "No se generaron chunks de páginas."
+        }
+
+    # --- 3. Llamar Agentes de Visión en Paralelo ---
+    tareas_agente_ocr = []
+    for paginas in chunks_de_paginas:
+        tareas_agente_ocr.append(
+            llamar_agente_ocr_vision(banco, pdf_bytes, paginas)
+        )
+    
+    # 'gather' lanzará todas las tareas del chunk en paralelo (dentro de este proceso)
+    resultados_chunks = await asyncio.gather(*tareas_agente_ocr, return_exceptions=True)
+    
+    # --- 4. Consolidar y Deduplicar ---
+    transacciones_totales_crudas = []
+    ids_unicos = set()
+    logger.debug(f"Procesando {len(resultados_chunks)} chunks para {filename}...") 
+
+    for i, resultado in enumerate(resultados_chunks):
+        logger.debug(f"Contenido del Chunk {i} para {filename}: {resultado}")
+
+        if isinstance(resultado, Exception):
+            logger.warning(f"Un chunk de OCR falló para {filename}: {resultado}")
+            continue
+        
+        for trx in resultado: 
+            fecha = trx.get("fecha")
+            monto = trx.get("monto")
+            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:20]}" 
+            if id_trx not in ids_unicos:
+                transacciones_totales_crudas.append(trx)
+                ids_unicos.add(id_trx)
+
+    # --- 5. Lógica de Negocio y Cálculo de Totales ---
+    if not transacciones_totales_crudas:
+        logger.error(f"¡Error de lógica! 'transacciones_totales_crudas' está vacía para {filename} a pesar de que los chunks terminaron.")
+
+        ia_data.update({
+            "transacciones": [], 
+            "depositos_en_efectivo": 0.0, 
+            "entradas_TPV_bruto": 0.0, 
+            "entradas_TPV_neto": 0.0, 
+            "traspaso_entre_cuentas": 0.0, 
+            "total_entradas_financiamiento": 0.0,
+            "error_transacciones": "Agentes LLM de Visión no encontraron transacciones TPV."
+        })
+        return ia_data
+
+    total_depositos_efectivo = 0.0
+    total_traspaso_entre_cuentas = 0.0
+    total_entradas_financiamiento = 0.0
+    total_entradas_tpv = 0.0
+    transacciones_clasificadas = []
+
+    for trx in transacciones_totales_crudas:
+        monto_float = trx.get("monto", 0.0)
+        if not isinstance(monto_float, (int, float)):
+            monto_float = limpiar_monto(str(monto_float))
+        
+        descripcion_limpia = trx.get("descripcion", "").lower()
+        
+        if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
+            if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
+                total_depositos_efectivo += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                total_traspaso_entre_cuentas += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                total_entradas_financiamiento += monto_float
+            else:
+                total_entradas_tpv += monto_float
+            
+            transacciones_clasificadas.append({
+                "fecha": trx.get("fecha"),
+                "descripcion": trx.get("descripcion"),
+                "monto": f"{monto_float:,.2f}", # Formateamos como string
+                "tipo": trx.get("tipo", "abono") 
+            })
+
+    # --- 6. Ensamblar Resultado Final ---
+    comisiones_str = ia_data.get("comisiones", "0.0")
+    comisiones = limpiar_monto(comisiones_str)
+    entradas_TPV_neto = total_entradas_tpv - comisiones
+
+    resultado_final = {
+        **ia_data,
+        "transacciones": transacciones_clasificadas,
+        "depositos_en_efectivo": total_depositos_efectivo,
+        "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
+        "total_entradas_financiamiento": total_entradas_financiamiento,
+        "entradas_TPV_bruto": total_entradas_tpv,
+        "entradas_TPV_neto": entradas_TPV_neto,
+        "error_transacciones": None
+    }
+    
+    return resultado_final
+
+def procesar_digital_worker_sync(
+    ia_data: dict, 
+    texto_por_pagina: Dict[int, str], 
+    movimientos: Dict[int, Any], 
+    filename: str
+) -> Union[AnalisisTPV.ResultadoExtraccion, Exception]:
+    """
+    WORKER SÍNCRONO (para ProcessPool): Inicia un nuevo loop de asyncio
+    y ejecuta el orquestador de Agentes LLM para un documento digital.
+    """
+    try:
+        # asyncio.run() crea un nuevo loop de eventos en este proceso separado
+        resultado_dict = asyncio.run(
+            procesar_documento_con_agentes_async(
+                ia_data=ia_data,
+                texto_por_pagina=texto_por_pagina,
+                movimientos_por_pagina=movimientos,
+                filename=filename
+            )
+        )
+        return crear_objeto_resultado(resultado_dict)
+    except Exception as e:
+        logger.error(f"Error en el worker 'procesar_digital_worker_sync' para {filename}: {e}", exc_info=True)
+        return e # Devolvemos la excepción para que el endpoint la maneje
+
+def procesar_ocr_worker_sync(
+    ia_data: dict, 
+    pdf_content: bytes, 
+    filename: str
+) -> Union[AnalisisTPV.ResultadoExtraccion, Exception]:
+    """
+    WORKER SÍNCRONO (para ProcessPool): Inicia un nuevo loop de asyncio
+    y ejecuta el orquestador de Agentes de VISIÓN para un documento escaneado.
+    """
+    try:
+        # Inicia un nuevo loop de asyncio en este proceso
+        # y ejecuta el orquestador de agentes de visión
+        resultado_dict = asyncio.run(
+            procesar_documento_escaneado_con_agentes_async(
+                ia_data=ia_data,
+                pdf_bytes=pdf_content,
+                filename=filename
+            )
+        )
+        return crear_objeto_resultado(resultado_dict)
+    except Exception as e:
+        logger.error(f"Error en el worker 'procesar_ocr_worker_sync' para {filename}: {e}", exc_info=True)
+        return e
 
 ### ----- FUNCIONES ORQUESTADORAS PARA NOMIFLASH -----
 
@@ -431,6 +606,29 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> NomiFlash.RespuestaEsta
         return NomiFlash.RespuestaEstado(error_lectura_estado=f"Error procesando '{archivo.filename}': {e}")
 
 # --- PROCESADOR PARA COMPROBANTE DE DOMICILIO ---
+async def procesar_comprobante(archivo: UploadFile) -> NomiFlash.RespuestaComprobante:
+    """
+    Procesa un archivo de comprobante de domicilio.
+    Devuelve un objeto RespuestaComprobante en caso de éxito o error_lectura_comprobante en caso de fallo.
+    """
+    try:
+        pdf_bytes = await archivo.read()
+
+        # 1. Convertimos los PDF a imagenes (con loop executor para no bloquear el servidor)
+        loop = asyncio.get_running_loop()
+
+        imagen_buffers = await loop.run_in_executor(
+            None, convertir_pdf_a_imagenes, pdf_bytes
+        )
+
+        respuesta_ia = await analizar_gpt_nomi(PROMPT_COMPROBANTE, imagen_buffers)
+        datos_crudos = extraer_json_del_markdown(respuesta_ia)
+        datos_listos = sanitizar_datos_ia(datos_crudos)
+        return NomiFlash.RespuestaComprobante(**datos_listos)
+    
+    except Exception as e: 
+        return NomiFlash.RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")
+    
 def extraer_datos_con_regex(texto: str, tipo_persona: str) -> Optional[Dict]:
     """
     Aplica los patrones de regex compilados, distinguiendo entre campos
@@ -502,30 +700,6 @@ def extraer_datos_con_regex(texto: str, tipo_persona: str) -> Optional[Dict]:
         return None
         
     return datos_extraidos
-
-async def procesar_comprobante(archivo: UploadFile) -> NomiFlash.RespuestaComprobante:
-    """
-    Procesa un archivo de comprobante de domicilio.
-    Devuelve un objeto RespuestaComprobante en caso de éxito o error_lectura_comprobante en caso de fallo.
-    """
-    try:
-        pdf_bytes = await archivo.read()
-
-        # 1. Convertimos los PDF a imagenes (con loop executor para no bloquear el servidor)
-        loop = asyncio.get_running_loop()
-
-        imagen_buffers = await loop.run_in_executor(
-            None, convertir_pdf_a_imagenes, pdf_bytes
-        )
-
-        respuesta_ia = await analizar_gpt_nomi(PROMPT_COMPROBANTE, imagen_buffers)
-        datos_crudos = extraer_json_del_markdown(respuesta_ia)
-        datos_listos = sanitizar_datos_ia(datos_crudos)
-        return NomiFlash.RespuestaComprobante(**datos_listos)
-    
-    except Exception as e: 
-        return NomiFlash.RespuestaComprobante(error_lectura_comprobante=f"Error procesando '{archivo.filename}': {e}")
-    
 
 # --- PROCESADOR PARA CONTANCIA DE SITUACIÓN FISCAL ---
 async def procesar_constancia(archivo: UploadFile) -> CSF.ResultadoConsolidado:
