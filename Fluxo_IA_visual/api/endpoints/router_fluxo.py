@@ -175,7 +175,7 @@ async def procesar_pdf_api(
                 doc_info["ia_data"],
                 doc_info["texto_por_pagina"],
                 doc_info["movimientos"],
-                doc_info["filename"]
+                doc_info["filename"] 
             )
             tareas_digitales.append((doc_info["index"], tarea))
 
