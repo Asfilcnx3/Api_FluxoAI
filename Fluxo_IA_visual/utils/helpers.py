@@ -2,7 +2,7 @@ from ..models.responses import AnalisisTPV, NomiFlash
 from .helpers_texto_fluxo import (
     BANCO_DETECTION_REGEX, ALIAS_A_BANCO_MAP, PATRONES_COMPILADOS, PALABRAS_CLAVE_VERIFICACION, PROMPT_GENERICO, PROMPT_OCR_INSTRUCCIONES_BASE, PROMPT_TEXTO_INSTRUCCIONES_BASE, PROMPTS_POR_BANCO
 )
-from .helpers_texto_nomi import CAMPOS_FLOAT, CAMPOS_STR
+from .helpers_texto_nomi import CAMPOS_FLOAT, CAMPOS_STR, PATTERNS_COMPILADOS_RFC_CURP
 
 from dateutil.relativedelta import relativedelta
 from typing import Tuple, List, Any, Dict, Union, Optional, Literal
@@ -108,6 +108,36 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
     except json.JSONDecodeError:
         logger.debug(f"El modelo no devolvió un JSON válido. Respuesta: {respuesta[:200]}...")
         return {}
+# --- FUNCIÓN PARA EXTRAER RFC Y CURP DE TEXTO ---
+def extraer_rfc_curp_por_texto(texto: str, tipo_doc: str) -> Tuple[List[str], List[str]]:
+    """
+    Busca RFC y/o CURP en el texto probando solo los patrones 
+    definidos para el tipo de documento indicado (ej: 'nomina', 'estado').
+    Devuelve dos listas: [RFCs encontrados], [CURPs encontrados].
+    """
+    if not texto or not tipo_doc:
+        logger.error("Texto o tipo de documento no proporcionado para extraer RFC/CURP.")
+        return [], []
+
+    rfcs, curps = [], []
+
+    # Buscar RFCs para ese tipo de documento
+    patron_rfc = PATTERNS_COMPILADOS_RFC_CURP["RFC"].get(tipo_doc.lower())
+    if patron_rfc:
+        logger.info(f"Buscando RFCs con patrón para tipo de documento '{tipo_doc}'.")
+        for match in patron_rfc.finditer(texto):
+            rfcs.append(match.group(1).upper())
+            logger.info(f"RFC encontrado: {match.group(1).upper()}")
+    
+    # Buscar CURPs para ese tipo de documento
+    patron_curp = PATTERNS_COMPILADOS_RFC_CURP["CURP"].get(tipo_doc.lower())
+    if patron_curp:
+        logger.info(f"Buscando CURPs con patrón para tipo de documento '{tipo_doc}'.")
+        for match in patron_curp.finditer(texto):
+            curps.append(match.group(1).upper())
+            logger.info(f"CURP encontrado: {match.group(1).upper()}")
+
+    return rfcs, curps
     
 def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     """
@@ -381,7 +411,7 @@ def _crear_prompt_agente_unificado(
     """
     return prompt_final.strip()
 
-def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
+def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion: # no estamos usandola (identificar si se usará o eliminar)
     """
     Transforma un diccionario plano de resultados en un objeto Pydantic
     ResultadoExtraccion completamente estructurado y anidado.
@@ -402,6 +432,7 @@ def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
             depositos_en_efectivo=datos_dict.get("depositos_en_efectivo"),
             traspaso_entre_cuentas=datos_dict.get("traspaso_entre_cuentas"),
             total_entradas_financiamiento=datos_dict.get("total_entradas_financiamiento"),
+            entradas_bmrcash=datos_dict.get("entradas_bmrcash"),
             entradas_TPV_bruto=datos_dict.get("entradas_TPV_bruto"),
             entradas_TPV_neto=datos_dict.get("entradas_TPV_neto"),
         )

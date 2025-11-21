@@ -7,7 +7,7 @@ from .ia_extractor import (
     analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia, llamar_agente_tpv, llamar_agente_ocr_vision
 )
 from ..utils.helpers_texto_fluxo import (
-    PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO
+    PALABRAS_BMRCASH, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO
 )
 from ..utils.helpers_texto_nomi import (
     PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA, SEGUNDO_PROMPT_NOMINA
@@ -17,8 +17,10 @@ from ..utils.helpers_texto_csf import (
 )
 
 from .pdf_processor import (
-    extraer_movimientos_con_posiciones, extraer_texto_de_pdf, extraer_rfc_curp_por_texto, convertir_pdf_a_imagenes, leer_qr_de_imagenes
+    extraer_movimientos_con_posiciones, extraer_texto_de_pdf, convertir_pdf_a_imagenes, leer_qr_de_imagenes
 )
+
+from ..utils.helpers import extraer_rfc_curp_por_texto
 from ..models.responses import NomiFlash, CSF, AnalisisTPV
 
 from typing import Dict, Any, Tuple, Optional, Union
@@ -201,6 +203,7 @@ async def procesar_documento_con_agentes_async(
             "entradas_TPV_neto": 0.0, 
             "traspaso_entre_cuentas": 0.0, 
             "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
             "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
         })
         return ia_data
@@ -208,6 +211,7 @@ async def procesar_documento_con_agentes_async(
     total_depositos_efectivo = 0.0
     total_traspaso_entre_cuentas = 0.0
     total_entradas_financiamiento = 0.0
+    total_entradas_bmrcash = 0.0
     total_entradas_tpv = 0.0
     transacciones_clasificadas = []
 
@@ -225,6 +229,8 @@ async def procesar_documento_con_agentes_async(
                 total_traspaso_entre_cuentas += monto_float
             elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
                 total_entradas_financiamiento += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
+                total_entradas_bmrcash += monto_float
             else:
                 total_entradas_tpv += monto_float
             
@@ -246,6 +252,7 @@ async def procesar_documento_con_agentes_async(
         "depositos_en_efectivo": total_depositos_efectivo,
         "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
         "total_entradas_financiamiento": total_entradas_financiamiento,
+        "entradas_bmrcash": total_entradas_bmrcash,
         "entradas_TPV_bruto": total_entradas_tpv,
         "entradas_TPV_neto": entradas_TPV_neto,
         "error_transacciones": None
@@ -337,6 +344,7 @@ async def procesar_documento_escaneado_con_agentes_async(
             "entradas_TPV_neto": 0.0, 
             "traspaso_entre_cuentas": 0.0, 
             "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
             "error_transacciones": "Agentes LLM de Visión no encontraron transacciones TPV."
         })
         return ia_data
@@ -344,6 +352,7 @@ async def procesar_documento_escaneado_con_agentes_async(
     total_depositos_efectivo = 0.0
     total_traspaso_entre_cuentas = 0.0
     total_entradas_financiamiento = 0.0
+    total_entradas_bmrcash = 0.0
     total_entradas_tpv = 0.0
     transacciones_clasificadas = []
 
@@ -361,6 +370,8 @@ async def procesar_documento_escaneado_con_agentes_async(
                 total_traspaso_entre_cuentas += monto_float
             elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
                 total_entradas_financiamiento += monto_float
+            elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
+                total_entradas_bmrcash += monto_float
             else:
                 total_entradas_tpv += monto_float
             
@@ -382,6 +393,7 @@ async def procesar_documento_escaneado_con_agentes_async(
         "depositos_en_efectivo": total_depositos_efectivo,
         "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
         "total_entradas_financiamiento": total_entradas_financiamiento,
+        "entradas_bmrcash": total_entradas_bmrcash,
         "entradas_TPV_bruto": total_entradas_tpv,
         "entradas_TPV_neto": entradas_TPV_neto,
         "error_transacciones": None
@@ -506,6 +518,9 @@ async def procesar_segunda_nomina(archivo: UploadFile) -> NomiFlash.SegundaRespu
         # 1. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
         rfc, curp = extraer_rfc_curp_por_texto(texto_inicial, "nomina")
+        # 2.5 Log de RFC y CURP extraídos
+        logger.info(f"Se extrajo el RFC: {rfc[-1] if rfc else None}")
+        logger.info(f"Se extrajo el CURP: {curp[-1] if curp else None}")
 
         # 2. Leemos el QR de las imagenes (con loop executor para no bloquear el servidor)
         loop = asyncio.get_running_loop()
@@ -556,6 +571,7 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> NomiFlash.RespuestaEsta
         # 0. Extraemos texto para la validación con regex
         texto_inicial = extraer_texto_de_pdf(pdf_bytes, num_paginas=2)
         rfc, _ = extraer_rfc_curp_por_texto(texto_inicial, "estado")
+        logger.info(f"Se extrajo el RFC: {rfc[0] if rfc else None}")
 
         loop = asyncio.get_running_loop()
 
@@ -597,7 +613,8 @@ async def procesar_estado_cuenta(archivo: UploadFile) -> NomiFlash.RespuestaEsta
         if datos_qr:
             datos_listos["datos_qr"] = datos_qr
         if rfc:
-            datos_listos["rfc"] = rfc[-1]
+            logger.info(f"RFC extraído: {rfc[0]}")
+            datos_listos["rfc"] = rfc[0]
 
         logger.debug(datos_listos)
         return NomiFlash.RespuestaEstado(**datos_listos)

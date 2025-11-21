@@ -320,6 +320,7 @@ def test_crear_objeto_resultado_completo():
         "depositos_en_efectivo": 3000.00,
         "traspaso_entre_cuentas": 1500.00,
         "total_entradas_financiamiento": 2500.00,
+        "entradas_bmrcash": 4000.00,
         "entradas_TPV_bruto": 12000.00,
         "entradas_TPV_neto": 11876.55,
         "transacciones": [
@@ -343,6 +344,7 @@ def test_crear_objeto_resultado_completo():
     assert resultado.AnalisisIA.saldo_promedio == 5000.00
     assert resultado.AnalisisIA.depositos_en_efectivo == 3000.00
     assert resultado.AnalisisIA.traspaso_entre_cuentas == 1500.00
+    assert resultado.AnalisisIA.entradas_bmrcash == 4000.00
     assert resultado.AnalisisIA.total_entradas_financiamiento == 2500.00
     assert resultado.AnalisisIA.entradas_TPV_bruto == 12000.00
     assert resultado.AnalisisIA.entradas_TPV_neto == 11876.55
