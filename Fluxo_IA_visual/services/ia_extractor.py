@@ -12,7 +12,10 @@ import base64
 import logging
 
 nomi_api = settings.OPENAI_API_KEY_NOMI.get_secret_value()
-fluxo_api = settings.OPENAI_API_KEY_FLUXO.get_secret_value()
+
+def get_fluxo_client():
+    return AsyncOpenAI(api_key=settings.OPENAI_API_KEY_FLUXO.get_secret_value())
+
 openrouter_api = settings.OPENROUTER_API_KEY.get_secret_value()
 
 logger = logging.getLogger(__name__)
@@ -21,9 +24,6 @@ client_gpt_nomi = AsyncOpenAI(
     api_key=nomi_api
 )
 
-client_gpt_fluxo = AsyncOpenAI(
-    api_key=fluxo_api
-)
 
 client_openrouter = AsyncOpenAI(
     api_key=openrouter_api,
@@ -60,7 +60,8 @@ async def analizar_gpt_fluxo(
                 "detail": detalle
                 },
             })
-    response = await client_gpt_fluxo.chat.completions.create(
+    client = get_fluxo_client()
+    response = await client.chat.completions.create(
         model="gpt-5",
         messages=[{"role": "user","content": content}],
         reasoning_effort=razonamiento
@@ -118,7 +119,8 @@ async def llamar_agente_tpv(
 
     try:
         # 2. Llamar al LLM (modo texto)
-        response = await client_gpt_fluxo.chat.completions.create(
+        client = get_fluxo_client()
+        response = await client.chat.completions.create(
             model="gpt-5", # O tu modelo de texto preferido
             messages=[
                 {"role": "system", "content": prompt_sistema},
@@ -264,7 +266,8 @@ async def _extraer_datos_con_ia(texto: str) -> Dict:
     {texto[:4000]}
     """
     try:
-        response = await client_gpt_fluxo.chat.completions.create(
+        client = get_fluxo_client()
+        response = await client.chat.completions.create(
             model="gpt-5",
             messages=[{"role": "user", "content": prompt_ia}],
             response_format={"type": "json_object"}

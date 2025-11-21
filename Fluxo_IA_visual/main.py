@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 LOGGING_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 logging.basicConfig(
-    level = logging.DEBUG if settings.DEBUG else logging.INFO, # Solo aparecen las partes debug si estamos en modo debug
+    level = logging.INFO, # logging.DEBUG if settings.DEBUG else logging.INFO, # Solo aparecen las partes debug si estamos en modo debug
     format = LOGGING_FORMAT,
     handlers = [logging.StreamHandler(sys.stdout)]
 )

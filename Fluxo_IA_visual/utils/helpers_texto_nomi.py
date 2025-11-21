@@ -112,7 +112,7 @@ En caso de no encontrar ninguna similitud, coloca Null en todas y al final retor
 PATTERNS_COMPILADOS_RFC_CURP: Dict[str, Dict[str, re.Pattern]] = {
     "RFC": {
         "nomina": re.compile(r"r\.?f\.?c\.?\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3})"),
-        "estado": re.compile(r"r\.?f\.?c\.?:\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3})"),
+        "estado": re.compile(r"(?:r\.?f\.?c\.?\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3})|r\.?f\.?c\.?:\s+([a-zñ&]{3,4}\d{6}[a-z0-9]{3}))"),
     },
     "CURP": {
         "nomina": re.compile(r"curp:\s*([a-z]{4}\d{6}[hm][a-z]{5}\d{2})"),

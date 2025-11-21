@@ -226,29 +226,3 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List
         logging.error(f"Error al procesar posiciones en documento: {e}", exc_info=True)
         
     return resultados_por_pagina, texto_por_pagina
-
-# --- FUNCIÓN PARA EXTRAER RFC Y CURP DE TEXTO ---
-def extraer_rfc_curp_por_texto(texto: str, tipo_doc: str) -> Tuple[List[str], List[str]]:
-    """
-    Busca RFC y/o CURP en el texto probando solo los patrones 
-    definidos para el tipo de documento indicado (ej: 'nomina', 'estado').
-    Devuelve dos listas: [RFCs encontrados], [CURPs encontrados].
-    """
-    if not texto or not tipo_doc:
-        return [], []
-
-    rfcs, curps = [], []
-
-    # Buscar RFCs para ese tipo de documento
-    patron_rfc = PATTERNS_COMPILADOS_RFC_CURP["RFC"].get(tipo_doc.lower())
-    if patron_rfc:
-        for match in patron_rfc.finditer(texto):
-            rfcs.append(match.group(1).upper())
-
-    # Buscar CURPs para ese tipo de documento
-    patron_curp = PATTERNS_COMPILADOS_RFC_CURP["CURP"].get(tipo_doc.lower())
-    if patron_curp:
-        for match in patron_curp.finditer(texto):
-            curps.append(match.group(1).upper())
-
-    return rfcs, curps

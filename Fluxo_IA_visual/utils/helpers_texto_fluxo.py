@@ -25,6 +25,10 @@ PALABRAS_TRASPASO_FINANCIAMIENTO = [
     "prestamo", "anticipo de ventas", "anticipo de venta", "financiamiento", "credito"
 ]
 
+PALABRAS_BMRCASH = [
+    "bmrcash ref", "bmrcash"
+]
+
 PALABRAS_TRASPASO_MORATORIO = [ # Faltan ejemplos
     "cargo por moratorio", "intereses moratorios", "mora", "recargo", "recargos", "penalización", "pena", "penalizaciones", "pena convencional", "penalizacion", "penalizaciones convencionales", "cargo por moratorios", "interes moratorio"
 ]
@@ -381,8 +385,8 @@ PROMPTS_POR_BANCO = {
         - traspaso cuentas propias
         - anticipo de ventas
         - anticipo de venta
-        - financiamiento
-        - credito
+        - financiamiento # si aparece esta palabra, colocala en la salida
+        - credito # si aparece esta palabra, colocala en la salida
         - ventas nal. amex
     Reglas de la extracción multilinea:
         la primer línea puede contener:
@@ -414,7 +418,7 @@ PROMPTS_POR_BANCO = {
         - kiwi international payment technologies
         - traspaso entre cuentas
         - deposito de tercero
-        - bmrcash ref
+        - bmrcash ref # si aparece esta palabra, colocala en la salida
         - zettle by paypal
         - pw online mexico sapi de cv
         - liquidacion wuzi

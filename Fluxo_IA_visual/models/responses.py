@@ -110,6 +110,7 @@ class AnalisisTPV:
         depositos_en_efectivo: Optional[float] = None
         traspaso_entre_cuentas: Optional[float] = None
         total_entradas_financiamiento: Optional[float] = None
+        entradas_bmrcash: Optional[float] = None
         entradas_TPV_bruto: Optional[float] = None
         entradas_TPV_neto: Optional[float] = None
 
