@@ -1,6 +1,11 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 
+class RespuestaProcesamientoIniciado(BaseModel):
+    mensaje: str
+    job_id: str
+    estatus: str
+    
 # ---- Modelos base reutilizables ----
 class ErrorRespuestaBase(BaseModel):
     """Modelo base para respuestas de error estandarizadas."""

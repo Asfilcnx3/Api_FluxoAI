@@ -132,6 +132,7 @@ async def procesar_documento_con_agentes_async(
 ) -> Dict[str, Any]:
     """
     Orquesta el procesamiento de un documento digital usando Agentes LLM.
+    Utiliza 'movimientos_por_pagina' como un mapa de calor para saber exactamente qué páginas contienen información valiosa y descartar el resto.
     Crea chunks, llama a los agentes en paralelo, deduplica y calcula los totales.
     """
     logger.info(f"Iniciando procesamiento con Agentes LLM para: {filename}")
@@ -139,60 +140,78 @@ async def procesar_documento_con_agentes_async(
     # --- 1. Preparación ---
     banco = ia_data.get("banco", "generico")
     
-    # --- 2. Crear Chunks ---
-    # Obtenemos solo las páginas que tienen movimientos para ser eficientes
-    paginas_con_movimientos = list(movimientos_por_pagina.keys())
+    # --- 2. FILTRADO DE PÁGINAS (El "Handshake") ---
+    # Aquí es donde las dos funciones se dan la mano.
+    # Solo seleccionamos páginas donde la función de coordenadas encontró ALGO.
+    paginas_relevantes = []
+    paginas_descartadas = []
+
+    for page_num, movimientos in movimientos_por_pagina.items():
+        # Si hay movimientos detectados Y la lista no está vacía
+        if movimientos and len(movimientos) > 0:
+            paginas_relevantes.append(page_num)
+        else:
+            paginas_descartadas.append(page_num)
     
-    chunks_de_texto = crear_chunks_con_superposicion(
-        texto_por_pagina=texto_por_pagina,
-        paginas_con_movimientos=paginas_con_movimientos,
-        tamano_chunk=7,  # Procesará en lotes de 10 páginas
-        superposicion=1 # Con 1 página de superposición
-    )
+    paginas_relevantes.sort() # Ordenamos para mantener la secuencia temporal
     
-    if not chunks_de_texto:
-        logger.warning(f"No se generaron chunks para {filename}, no hay páginas con movimientos.")
+    # LOGS DE DIAGNÓSTICO (Para que veas el filtro en acción)
+    if paginas_descartadas:
+        rango_descartado = f"{min(paginas_descartadas)}-{max(paginas_descartadas)}" if len(paginas_descartadas) > 1 else str(paginas_descartadas[0])
+        logger.info(f"FILTRO ACTIVADO: Se omitirán {len(paginas_descartadas)} páginas irrelevantes (Ej: {rango_descartado}).")
+    
+    logger.info(f"ANÁLISIS LLM: Se procesarán {len(paginas_relevantes)} páginas confirmadas como tablas de transacciones.")
+
+    # Validación de seguridad
+    if not paginas_relevantes:
+        logger.warning(f"El filtro de coordenadas fue demasiado estricto para {filename}. Ninguna página pasó.")
         return {
             **ia_data, 
             "transacciones": [], 
-            "error_transacciones": "No se encontraron páginas con transacciones."
+            "error_transacciones": "No se detectaron tablas válidas (Cargos/Abonos) en el documento."
         }
+    
+    # --- 3. Chunking Inteligente ---
+    # Solo pasamos las páginas relevantes a la función de chunking
+    chunks_de_texto = crear_chunks_con_superposicion(
+        texto_por_pagina=texto_por_pagina,
+        paginas_con_movimientos=paginas_relevantes, # <--- Solo lo útil
+        tamano_chunk=5,
+        superposicion=1 
+    )
+    
+    if not chunks_de_texto:
+        logger.warning(f"Error al generar chunks para {filename}.")
+        return {**ia_data, "transacciones": [], "error_transacciones": "Error interno generando chunks."}
 
-    # --- 3. Llamar Agentes en Paralelo (Sin Semáforo) ---
+    # --- 4. Llamar Agentes en Paralelo ---
     tareas_agente = []
-
     for texto_chunk, paginas in chunks_de_texto:
-        # Llamamos directamente a la función del agente
         tareas_agente.append(
             llamar_agente_tpv(banco, texto_chunk, paginas)
         )
         
-    # 'gather' lanzará todas las tareas del chunk en paralelo (dentro de este proceso)
     resultados_chunks = await asyncio.gather(*tareas_agente, return_exceptions=True)
     
-    # --- 4. Consolidar y Deduplicar ---
+    # --- 5. Consolidar y Deduplicar ---
     transacciones_totales_crudas = []
     ids_unicos = set()
-    logger.debug(f"Procesando {len(resultados_chunks)} chunks para {filename}...") 
-
-    for i, resultado in enumerate(resultados_chunks):
-        logger.debug(f"Contenido del Chunk {i} para {filename}: {resultado}")
-
+    
+    for resultado in resultados_chunks:
         if isinstance(resultado, Exception):
             logger.warning(f"Un chunk falló para {filename}: {resultado}")
             continue
         
-        # 'resultado' es la List[Dict] de la función llamar_agente_tpv
         for trx in resultado: 
             fecha = trx.get("fecha")
             monto = trx.get("monto")
-            # ID único robusto para deduplicar
-            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:20]}" 
+            # ID único para evitar duplicados por la superposición
+            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:15]}" 
             if id_trx not in ids_unicos:
                 transacciones_totales_crudas.append(trx)
                 ids_unicos.add(id_trx)
 
-    # --- 5. Lógica de Negocio y Cálculo de Totales ---
+    # --- 6. Clasificación de Negocio (Tu lógica existente) ---
     if not transacciones_totales_crudas:
         logger.error(f"¡Error de lógica! 'transacciones_totales_crudas' está vacía para {filename} a pesar de que los chunks terminaron.")
 

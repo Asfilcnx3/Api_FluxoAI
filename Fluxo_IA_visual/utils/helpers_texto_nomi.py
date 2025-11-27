@@ -107,6 +107,16 @@ Ignora cualquier otra parte del documento. No infieras ni estimes valores.
 En caso de no encontrar ninguna similitud, coloca Null en todas y al final retorna en "error_lectura_estado" un "Documento sin coincidencias" 
 """
 
+RFCS_INSTITUCIONES_IGNORAR = {
+    "BBA830831LJ2",  # BBVA Bancomer
+    "BNM840515VB1",  # Citibanamex
+    "BSM970519DU8",  # Santander
+    "HMI950125KG8",  # HSBC
+    "BMN930209927",  # Banorte
+    "SIN9412025I4",  # Scotiabank
+    "CBA131211E64",  # Banco Azteca
+}
+
 # ---- PATRONES REGEX ----
 # Diccionario de regex para RFC y CURP por tipo de documento
 PATTERNS_COMPILADOS_RFC_CURP: Dict[str, Dict[str, re.Pattern]] = {
