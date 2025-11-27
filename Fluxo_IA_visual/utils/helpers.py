@@ -2,7 +2,7 @@ from ..models.responses import AnalisisTPV, NomiFlash
 from .helpers_texto_fluxo import (
     BANCO_DETECTION_REGEX, ALIAS_A_BANCO_MAP, PATRONES_COMPILADOS, PALABRAS_CLAVE_VERIFICACION, PROMPT_GENERICO, PROMPT_OCR_INSTRUCCIONES_BASE, PROMPT_TEXTO_INSTRUCCIONES_BASE, PROMPTS_POR_BANCO
 )
-from .helpers_texto_nomi import CAMPOS_FLOAT, CAMPOS_STR, PATTERNS_COMPILADOS_RFC_CURP
+from .helpers_texto_nomi import CAMPOS_FLOAT, CAMPOS_STR, PATTERNS_COMPILADOS_RFC_CURP, RFCS_INSTITUCIONES_IGNORAR
 
 from dateutil.relativedelta import relativedelta
 from typing import Tuple, List, Any, Dict, Union, Optional, Literal
@@ -111,31 +111,46 @@ def extraer_json_del_markdown(respuesta: str) -> Dict[str, Any]:
 # --- FUNCIÓN PARA EXTRAER RFC Y CURP DE TEXTO ---
 def extraer_rfc_curp_por_texto(texto: str, tipo_doc: str) -> Tuple[List[str], List[str]]:
     """
-    Busca RFC y/o CURP en el texto probando solo los patrones 
-    definidos para el tipo de documento indicado (ej: 'nomina', 'estado').
-    Devuelve dos listas: [RFCs encontrados], [CURPs encontrados].
+    Busca RFC y/o CURP filtrando RFCs institucionales (bancos).
     """
     if not texto or not tipo_doc:
-        logger.error("Texto o tipo de documento no proporcionado para extraer RFC/CURP.")
+        logger.error("Texto o tipo de documento no proporcionado.")
         return [], []
 
     rfcs, curps = [], []
+    tipo_doc_key = tipo_doc.lower()
 
-    # Buscar RFCs para ese tipo de documento
-    patron_rfc = PATTERNS_COMPILADOS_RFC_CURP["RFC"].get(tipo_doc.lower())
-    if patron_rfc:
-        logger.info(f"Buscando RFCs con patrón para tipo de documento '{tipo_doc}'.")
-        for match in patron_rfc.finditer(texto):
-            rfcs.append(match.group(1).upper())
-            logger.info(f"RFC encontrado: {match.group(1).upper()}")
+    # --- BUSCAR RFCs ---
+    # Asumimos que PATTERNS_COMPILADOS_RFC_CURP existe en el contexto global
+    patron_rfc = PATTERNS_COMPILADOS_RFC_CURP["RFC"].get(tipo_doc_key)
     
-    # Buscar CURPs para ese tipo de documento
-    patron_curp = PATTERNS_COMPILADOS_RFC_CURP["CURP"].get(tipo_doc.lower())
+    if patron_rfc:
+        for match in patron_rfc.finditer(texto):
+            valor_encontrado = match.group(1)
+            
+            if valor_encontrado:
+                valor_limpio = valor_encontrado.upper()
+                
+                # --- NUEVA REGLA DE NEGOCIO ---
+                # Si el RFC encontrado está en la lista negra, lo ignoramos y seguimos buscando.
+                if valor_limpio in RFCS_INSTITUCIONES_IGNORAR:
+                    logger.debug(f"RFC Institucional detectado e ignorado: {valor_limpio}")
+                    continue
+                
+                # Si no es un banco, lo guardamos
+                rfcs.append(valor_limpio)
+                logger.info(f"RFC válido encontrado: {valor_limpio}")
+    
+    # --- BUSCAR CURPs ---
+    patron_curp = PATTERNS_COMPILADOS_RFC_CURP["CURP"].get(tipo_doc_key)
+    
     if patron_curp:
-        logger.info(f"Buscando CURPs con patrón para tipo de documento '{tipo_doc}'.")
         for match in patron_curp.finditer(texto):
-            curps.append(match.group(1).upper())
-            logger.info(f"CURP encontrado: {match.group(1).upper()}")
+            valor_encontrado = match.group(1)
+            
+            if valor_encontrado:
+                valor_limpio = valor_encontrado.upper()
+                curps.append(valor_limpio)
 
     return rfcs, curps
     
@@ -160,6 +175,63 @@ def es_escaneado_o_no(texto_extraido: str, umbral: int = 50) -> bool:
     pasa_contenido = bool(PALABRAS_CLAVE_VERIFICACION.search(texto_limpio))
 
     return pasa_longitud and pasa_contenido
+
+def parsear_respuesta_toon(texto_toon: str) -> List[Dict[str, Any]]:
+    """
+    Convierte el formato TOON (texto delimitado por pipes) a una lista de diccionarios.
+    Formato esperado por línea: FECHA | DESCRIPCION | MONTO | TIPO
+    """
+    transacciones = []
+    
+    # Limpiamos bloques de código si el LLM los puso (```text ... ```)
+    texto_limpio = re.sub(r'^```\w*\n|```$', '', texto_toon.strip(), flags=re.MULTILINE).strip()
+    
+    lineas = texto_limpio.split('\n')
+    
+    for linea in lineas:
+        linea = linea.strip()
+        if not linea: continue # Saltar líneas vacías
+        
+        # Ignorar encabezados si el LLM los generó (ej. "Fecha | Desc...")
+        if "fecha" in linea.lower() and "monto" in linea.lower() and "|" in linea:
+            continue
+
+        partes = linea.split('|')
+        
+        # Esperamos 4 partes. Si hay más (ej. pipe en la descripción), intentamos unirlas
+        if len(partes) < 3: # Mínimo fecha, desc, monto
+            logger.debug(f"Línea TOON ignorada (formato incorrecto): {linea}")
+            continue
+            
+        try:
+            # Asignación inteligente
+            fecha = partes[0].strip()
+            
+            # El tipo suele ser el último
+            tipo_raw = partes[-1].strip().lower()
+            tipo = "abono" if "abono" in tipo_raw else "cargo" if "cargo" in tipo_raw else "indefinido"
+            
+            # El monto suele ser el penúltimo
+            monto_str = partes[-2].strip()
+            
+            # La descripción es todo lo que está en medio (por si hubo pipes extra)
+            descripcion = " ".join(p.strip() for p in partes[1:-2])
+            
+            # Validación básica: Si el monto no parece número, algo anda mal
+            # (limpiar_monto ya lo tienes, úsalo aquí si quieres validar)
+            
+            transacciones.append({
+                "fecha": fecha,
+                "descripcion": descripcion,
+                "monto": monto_str, # Se limpiará más adelante en la lógica de negocio
+                "tipo": tipo
+            })
+            
+        except Exception as e:
+            logger.warning(f"Error parseando línea TOON: '{linea}' - {e}")
+            continue
+
+    return transacciones
 
 # Funciones para procesar las descripciones de los bancos
 # fecha, descripción o parte de esta, monto
@@ -403,9 +475,13 @@ def _crear_prompt_agente_unificado(
     # 3. Construir el prompt final
     prompt_final = f"""
     {intro}
-    Tu tarea es analizar el documento y extraer TODAS las transacciones de ingresos TPV, depósitos en efectivo o traspasos.
-
+    Tu tarea es analizar el documento y extraer ÚNICAMENTE las transacciones que cumplan con los criterios específicos del banco detallados abajo.
+    
+    --- CRITERIOS ESPECÍFICOS DEL BANCO ({banco}) ---
     {pistas_especificas}
+    --------------------------------------------------
+
+    Si las pistas de arriba no especifican reglas, entonces extrae todas las transacciones de ingresos TPV, depósitos en efectivo o traspasos entre cuentas propias.
 
     {instrucciones_base}
     """

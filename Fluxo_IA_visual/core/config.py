@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 10
     UPLOAD_DIR: str = "uploads"
     ALLOWED_EXTENSION: List[str] = [".pdf"]
-        
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

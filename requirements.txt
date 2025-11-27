@@ -12,6 +12,7 @@ pdfplumber
 pytesseract
 Pillow
 python-dateutil
+openpyxl
 pytest-asyncio
 pyzbar
 fpdf2

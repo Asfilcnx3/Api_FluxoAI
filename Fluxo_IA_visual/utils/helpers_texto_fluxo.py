@@ -232,76 +232,41 @@ REGLAS IMPORTANTES:
 """
 
 PROMPT_TEXTO_INSTRUCCIONES_BASE = """
+INSTRUCCIONES DE FORMATO (TOON - Token Oriented Object Notation):
+1.  NO USES JSON. Genera una salida de texto plano ultra-compacta.
+2.  Una línea por transacción.
+3.  Delimitador: Usa el caracter `|` (pipe) para separar los campos.
+4.  Estructura: `FECHA | DESCRIPCION COMPLETA | MONTO | TIPO`
+    * `FECHA`: dd/mm o formato original.
+    * `DESCRIPCION`: Todo el texto del concepto.
+    * `MONTO`: Solo números y puntos (ej. 1500.50).
+    * `TIPO`: "cargo" o "abono".
+
 INSTRUCCIONES CLAVE DE PROCESAMIENTO:
 1. Ignora el inicio si está incompleto: Si el texto comienza a mitad de una transacción (por ejemplo, sin una fecha o referencia clara), ignora esa primera transacción incompleta. El fragmento anterior ya la procesó.
 2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
 3. Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información. Si un dato no está, déjalo como null.
-4. Formato de Salida Obligatorio: Devuelve tu respuesta como un ÚNICO objeto JSON válido dentro de un bloque markdown (```json ... ```).
-    El objeto JSON debe tener una sola clave: "transacciones".
-    El valor debe ser una LISTA de objetos, donde cada objeto represente una transacción.
 
-ejemplo de estructura de salida, SIEMPRE EN MINUSCULAS:
-```json
-{{
-    "transacciones": [
-    {{
-        "fecha": "05/may",
-        "descripcion": "ventas tarjetas 123456789",
-        "monto": 15200.50,
-        "tipo": "abono"
-    }},
-    {{
-        "fecha": "06/may",
-        "descripcion": "deposito en efectivo 98765",
-        "monto": 5000.00,
-        "tipo": "abono"
-    }}
-    ]
-}}```
-
-Si no encuentras absolutamente ninguna transacción, devuelve:
-
-```json
-{{
-    "transacciones": []
-}}```
+EJEMPLO DE SALIDA, SIEMPRE EN MINUSCULAS:
+05/MAY | VENTAS TARJETAS 123456 | 15200.50 | abono
+06/MAY | COMISION POR APERTURA | 500.00 | cargo
 """
 
 PROMPT_OCR_INSTRUCCIONES_BASE = """
+INSTRUCCIONES DE FORMATO (TOON):
+1.  NO USES JSON. Genera una salida de texto plano.
+2.  Una línea por transacción. Usa `|` como separador.
+3.  Estructura: `FECHA | DESCRIPCION | MONTO | TIPO`
+
 INSTRUCCIONES CLAVE DE PROCESAMIENTO:
 1.  Analiza las Imágenes de forma horizontal: Las siguientes imágenes son páginas de un estado de cuenta escaneado. Tu tarea es actuar como un OCR experto y un analista financiero analizano línea por línea los estados.
 2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
 3.  Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información, si no ves campos es porque no los hay, dejalos como null.
 4.  procesamiento secuencial obligatorio: Estás recibiendo múltiples imágenes. Debes extraer los datos de la Imagen 1, luego de la Imagen 2, etc., hasta terminar con todas. NO TE SALTES NINGUNA IMAGEN. Tu objetivo es transcribir CADA transacción visible. Si hay 50 transacciones en una página, debes generar 50 objetos en el JSON. No resumas.
-5.  Formato de Salida Obligatorio: Devuelve tu respuesta como un ÚNICO objeto JSON válido dentro de un bloque markdown (```json ... ```).
-    El objeto JSON debe tener una sola clave: "transacciones".
-    El valor debe ser una LISTA de objetos, donde cada objeto represente una transacción.
 
-ejemplo de estructura de salida, SIEMPRE EN MINUSCULAS:
-```json
-{{
-    "transacciones": [
-    {{
-        "fecha": "05/may",
-        "descripcion": "ventas tarjetas 123456789",
-        "monto": 15200.50,
-        "tipo": "abono"
-    }},
-    {{
-        "fecha": "06/may",
-        "descripcion": "deposito en efectivo 98765",
-        "monto": 5000.00,
-        "tipo": "abono"
-    }}
-    ]
-}}```
-
-Si no encuentras absolutamente ninguna transacción, devuelve:
-
-```json
-{{
-    "transacciones": []
-}}```
+EJEMPLO DE SALIDA:
+05/MAY | DEPOSITO EFECTIVO SUC 02 | 5000.00 | abono
+05/MAY | CHEQUE PAGADO 001 | 2000.00 | cargo
 """
 
 PROMPT_GENERICO = """
@@ -371,257 +336,291 @@ PROMPT_GENERICO = """
 
 PROMPTS_POR_BANCO = {
     "bbva": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea: 
-        - venta tarjetas
-        - venta tdc inter
-        - ventas crédito
-        - ventas débito 
-        - deposito efectivo
-        - deposito en efectivo
-        - dep.efectivo 
-        - deposito efectivo corresponsal 
-        - traspaso entre cuentas 
-        - traspaso cuentas propias
-        - anticipo de ventas
-        - anticipo de venta
-        - financiamiento # si aparece esta palabra, colocala en la salida
-        - credito # si aparece esta palabra, colocala en la salida
-        - ventas nal. amex
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - t20 spei recibido santander, banorte, stp, afirme, hsbc, citi mexico
-        - spei recibido banorte
-        - t20 spei recibidostp
-        - w02 spei recibidosantander
-        - traspaso ntre cuentas
-        - deposito de tercero
-        - t20 spei recibido jpmorgan
-        - traspaso entre cuentas propias
-        - traspaso cuentas propias
-        las demás líneas pueden contener:
-        - deposito bpu
-        - mp agregador s de rl de cv 
-        - anticipo rr belleza
-        - haycash sapi de cv
-        - gana
-        - 0000001af
-        - 0000001sq
-        - trans sr pago
-        - dispersion sihay ref
-        - net pay sapi de cv
-        - getnet mexico servicios de adquirencia s
-        - payclip s de rl de cv
-        - pocket de latinoamerica sapi de cv
-        - cobra online sapi de cv
-        - kiwi bop sa de cv
-        - kiwi international payment technologies
-        - traspaso entre cuentas
-        - deposito de tercero
-        - bmrcash ref # si aparece esta palabra, colocala en la salida
-        - zettle by paypal
-        - pw online mexico sapi de cv
-        - liquidacion wuzi
-        - prestamo
-        - anticipo
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea: 
+            - venta tarjetas
+            - venta tdc inter
+            - ventas crédito
+            - ventas débito 
+            - deposito efectivo
+            - deposito en efectivo
+            - dep.efectivo 
+            - deposito efectivo corresponsal 
+            - traspaso entre cuentas 
+            - traspaso cuentas propias
+            - anticipo de ventas
+            - anticipo de venta
+            - financiamiento # si aparece esta palabra, colocala en la salida
+            - credito # si aparece esta palabra, colocala en la salida
+            - ventas nal. amex
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - t20 spei recibido santander, banorte, stp, afirme, hsbc, citi mexico
+            - spei recibido banorte
+            - t20 spei recibidostp
+            - w02 spei recibidosantander
+            - traspaso ntre cuentas
+            - deposito de tercero
+            - t20 spei recibido jpmorgan
+            - traspaso entre cuentas propias
+            - traspaso cuentas propias
+            las demás líneas pueden contener:
+            - deposito bpu
+            - mp agregador s de rl de cv 
+            - anticipo rr belleza
+            - haycash sapi de cv
+            - gana
+            - 0000001af
+            - 0000001sq
+            - trans sr pago
+            - dispersion sihay ref
+            - net pay sapi de cv
+            - getnet mexico servicios de adquirencia s
+            - payclip s de rl de cv
+            - pocket de latinoamerica sapi de cv
+            - cobra online sapi de cv
+            - kiwi bop sa de cv
+            - kiwi international payment technologies
+            - traspaso entre cuentas
+            - deposito de tercero
+            - bmrcash ref # si aparece esta palabra, colocala en la salida
+            - zettle by paypal
+            - pw online mexico sapi de cv
+            - liquidacion wuzi
+            - prestamo
+            - anticipo
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "banbajío": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea: 
-        - deposito negocios afiliados 
-        - deposito negocios afiliados adquiriente
-        - deposito negocios afiliados adquiriente optblue amex
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea: 
+            - deposito negocios afiliados 
+            - deposito negocios afiliados adquiriente
+            - deposito negocios afiliados adquiriente optblue amex
+    
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "banorte": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea: 
-        - 8 numeros y luego una c
-        - 8 numeros y luego una d
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - spei recibido
-        - traspaso de cta
-        - spei recibido edl cliente red amigo
-        - pago recibido de banorte por
-        las demás líneas pueden contener:
-        - ganancias clip
-        - clip
-        - amexco
-        - orden de netpay sapi de cv
-        - traspaso cuentas propias
-        - traspaso entre cuentas propias
-        - prestamo
-        - dal sapi de cv
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea: 
+            - 8 numeros y luego una c
+            - 8 numeros y luego una d
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - spei recibido
+            - traspaso de cta
+            - spei recibido edl cliente red amigo
+            - pago recibido de banorte por
+            las demás líneas pueden contener:
+            - ganancias clip
+            - clip
+            - amexco
+            - orden de netpay sapi de cv
+            - traspaso cuentas propias
+            - traspaso entre cuentas propias
+            - prestamo
+            - dal sapi de cv
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "afirme": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea: 
-        - venta tpv cr
-        - venta tpv db
-        - venta tpvcr
-        - venta tpvdb
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea: 
+            - venta tpv cr
+            - venta tpv db
+            - venta tpvcr
+            - venta tpvdb
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "hsbc": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea: 
-        - transf rec hsbcnet tpv db
-        - transf rec hsbcnet tpv cr
-        - transf rec hsbcnet dep tpv
-        - deposito bpu y 10 numeros
-        - transf rec hsbcnet dep tpv (comnibaciones de numeros)
-        - deposito bpu (varias combinaciones)
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea: 
+            - transf rec hsbcnet tpv db
+            - transf rec hsbcnet tpv cr
+            - transf rec hsbcnet dep tpv
+            - deposito bpu y 10 numeros
+            - transf rec hsbcnet dep tpv (comnibaciones de numeros)
+            - deposito bpu (varias combinaciones)
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "mifel": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - vta. cre y 2 secciones de numeros
-        - vta. deb y 2 secciones de numeros
-        - vta cre y 2 secciones de numeros
-        - vta deb y 2 secciones de numeros
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - vta deb
-        - vta cre
-        - transferencia spei
-        - transferencia spei bn
-        - transferencia spei entre
-        las demás líneas pueden contener:
-        - dispersion ed fondos
-        - cuentas
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - vta. cre y 2 secciones de numeros
+            - vta. deb y 2 secciones de numeros
+            - vta cre y 2 secciones de numeros
+            - vta deb y 2 secciones de numeros
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - vta deb
+            - vta cre
+            - transferencia spei
+            - transferencia spei bn
+            - transferencia spei entre
+            las demás líneas pueden contener:
+            - dispersion ed fondos
+            - cuentas
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "scotiabank": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - transf interbancaria spei
-        la segunda línea pueden contener:
-        - transf interbancaria spei
-        - deposito bpu
-        - amexco se
-        - dep
-        la tercera línea puede contener:
-        - pocket de latinoamerica sapi
-        - first data merchant services m
-        - american express company mexic
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - transf interbancaria spei
+            la segunda línea pueden contener:
+            - transf interbancaria spei
+            - deposito bpu
+            - amexco se
+            - dep
+            la tercera línea puede contener:
+            - pocket de latinoamerica sapi
+            - first data merchant services m
+            - american express company mexic
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "banregio": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - abono ventas tdd 
-        - abono ventas tdc
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - abono ventas tdd 
+            - abono ventas tdc
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "santander": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - deposito ventas del dia afil
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - abono transferencia spei hora
-        la segunda línea pueden contener:
-        - de la cuenta
-        - recibido de stp
-        las demás líneas pueden contener:
-        - deposito bpu
-        - traspaso entre cuentas
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - deposito ventas del dia afil
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - abono transferencia spei hora
+            la segunda línea pueden contener:
+            - de la cuenta
+            - recibido de stp
+            las demás líneas pueden contener:
+            - deposito bpu
+            - traspaso entre cuentas
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "multiva": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - ventas tpvs 
-        - venta tdd
-        - venta tdc
-        - ventas tarjetas
-        - ventas tdc inter
-        - ventas credito 
-        - ventas debito
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - spei recibido stp
-        las demás líneas pueden contener:
-        - latinoamerica sapi de cv
-        - bpu2437419281
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - ventas tpvs 
+            - venta tdd
+            - venta tdc
+            - ventas tarjetas
+            - ventas tdc inter
+            - ventas credito 
+            - ventas debito
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - spei recibido stp
+            las demás líneas pueden contener:
+            - latinoamerica sapi de cv
+            - bpu2437419281
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "citibanamex": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - deposito ventas netas por evopaymx
-        - deposito ventas netas
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - deposito ventas netas d tar
-        - deposito ventas netas d amex
-        las demás líneas pueden contener:
-        - por evopay
-        - suc
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - deposito ventas netas por evopaymx
+            - deposito ventas netas
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - deposito ventas netas d tar
+            - deposito ventas netas d amex
+            las demás líneas pueden contener:
+            - por evopay
+            - suc
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "banamex": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción de una línea:
-        - deposito ventas netas por evopaymx
-        - deposito ventas netas
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - deposito ventas netas d tar
-        - deposito ventas netas d amex
-        las demás líneas pueden contener:
-        - por evopay
-        - suc
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción de una línea:
+            - deposito ventas netas por evopaymx
+            - deposito ventas netas
+            - BN-NTS029220
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - deposito ventas netas d tar
+            - deposito ventas netas d amex
+            las demás líneas pueden contener:
+            - por evopay
+            - suc
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "azteca": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - transferencia spei a su favor
-        las demás líneas pueden contener:
-        - emisor: banorte
-        - emisor: santander
-        - payclip s de rl decv
-        - gananciasclip
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - transferencia spei a su favor
+            las demás líneas pueden contener:
+            - emisor: banorte
+            - emisor: santander
+            - payclip s de rl decv
+            - gananciasclip
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "inbursa": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - deposito spei
-        las demás líneas pueden contener:
-        - kiwi international payment technologies
-        - cobra online sapi de cv
-        - operadora paypal de mexico s de rl
-        - clave de rastreo
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - deposito spei
+            las demás líneas pueden contener:
+            - kiwi international payment technologies
+            - cobra online sapi de cv
+            - operadora paypal de mexico s de rl
+            - clave de rastreo
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "intercam": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - recepcion spei jp morgan
-        - recepcion spei santander
-        - recepcion spei banorte
-        la última línea debe contener:
-        - 136180018635900157
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - recepcion spei jp morgan
+            - recepcion spei santander
+            - recepcion spei banorte
+            la última línea debe contener:
+            - 136180018635900157
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
     "vepormas": """ 
-    Las transacciones TPV válidas contienen lo siguiente en su concepto:
-    Reglas de la extracción multilinea:
-        la primer línea puede contener:
-        - recepcion spei jp morgan
-        - recepcion spei santander
-        - recepcion spei banorte
-        la última línea debe contener:
-        - 136180018635900157
+    CRITERIO DE ACEPTACIÓN EXCLUSIVO:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+        Reglas de la extracción multilinea:
+            la primer línea puede contener:
+            - recepcion spei jp morgan
+            - recepcion spei santander
+            - recepcion spei banorte
+            la última línea debe contener:
+            - 136180018635900157
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 }

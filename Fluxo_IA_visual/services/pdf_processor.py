@@ -128,100 +128,125 @@ def extraer_texto_de_pdf(pdf_bytes: bytes, num_paginas: Optional[int] = None) ->
 # --- FUNCIÓN PARA EXTRAER MOVIMIENTOS CON POSICIONES ---
 def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[int, str]]:
     """
-    Extrae todos los movimientos Y el texto de cada página en una sola pasada.
-
-    Devuelve:
-        - Un diccionario de movimientos por página.
-        - Un diccionario con el texto de TODAS las páginas.
+    Extrae movimientos basándose ESTRICTAMENTE en la alineación vertical 
+    con encabezados clave (Cargos/Abonos).
+    
+    Si hay 5 columnas pero solo 2 tienen encabezados válidos, solo extrae esas 2.
     """
     resultados_por_pagina = {}
     texto_por_pagina = {}
 
-    CARGOS_KEYWORDS = ["cargos", "retiros", "retiros/cargos"]
-    ABONOS_KEYWORDS = ["abonos", "depositos", "depósito", "depósitos/abonos", "depositos/abonos"]
+    # Diccionario de términos para buscar encabezados
+    KEYWORDS_MAPPING = {
+        "cargo": ["cargos", "retiros", "retiro", "debitos", "débitos", "cargo", "debe", "signo"],
+        "abono": ["abonos", "depositos", "depósito", "depósitos", "creditos", "créditos", "abono", "haber"]
+    }
+    
+    # Regex estricta para montos (requiere punto decimal)
+    MONTO_REGEX = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}$')
 
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             for page_index, page in enumerate(doc):
                 page_num = page_index + 1
-
-                # Extraemos el texto y las palabras de la página UNA SOLA VEZ
-                page_text = page.get_text("text").lower()
-                words = page.get_text("words")
                 
-                texto_por_pagina[page_num] = page_text # Guardamos el texto
+                # Extracción inicial
+                page_text = page.get_text("text").lower()
+                words = page.get_text("words") # (x0, y0, x1, y1, text, block_no, line_no, word_no)
+                
+                texto_por_pagina[page_num] = page_text
                 resultados_por_pagina[page_num] = []
                 
-                zona_cargos, zona_abonos = None, None
-
-                # --- PASO 1: UBICAR POR ENCABEZADOS ---
-                cargos_header_x, abonos_header_x = None, None
+                # --- PASO 1: DETECTAR UBICACIÓN DE ENCABEZADOS ---
+                # Guardamos el centro X de cada encabezado encontrado
+                headers_found = {"cargo": [], "abono": []}
+                
                 for w in words:
-                    word_text = w[4].lower().strip()
-                    if word_text in CARGOS_KEYWORDS:
-                        cargos_header_x = (w[0] + w[2]) / 2
-                    elif word_text in ABONOS_KEYWORDS:
-                        abonos_header_x = (w[0] + w[2]) / 2
-
-                if cargos_header_x and abonos_header_x:
-                    logging.info(f"Página {page_num}: Columnas identificadas por encabezados.")
-                    zona_cargos = (cargos_header_x - 50, cargos_header_x + 50)
-                    zona_abonos = (abonos_header_x - 50, abonos_header_x + 50)
-
-                # --- PASO 2: SI FALLA, USAR ESTADÍSTICA DE GRUPOS ---
-                if not (zona_cargos and zona_abonos):
-                    logging.info(f"Página {page_num}: No se encontraron encabezados. Usando análisis estadístico.")
-                    montos_con_coords = [
-                        {"centro_x": (w[0] + w[2]) / 2, "monto": float(w[4].replace(',', '')), "coords": w[:4]}
-                        for w in words if re.fullmatch(r'[\d,]+\.\d{2}', w[4].strip())
-                    ]
+                    text_clean = w[4].lower().strip().replace(":", "").replace(".", "")
                     
-                    if len(montos_con_coords) > 1:
-                        montos_con_coords.sort(key=lambda item: item['centro_x'])
-                        brechas = [montos_con_coords[i+1]['centro_x'] - montos_con_coords[i]['centro_x'] for i in range(len(montos_con_coords)-1)]
+                    # Revisamos si la palabra es un encabezado de cargo
+                    if text_clean in KEYWORDS_MAPPING["cargo"]:
+                        center_x = (w[0] + w[2]) / 2
+                        headers_found["cargo"].append(center_x)
                         
-                        if brechas:
-                            umbral_columna = max(brechas) * 0.7
-                            columnas = []
-                            columna_actual = [montos_con_coords[0]]
-                            for i in range(len(brechas)):
-                                if brechas[i] > umbral_columna:
-                                    columnas.append(columna_actual)
-                                    columna_actual = []
-                                columna_actual.append(montos_con_coords[i+1])
-                            columnas.append(columna_actual)
-                            
-                            logging.info(f"Página {page_num}: Se detectaron {len(columnas)} columnas de montos.")
+                    # Revisamos si la palabra es un encabezado de abono
+                    elif text_clean in KEYWORDS_MAPPING["abono"]:
+                        center_x = (w[0] + w[2]) / 2
+                        headers_found["abono"].append(center_x)
 
-                            if len(columnas) >= 2:
-                                columna_cargos = columnas[-2]
-                                columna_abonos = columnas[-1]
-                                zona_cargos = (min(m['centro_x'] for m in columna_cargos) - 10, max(m['centro_x'] for m in columna_cargos) + 10)
-                                zona_abonos = (min(m['centro_x'] for m in columna_abonos) - 10, max(m['centro_x'] for m in columna_abonos) + 10)
-
-                # --- CLASIFICACIÓN FINAL ---
-                if not (zona_cargos and zona_abonos):
-                    logging.warning(f"Página {page_num}: No se pudieron definir las zonas.")
+                # Si no encontramos NINGÚN encabezado en toda la página, es arriesgado procesarla
+                # (A menos que quieras mantener un fallback, pero pediste no inferir)
+                if not headers_found["cargo"] and not headers_found["abono"]:
+                    logging.debug(f"Página {page_num}: Ignorada. No se encontraron encabezados de Cargos/Abonos.")
                     continue
 
-                all_montos_on_page = [
-                    {"monto": float(w[4].replace(',', '')), "centro_x": (w[0]+w[2])/2, "coords": w[:4]}
-                    for w in words if re.fullmatch(r'[\d,]+\.\d{2}', w[4].strip())
+                # --- PASO 2: AGRUPAR NÚMEROS EN COLUMNAS ---
+                # Filtramos todo lo que parece un monto
+                candidatos_montos = [
+                    {"centro_x": (w[0] + w[2]) / 2, "monto": float(w[4].replace(',', '')), "coords": w[:4], "x0": w[0], "x1": w[2]}
+                    for w in words if MONTO_REGEX.fullmatch(w[4].strip())
                 ]
 
-                for monto_info in all_montos_on_page:
-                    tipo = "indefinido"
-                    if zona_cargos[0] <= monto_info["centro_x"] <= zona_cargos[1]:
-                        tipo = "cargo"
-                    elif zona_abonos[0] <= monto_info["centro_x"] <= zona_abonos[1]:
-                        tipo = "abono"
+                if len(candidatos_montos) < 3:
+                    continue # Página sin datos numéricos suficientes
+
+                # Agrupamos por proximidad horizontal (Clustering)
+                candidatos_montos.sort(key=lambda x: x['centro_x'])
+                columnas = []
+                if candidatos_montos:
+                    columna_actual = [candidatos_montos[0]]
+                    for i in range(len(candidatos_montos)-1):
+                        # Si la distancia entre centros X es pequeña (<20px), es la misma columna
+                        diff = candidatos_montos[i+1]['centro_x'] - candidatos_montos[i]['centro_x']
+                        if diff < 20: 
+                            columna_actual.append(candidatos_montos[i+1])
+                        else:
+                            columnas.append(columna_actual)
+                            columna_actual = [candidatos_montos[i+1]]
+                    columnas.append(columna_actual)
+
+                # Filtramos columnas "basura" (muy pocos elementos)
+                columnas_validas = [col for col in columnas if len(col) >= 3]
+                
+                logging.info(f"Página {page_num}: Se detectaron {len(columnas_validas)} columnas numéricas. Buscando coincidencia con encabezados...")
+
+                # --- PASO 3: VINCULAR COLUMNAS CON ENCABEZADOS ---
+                for columna in columnas_validas:
+                    # Calculamos el rango X que ocupa esta columna
+                    col_min_x = min(m['x0'] for m in columna)
+                    col_max_x = max(m['x1'] for m in columna)
                     
-                    # Solo guardamos movimientos que pudimos clasificar
-                    if tipo != "indefinido":
-                        resultados_por_pagina[page_num].append({
-                            "monto": monto_info["monto"], "tipo": tipo, "coords": monto_info["coords"]
-                        })
-                            
+                    tipo_asignado = "indefinido"
+                    
+                    # Verificamos si algún encabezado de CARGO cae sobre esta columna
+                    # Damos un margen de tolerancia (ej. 15px)
+                    margin = 15
+                    
+                    # Check Cargos
+                    for header_x in headers_found["cargo"]:
+                        if (col_min_x - margin) <= header_x <= (col_max_x + margin):
+                            tipo_asignado = "cargo"
+                            break
+                    
+                    # Check Abonos (Si ya es cargo, no sobreescribimos a menos que sea corrección, pero asumimos exclusividad)
+                    if tipo_asignado == "indefinido":
+                        for header_x in headers_found["abono"]:
+                            if (col_min_x - margin) <= header_x <= (col_max_x + margin):
+                                tipo_asignado = "abono"
+                                break
+                    
+                    # --- PASO 4: GUARDAR RESULTADOS ---
+                    if tipo_asignado != "indefinido":
+                        logging.debug(f"  -> Columna en X~{int((col_min_x+col_max_x)/2)} asignada como {tipo_asignado.upper()}")
+                        for item in columna:
+                            resultados_por_pagina[page_num].append({
+                                "monto": item["monto"],
+                                "tipo": tipo_asignado,
+                                "coords": item["coords"]
+                            })
+                    else:
+                        logging.debug(f"  -> Columna en X~{int((col_min_x+col_max_x)/2)} ignorada (Sin encabezado coincidente).")
+
     except Exception as e:
         logging.error(f"Error al procesar posiciones en documento: {e}", exc_info=True)
         

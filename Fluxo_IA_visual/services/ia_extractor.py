@@ -1,6 +1,6 @@
 from .pdf_processor import convertir_pdf_a_imagenes
 from ..core.config import settings
-from ..utils.helpers import _crear_prompt_agente_unificado
+from ..utils.helpers import _crear_prompt_agente_unificado, parsear_respuesta_toon
 
 from fastapi import HTTPException
 from openai import AsyncOpenAI
@@ -127,38 +127,18 @@ async def llamar_agente_tpv(
                 {"role": "user", "content": prompt_usuario}
             ],
             # Si el modelo soporta JSON mode, es altamente recomendado:
-            response_format={"type": "json_object"} 
+            # response_format={"type": "json_object"} 
         )
         
         respuesta_str = response.choices[0].message.content
 
-        # --- INICIO DEL BLOQUE DE PARSEO CORREGIDO ---
-        
-        # 3. Buscar el JSON de forma robusta.
-        # Esta regex busca el primer '{' y el último '}' en la respuesta,
-        # capturando el JSON incluso si la IA añade texto antes o después.
-        json_match = re.search(r"\{.*\S.*\}", respuesta_str, re.DOTALL)
-        
-        if not json_match:
-            logger.warning(f"Agente TPV ({banco}): La IA no devolvió un JSON válido. Respuesta: {respuesta_str[:150]}...")
-            return [] # Devuelve lista vacía
+        if "SIN_DATOS" in respuesta_str:
+            return []
 
-        datos_json_str = json_match.group(0)
-
-        # 4. Parsear el JSON de forma segura
-        try:
-            datos_json = json.loads(datos_json_str)
-            # 5. Devolver la lista de transacciones
-            transacciones = datos_json.get("transacciones", [])
-            
-            # Log de éxito
-            logger.debug(f"Agente TPV ({banco}): JSON parseado con éxito, {len(transacciones)} transacciones encontradas.")
-            
-            return transacciones
+        transacciones = parsear_respuesta_toon(respuesta_str)
         
-        except json.JSONDecodeError as e:
-            logger.error(f"Agente TPV ({banco}): Error al decodificar el JSON. Error: {e}. JSON recibido: {datos_json_str}")
-            return [] # Devuelve lista vacía
+        logger.debug(f"Agente TPV ({banco}): TOON parseado, {len(transacciones)} transacciones encontradas.")
+        return transacciones
         
     except Exception as e:
         logger.error(f"Error crítico llamando al Agente TPV para {banco} (págs {paginas[0]}-{paginas[-1]}): {e}", exc_info=True)
@@ -233,22 +213,16 @@ async def llamar_agente_ocr_vision(
         )
 
         respuesta_str = response.choices[0].message.content
+        logger.debug(f"Agente OCR ({banco}) RAW TOON: {respuesta_str[:100]}...") # Loguear inicio para ver formato
 
-        # 5. Parsear la respuesta (con la lógica robusta que ya tenemos)
-        json_match = re.search(r"\{.*\S.*\}", respuesta_str, re.DOTALL)
-        if not json_match:
-            logger.warning(f"Agente OCR-Visión ({banco}): La IA no devolvió un JSON válido.")
+        # --- PARSEO TOON ---
+        if "SIN_DATOS" in respuesta_str:
             return []
 
-        datos_json_str = json_match.group(0)
-        try:
-            datos_json = json.loads(datos_json_str)
-            transacciones = datos_json.get("transacciones", [])
-            logger.debug(f"Agente OCR-Visión ({banco}): JSON parseado, {len(transacciones)} transacciones encontradas.")
-            return transacciones
-        except json.JSONDecodeError as e:
-            logger.error(f"Agente OCR-Visión ({banco}): Error al decodificar JSON. {e}")
-            return []
+        transacciones = parsear_respuesta_toon(respuesta_str)
+        
+        logger.debug(f"Agente OCR ({banco}): TOON parseado, {len(transacciones)} transacciones encontradas.")
+        return transacciones
 
     except Exception as e:
         logger.error(f"Error crítico llamando al Agente OCR-Visión para {banco}: {e}", exc_info=True)
@@ -270,7 +244,7 @@ async def _extraer_datos_con_ia(texto: str) -> Dict:
         response = await client.chat.completions.create(
             model="gpt-5",
             messages=[{"role": "user", "content": prompt_ia}],
-            response_format={"type": "json_object"}
+            # response_format={"type": "json_object"}
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
