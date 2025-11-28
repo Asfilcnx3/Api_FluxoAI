@@ -410,6 +410,7 @@ PROMPTS_POR_BANCO = {
         Reglas de la extracción de una línea: 
             - 8 numeros y luego una c
             - 8 numeros y luego una d
+            - dep. efectivo
         Reglas de la extracción multilinea:
             la primer línea puede contener:
             - spei recibido
