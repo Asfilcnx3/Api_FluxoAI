@@ -437,6 +437,9 @@ PROMPTS_POR_BANCO = {
             - venta tpv db
             - venta tpvcr
             - venta tpvdb
+            - deposito efectivo
+            - deposito en efectivo
+            - dep.efectivo
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
