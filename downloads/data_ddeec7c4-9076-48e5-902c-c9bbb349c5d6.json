@@ -17,8 +17,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1642853.81,
-            "entradas_TPV_neto": 1612323.94
+            "entradas_TPV_bruto": 1492934.81,
+            "entradas_TPV_neto": 1462404.94
         },
         {
             "banco": "AFIRME",
@@ -53,8 +53,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1833276.4000000001,
-            "entradas_TPV_neto": 1799092.4000000001
+            "entradas_TPV_bruto": 1788649.4000000001,
+            "entradas_TPV_neto": 1754465.4000000001
         },
         {
             "banco": "AFIRME",
@@ -89,8 +89,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 2174342.12,
-            "entradas_TPV_neto": 2132565.13
+            "entradas_TPV_bruto": 2306031.12,
+            "entradas_TPV_neto": 2264254.13
         },
         {
             "banco": "AFIRME",
@@ -125,8 +125,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1685826.4700000002,
-            "entradas_TPV_neto": 1654217.36
+            "entradas_TPV_bruto": 1434863.4700000002,
+            "entradas_TPV_neto": 1403254.36
         },
         {
             "banco": "AFIRME",
@@ -143,8 +143,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1835412.25,
-            "entradas_TPV_neto": 1801167.37
+            "entradas_TPV_bruto": 1926716.25,
+            "entradas_TPV_neto": 1892471.37
         },
         {
             "banco": "AFIRME",
@@ -161,8 +161,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1258060.4400000002,
-            "entradas_TPV_neto": 1230883.1
+            "entradas_TPV_bruto": 1484057.34,
+            "entradas_TPV_neto": 1456880.0
         },
         {
             "banco": "AFIRME",
@@ -197,8 +197,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 2101326.2,
-            "entradas_TPV_neto": 2056034.85
+            "entradas_TPV_bruto": 2512047.9,
+            "entradas_TPV_neto": 2466756.55
         },
         {
             "banco": "AFIRME",
@@ -233,8 +233,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 2280267.9,
-            "entradas_TPV_neto": 2236013.87
+            "entradas_TPV_bruto": 2243133.1,
+            "entradas_TPV_neto": 2198879.0700000003
         },
         {
             "banco": "AFIRME",
@@ -251,8 +251,8 @@
             "traspaso_entre_cuentas": 0.0,
             "total_entradas_financiamiento": 0.0,
             "entradas_bmrcash": 0.0,
-            "entradas_TPV_bruto": 1506547.5999999999,
-            "entradas_TPV_neto": 1474621.91
+            "entradas_TPV_bruto": 1632695.4999999998,
+            "entradas_TPV_neto": 1600769.8099999998
         }
     ],
     "resultados_individuales": [
@@ -272,98 +272,98 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1642853.81,
-                "entradas_TPV_neto": 1612323.94
+                "entradas_TPV_bruto": 1492934.81,
+                "entradas_TPV_neto": 1462404.94
             },
             "DetalleTransacciones": {
                 "transacciones": [
                     {
                         "fecha": "01/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "7,376.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "01/08",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "21,954.51",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "04/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "23,572.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "04/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/08",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "9,276.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "69,590.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/08",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "13,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "87,384.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "35,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/08",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "4,311.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "12,494.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12/08",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12/08",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "8,000.00",
                         "tipo": "abono"
                     },
@@ -452,81 +452,75 @@
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "20",
-                        "descripcion": "venta tpvcr 094634",
-                        "monto": "97,888.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "20",
-                        "descripcion": "venta tpvdb 094634",
-                        "monto": "27,031.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "21",
-                        "descripcion": "venta tpvcr 094634",
-                        "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "21",
+                        "fecha": "21/08",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "9,466.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "22",
+                        "fecha": "22/08",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "27,011.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "22",
+                        "fecha": "22/08",
                         "descripcion": "venta tpvcr amx 09",
                         "monto": "50,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
+                        "fecha": "25/08",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "6,593.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
+                        "fecha": "25/08",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "12,661.40",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
+                        "fecha": "25/08",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "101,700.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "26",
+                        "fecha": "26/08",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "27",
+                        "fecha": "27/08",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "27",
+                        "fecha": "27/08",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "9,129.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "27",
+                        "fecha": "27/08",
                         "descripcion": "venta tpvcr amx 09",
                         "monto": "7,661.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "28/08",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "88,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29/08",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
@@ -538,18 +532,6 @@
                     {
                         "fecha": "29",
                         "descripcion": "venta tpvcr 094634",
-                        "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "28/08",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "88,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "29/08",
-                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     }
@@ -874,8 +856,8 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1833276.4000000001,
-                "entradas_TPV_neto": 1799092.4000000001
+                "entradas_TPV_bruto": 1788649.4000000001,
+                "entradas_TPV_neto": 1754465.4000000001
             },
             "DetalleTransacciones": {
                 "transacciones": [
@@ -965,91 +947,91 @@
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "77,113.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "9,089.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "63,276.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "7,722.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "105,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "47,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "386.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "46,672.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "3,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "95,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "95,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "6,803.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "22",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
@@ -1063,12 +1045,6 @@
                         "fecha": "21/01",
                         "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "6,803.50",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "22/01",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
@@ -1144,14 +1120,26 @@
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31/01",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "29",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "2,840.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "42,533.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "31",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "106,555.80",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31/01",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "31",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "15,000.00",
                         "tipo": "abono"
                     }
@@ -1284,73 +1272,73 @@
                     },
                     {
                         "fecha": "13/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "46,657.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "168,577.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17/02",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "6,159.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "18/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "62,057.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "18/02",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "7,966.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20/02",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "7,644.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "28,750.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "7,638.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24/02",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
@@ -1422,8 +1410,8 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 2174342.12,
-                "entradas_TPV_neto": 2132565.13
+                "entradas_TPV_bruto": 2306031.12,
+                "entradas_TPV_neto": 2264254.13
             },
             "DetalleTransacciones": {
                 "transacciones": [
@@ -1593,7 +1581,7 @@
                         "fecha": "15",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "46,000.00",
-                        "tipo": "abono"
+                        "tipo": "indefinido"
                     },
                     {
                         "fecha": "15",
@@ -1632,63 +1620,63 @@
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "21",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "21",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "1,895.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "22",
+                        "fecha": "17/07",
                         "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "88,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "24",
+                        "fecha": "17/07",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "8,550.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "18/07",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "124,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21/07",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "25,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21/07",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "1,895.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22/07",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "88,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23/07",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "25,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "24/07",
                         "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "184,800.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "24",
+                        "fecha": "24/07",
                         "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "12,874.26",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
+                        "fecha": "25/07",
                         "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "95,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "25",
-                        "descripcion": "venta tpvdb 094634 9463445",
-                        "monto": "12,208.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "28",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "28,733.50",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "28",
-                        "descripcion": "venta tpvdb 094634 9463445",
-                        "monto": "23,751.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "28",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "49,169.00",
                         "tipo": "abono"
                     },
                     {
@@ -1784,175 +1772,175 @@
                 "transacciones": [
                     {
                         "fecha": "02/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "119,465.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "03/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "77,808.40",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "03/jun",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "28,805.80",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "04/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "87,520.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "67,384.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,500.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/jun",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "2,086.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10/jun",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,696.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12/jun",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,696.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "111,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "50,518.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "2,046.80",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "18",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "1,470.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "36,768.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "817.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "128,853.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "11,171.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "14,105.00",
                         "tipo": "abono"
                     },
@@ -2060,8 +2048,8 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1685826.4700000002,
-                "entradas_TPV_neto": 1654217.36
+                "entradas_TPV_bruto": 1434863.4700000002,
+                "entradas_TPV_neto": 1403254.36
             },
             "DetalleTransacciones": {
                 "transacciones": [
@@ -2216,79 +2204,61 @@
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "21",
-                        "descripcion": "venta tpvcr 094634",
-                        "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "21",
-                        "descripcion": "venta tpvdb 094634",
-                        "monto": "20,018.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "24",
-                        "descripcion": "venta tpvcr 094634",
-                        "monto": "205,945.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "25",
+                        "fecha": "25/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "27,226.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
+                        "fecha": "25/03",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "3,400.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "26",
+                        "fecha": "26/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "26",
+                        "fecha": "26/03",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "21,355.60",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "27",
+                        "fecha": "27/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "28",
+                        "fecha": "28/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31",
+                        "fecha": "31/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31",
+                        "fecha": "31/03",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "3,664.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31",
+                        "fecha": "31/03",
                         "descripcion": "venta tpvcr 094634",
                         "monto": "2,500.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31",
+                        "fecha": "31/03",
                         "descripcion": "venta tpvdb 094634",
                         "monto": "34,898.60",
                         "tipo": "abono"
@@ -2313,176 +2283,176 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1835412.25,
-                "entradas_TPV_neto": 1801167.37
+                "entradas_TPV_bruto": 1926716.25,
+                "entradas_TPV_neto": 1892471.37
             },
             "DetalleTransacciones": {
                 "transacciones": [
                     {
                         "fecha": "02/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/05",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "6,594.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/05",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "18,560.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "141,534.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/05",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "8,924.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/05",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "3,254.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "27,306.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/05",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "1,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13/05",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "129,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "1,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "13",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "129,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "7,164.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvcr amx 09 9463445",
+                        "descripcion": "venta tpvcr amx 09",
                         "monto": "14,255.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "44,219.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "267,198.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "10,387.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "30,900.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "45,028.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "3,500.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "22",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
@@ -2581,6 +2551,30 @@
                         "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "1,179.00",
                         "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "25,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "1,125.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "64,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "1,179.00",
+                        "tipo": "abono"
                     }
                 ],
                 "error_transacciones": null
@@ -2602,147 +2596,195 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1258060.4400000002,
-                "entradas_TPV_neto": 1230883.1
+                "entradas_TPV_bruto": 1484057.34,
+                "entradas_TPV_neto": 1456880.0
             },
             "DetalleTransacciones": {
                 "transacciones": [
                     {
                         "fecha": "01/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "24,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "04/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "24,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "05/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "39,066.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "41,212.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,459.90",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "81,215.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "18,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "38,216.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "11,084.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "42,725.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "24,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "7,659.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "24,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "13/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "11",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "42,725.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "11",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "24,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "11",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "7,659.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "12",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "24,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "13",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "47,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "13/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "13",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "12,677.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "14/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "14",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "126,896.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "14/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "14",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "7,497.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "15/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "15",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "19/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "19",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "19/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "19",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "4,150.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "19/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "19",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,270.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "20/11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "20",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "26,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "20/11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "20",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "1,968.80",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "24,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "58,144.40",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "40,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "4,968.00",
                         "tipo": "abono"
                     },
                     {
@@ -2771,67 +2813,67 @@
                     },
                     {
                         "fecha": "25/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "27,096.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "25/11",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "13,200.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "25/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "92,304.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "25/11",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "15,301.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "26/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "24,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "26/11",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "5,787.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "27/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "51,869.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "27/11",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "13,788.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "28/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "99,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "29/11",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "108,115.84",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "29/11",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "5,890.00",
                         "tipo": "abono"
                     }
@@ -2964,103 +3006,103 @@
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "109,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "8,062.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "7,518.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "5,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "14",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "40,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "145,300.70",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "4,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "16",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "36,583.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "13,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "18",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "1,890.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "22",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "42,740.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "20,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "14,215.60",
                         "tipo": "abono"
                     },
@@ -3168,265 +3210,325 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 2101326.2,
-                "entradas_TPV_neto": 2056034.85
+                "entradas_TPV_bruto": 2512047.9,
+                "entradas_TPV_neto": 2466756.55
             },
             "DetalleTransacciones": {
                 "transacciones": [
                     {
                         "fecha": "01/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "51,061.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "02/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "33,165.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "02/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "5,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "03/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "143,221.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "03/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "20,461.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "158,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "1,339.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "06/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "14,317.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "70,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "07/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "34,616.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "30,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "114,314.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "3,547.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "10/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "09",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "114,314.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "09",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "3,547.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "10",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "25,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "10",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "2,540.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "13/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "13",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "14/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "14",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "65,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "15/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "15",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "96,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "15/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "15",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "5,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "16/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "16",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "75,225.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "16/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "16",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "36,725.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "17/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "17",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "90,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "17/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "17",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "14,331.50",
                         "tipo": "abono"
                     },
                     {
+                        "fecha": "20",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "31,995.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "20",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "11,528.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "99,169.70",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "4,569.50",
+                        "tipo": "abono"
+                    },
+                    {
                         "fecha": "20/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "31,995.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "20/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "11,528.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "99,169.70",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "21/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "4,569.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "22/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "101,386.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "22/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "35,676.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "143,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "23/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "13,025.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "24/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "7,989.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "27/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "87,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "27/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "5,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "28/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "41,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "28/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "9,334.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "29/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "27,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "29/10",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "6,597.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "30/10",
-                        "descripcion": "venta tpvcr 094634",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "87,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "30/10",
+                        "fecha": "29",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "27,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "6,597.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "87,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30",
                         "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "10,042.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31/10",
+                        "fecha": "31",
                         "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "166,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "31/10",
+                        "fecha": "31",
                         "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "15,149.00",
                         "tipo": "abono"
@@ -3638,8 +3740,8 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 2280267.9,
-                "entradas_TPV_neto": 2236013.87
+                "entradas_TPV_bruto": 2243133.1,
+                "entradas_TPV_neto": 2198879.0700000003
             },
             "DetalleTransacciones": {
                 "transacciones": [
@@ -3735,182 +3837,170 @@
                     },
                     {
                         "fecha": "08",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "35,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "08",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,452.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "09",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "25,242.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "86,012.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "10",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,811.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "76,183.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "11",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "4,179.50",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "12",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "933.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "130,116.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "15",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "11,517.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "63,239.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "17",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "12,878.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "18",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "88,000.00",
                         "tipo": "abono"
                     },
                     {
                         "fecha": "19",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "26,009.30",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "22",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "17/09",
+                        "descripcion": "venta tpvdb 094634",
+                        "monto": "12,878.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "18/09",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "88,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "19/09",
+                        "descripcion": "venta tpvcr 094634",
+                        "monto": "26,009.30",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22/09",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "115,300.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "22",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "22/09",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "6,780.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "22",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "22/09",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "2,567.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "23",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "23/09",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "40,694.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "23",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "23/09",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "4,518.90",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "24",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "24/09",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "50,753.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "25/09",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "90,500.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
-                        "descripcion": "venta tpvdb 094634 9463445",
+                        "fecha": "25/09",
+                        "descripcion": "venta tpvdb 094634",
                         "monto": "61,974.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "26",
-                        "descripcion": "venta tpvcr 094634 9463445",
+                        "fecha": "26/09",
+                        "descripcion": "venta tpvcr 094634",
                         "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "29",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "25,000.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "29",
-                        "descripcion": "venta tpvdb 094634 9463445",
-                        "monto": "11,871.20",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "29",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "25,704.00",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "29",
-                        "descripcion": "venta tpvdb 094634 9463445",
-                        "monto": "10,446.90",
-                        "tipo": "abono"
-                    },
-                    {
-                        "fecha": "30",
-                        "descripcion": "venta tpvcr 094634 9463445",
-                        "monto": "91,000.00",
                         "tipo": "abono"
                     },
                     {
@@ -3945,7 +4035,7 @@
                     },
                     {
                         "fecha": "30/09",
-                        "descripcion": "venta tpvdb 094634",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "31,493.50",
                         "tipo": "abono"
                     }
@@ -3969,8 +4059,8 @@
                 "traspaso_entre_cuentas": 0.0,
                 "total_entradas_financiamiento": 0.0,
                 "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 1506547.5999999999,
-                "entradas_TPV_neto": 1474621.91
+                "entradas_TPV_bruto": 1632695.4999999998,
+                "entradas_TPV_neto": 1600769.8099999998
             },
             "DetalleTransacciones": {
                 "transacciones": [
@@ -4161,68 +4251,92 @@
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "24",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "22/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "78,923.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "4,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
+                        "monto": "42,366.50",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
+                        "monto": "358.40",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "24/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "24",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "24/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "21,547.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "25/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "37,709.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "25",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "25/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "10,683.60",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "28",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "28/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "19,209.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "28",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "28/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "29,834.10",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "28",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "28/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "69,419.70",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "28",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "28/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "2,047.50",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "29",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "29/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "85,000.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "29",
-                        "descripcion": "venta tpvdb 094634",
+                        "fecha": "29/04",
+                        "descripcion": "venta tpvdb 094634 9463445",
                         "monto": "355.00",
                         "tipo": "abono"
                     },
                     {
-                        "fecha": "30",
-                        "descripcion": "venta tpvcr 094634",
+                        "fecha": "30/04",
+                        "descripcion": "venta tpvcr 094634 9463445",
                         "monto": "25,000.00",
                         "tipo": "abono"
                     }
