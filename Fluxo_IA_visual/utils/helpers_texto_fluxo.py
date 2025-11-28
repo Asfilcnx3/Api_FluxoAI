@@ -410,6 +410,7 @@ PROMPTS_POR_BANCO = {
         Reglas de la extracción de una línea: 
             - 8 numeros y luego una c
             - 8 numeros y luego una d
+            - dep. efectivo
         Reglas de la extracción multilinea:
             la primer línea puede contener:
             - spei recibido
@@ -436,6 +437,9 @@ PROMPTS_POR_BANCO = {
             - venta tpv db
             - venta tpvcr
             - venta tpvdb
+            - deposito efectivo
+            - deposito en efectivo
+            - dep.efectivo
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
