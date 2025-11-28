@@ -354,8 +354,8 @@ PROMPTS_POR_BANCO = {
             - financiamiento # si aparece esta palabra, colocala en la salida
             - credito # si aparece esta palabra, colocala en la salida
             - ventas nal. amex
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - t20 spei recibido santander, banorte, stp, afirme, hsbc, citi mexico
             - spei recibido banorte
             - t20 spei recibidostp
@@ -365,7 +365,7 @@ PROMPTS_POR_BANCO = {
             - t20 spei recibido jpmorgan
             - traspaso entre cuentas propias
             - traspaso cuentas propias
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - deposito bpu
             - mp agregador s de rl de cv 
             - anticipo rr belleza
@@ -411,13 +411,13 @@ PROMPTS_POR_BANCO = {
             - 8 numeros y luego una c
             - 8 numeros y luego una d
             - dep. efectivo
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - spei recibido
             - traspaso de cta
             - spei recibido edl cliente red amigo
             - pago recibido de banorte por
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - ganancias clip
             - clip
             - amexco
@@ -464,14 +464,14 @@ PROMPTS_POR_BANCO = {
             - vta. deb y 2 secciones de numeros
             - vta cre y 2 secciones de numeros
             - vta deb y 2 secciones de numeros
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - vta deb
             - vta cre
             - transferencia spei
             - transferencia spei bn
             - transferencia spei entre
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - dispersion ed fondos
             - cuentas
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
@@ -480,15 +480,15 @@ PROMPTS_POR_BANCO = {
     "scotiabank": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
     Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - transf interbancaria spei
-            la segunda línea pueden contener:
+            la segunda línea deben contener:
             - transf interbancaria spei
             - deposito bpu
             - amexco se
             - dep
-            la tercera línea puede contener:
+            la tercera línea deben contener:
             - pocket de latinoamerica sapi
             - first data merchant services m
             - american express company mexic
@@ -509,13 +509,13 @@ PROMPTS_POR_BANCO = {
     Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
         Reglas de la extracción de una línea:
             - deposito ventas del dia afil
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - abono transferencia spei hora
-            la segunda línea pueden contener:
+            la segunda línea deben contener:
             - de la cuenta
             - recibido de stp
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - deposito bpu
             - traspaso entre cuentas
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
@@ -532,10 +532,10 @@ PROMPTS_POR_BANCO = {
             - ventas tdc inter
             - ventas credito 
             - ventas debito
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - spei recibido stp
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - latinoamerica sapi de cv
             - bpu2437419281
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
@@ -547,11 +547,11 @@ PROMPTS_POR_BANCO = {
         Reglas de la extracción de una línea:
             - deposito ventas netas por evopaymx
             - deposito ventas netas
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - deposito ventas netas d tar
             - deposito ventas netas d amex
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - por evopay
             - suc
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
@@ -564,11 +564,11 @@ PROMPTS_POR_BANCO = {
             - deposito ventas netas por evopaymx
             - deposito ventas netas
             - BN-NTS029220
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - deposito ventas netas d tar
             - deposito ventas netas d amex
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - por evopay
             - suc
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
@@ -591,10 +591,10 @@ PROMPTS_POR_BANCO = {
     "inbursa": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
     Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - deposito spei
-            las demás líneas pueden contener:
+            las demás líneas deben contener:
             - kiwi international payment technologies
             - cobra online sapi de cv
             - operadora paypal de mexico s de rl
@@ -605,12 +605,12 @@ PROMPTS_POR_BANCO = {
     "intercam": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
     Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - recepcion spei jp morgan
             - recepcion spei santander
             - recepcion spei banorte
-            la última línea debe contener:
+            la última línea deben contener:
             - 136180018635900157
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
@@ -618,12 +618,12 @@ PROMPTS_POR_BANCO = {
     "vepormas": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
     Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
-        Reglas de la extracción multilinea:
-            la primer línea puede contener:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
             - recepcion spei jp morgan
             - recepcion spei santander
             - recepcion spei banorte
-            la última línea debe contener:
+            la última línea deben contener:
             - 136180018635900157
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,

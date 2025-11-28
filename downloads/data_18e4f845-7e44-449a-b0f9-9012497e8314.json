@@ -1,0 +1,951 @@
+{
+    "total_depositos": 243930010.98,
+    "es_mayor_a_250": true,
+    "resultados_generales": [
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2025-04-01",
+            "periodo_fin": "2025-04-30",
+            "comisiones": 650.0,
+            "depositos": 22436814.11,
+            "cargos": 22386757.75,
+            "saldo_promedio": 79919.56,
+            "depositos_en_efectivo": 48516.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -650.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010548205614",
+            "periodo_inicio": "2025-08-01",
+            "periodo_fin": "2025-08-31",
+            "comisiones": 650.0,
+            "depositos": 19665018.32,
+            "cargos": 19971345.03,
+            "saldo_promedio": 130156.88,
+            "depositos_en_efectivo": 64460.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 671646.2,
+            "entradas_TPV_neto": 670996.2
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010548205614",
+            "periodo_inicio": "2024-12-01",
+            "periodo_fin": "2024-12-31",
+            "comisiones": 730.0,
+            "depositos": 17530550.82,
+            "cargos": 17577643.27,
+            "saldo_promedio": 115907.44,
+            "depositos_en_efectivo": 198392.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -730.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2025-01-01",
+            "periodo_fin": "2025-01-31",
+            "comisiones": 765.0,
+            "depositos": 15807192.4,
+            "cargos": 15210177.4,
+            "saldo_promedio": 106401.23,
+            "depositos_en_efectivo": 15500.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 441656.65,
+            "entradas_TPV_neto": 440891.65
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2025-02-01",
+            "periodo_fin": "2025-02-28",
+            "comisiones": 670.0,
+            "depositos": 16159282.6,
+            "cargos": 16617579.01,
+            "saldo_promedio": 182896.89,
+            "depositos_en_efectivo": 6500.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 157000.0,
+            "entradas_TPV_neto": 156330.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072108010548205614",
+            "periodo_inicio": "2025-07-01",
+            "periodo_fin": "2025-07-31",
+            "comisiones": 865.0,
+            "depositos": 20224517.51,
+            "cargos": 20138420.73,
+            "saldo_promedio": 150853.29,
+            "depositos_en_efectivo": 92511.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -865.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010548205614",
+            "periodo_inicio": "2025-06-01",
+            "periodo_fin": "2025-06-30",
+            "comisiones": 740.0,
+            "depositos": 18517370.88,
+            "cargos": 17899821.51,
+            "saldo_promedio": 154941.98,
+            "depositos_en_efectivo": 25500.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -740.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2025-03-01",
+            "periodo_fin": "2025-03-31",
+            "comisiones": 695.0,
+            "depositos": 20270391.83,
+            "cargos": 19737181.39,
+            "saldo_promedio": 116355.55,
+            "depositos_en_efectivo": 1500.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -695.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010548205614",
+            "periodo_inicio": "2025-05-01",
+            "periodo_fin": "2025-05-31",
+            "comisiones": 725.0,
+            "depositos": 17196256.83,
+            "cargos": 17433021.76,
+            "saldo_promedio": 143584.57,
+            "depositos_en_efectivo": 26463.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 200000.0,
+            "entradas_TPV_neto": 199275.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2024-11-01",
+            "periodo_fin": "2024-11-30",
+            "comisiones": 710.0,
+            "depositos": 14874678.97,
+            "cargos": 14417493.16,
+            "saldo_promedio": 119347.88,
+            "depositos_en_efectivo": 2800.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 4000.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -710.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2024-10-01",
+            "periodo_fin": "2024-10-31",
+            "comisiones": 825.0,
+            "depositos": 18239341.79,
+            "cargos": 18780126.92,
+            "saldo_promedio": 297231.11,
+            "depositos_en_efectivo": 27872.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -825.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010548205614",
+            "periodo_inicio": "2025-10-01",
+            "periodo_fin": "2025-10-31",
+            "comisiones": 695.0,
+            "depositos": 19843693.3,
+            "cargos": 20133486.77,
+            "saldo_promedio": 175344.84,
+            "depositos_en_efectivo": 82676.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -695.0
+        },
+        {
+            "banco": "BANORTE",
+            "rfc": "ALA130208Q26",
+            "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+            "clabe_interbancaria": "072180010542805614",
+            "periodo_inicio": "2023-09-01",
+            "periodo_fin": "2023-09-30",
+            "comisiones": 670.0,
+            "depositos": 23164901.62,
+            "cargos": 22944694.89,
+            "saldo_promedio": 218638.33,
+            "depositos_en_efectivo": 40850.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -670.0
+        }
+    ],
+    "resultados_individuales": [
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2025-04-01",
+                "periodo_fin": "2025-04-30",
+                "comisiones": 650.0,
+                "depositos": 22436814.11,
+                "cargos": 22386757.75,
+                "saldo_promedio": 79919.56,
+                "depositos_en_efectivo": 48516.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -650.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "14-abr-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "14-abr-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "42,516.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21-abr-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01625 referencia 0013fmf2h1bf",
+                        "monto": "1,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21-abr-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01831 referencia 0013fmi1s1hb",
+                        "monto": "3,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010548205614",
+                "periodo_inicio": "2025-08-01",
+                "periodo_fin": "2025-08-31",
+                "comisiones": 650.0,
+                "depositos": 19665018.32,
+                "cargos": 19971345.03,
+                "saldo_promedio": 130156.88,
+                "depositos_en_efectivo": 64460.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 671646.2,
+                "entradas_TPV_neto": 670996.2
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "08-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "4,960.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "11-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "1,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "18-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "5,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "19-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "20,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "25-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "20,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "25-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "25-ago-25",
+                        "descripcion": "traspaso 0000006456 , de la cuenta: 0811939896 corpino y bikini nina",
+                        "monto": "28,646.20",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-ago-25",
+                        "descripcion": "traspaso 0000250827 , de la cuenta: 1183969243 pago",
+                        "monto": "143,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-ago-25",
+                        "descripcion": "traspaso 0000250829 , de la cuenta: 1183969243 pago",
+                        "monto": "500,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-ago-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "11,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010548205614",
+                "periodo_inicio": "2024-12-01",
+                "periodo_fin": "2024-12-31",
+                "comisiones": 730.0,
+                "depositos": 17530550.82,
+                "cargos": 17577643.27,
+                "saldo_promedio": 115907.44,
+                "depositos_en_efectivo": 198392.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -730.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "03-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "6,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "03-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "22,911.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "04-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "47,700.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "19-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "9,281.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "100,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-dic-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "12,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2025-01-01",
+                "periodo_fin": "2025-01-31",
+                "comisiones": 765.0,
+                "depositos": 15807192.4,
+                "cargos": 15210177.4,
+                "saldo_promedio": 106401.23,
+                "depositos_en_efectivo": 15500.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 441656.65,
+                "entradas_TPV_neto": 440891.65
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "03-ene-25",
+                        "descripcion": "9bygfcd0cpgg spei recibido, bco:0110 jp morgan hr liq: 14:32:38 del cliente red amigo dal sapi de cv sofom enr de la clabe 110180000776475481 con rfc rad130627ih2 concepto: 010002630242 referencia: 0117365 cve rast: 9bygfcd0cpgg",
+                        "monto": "441,656.65",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "20-ene-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "4,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23-ene-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "8,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-ene-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "3,500.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2025-02-01",
+                "periodo_fin": "2025-02-28",
+                "comisiones": 670.0,
+                "depositos": 16159282.6,
+                "cargos": 16617579.01,
+                "saldo_promedio": 182896.89,
+                "depositos_en_efectivo": 6500.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 157000.0,
+                "entradas_TPV_neto": 156330.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "06-feb-25",
+                        "descripcion": "traspaso 0000250206 , de la cuenta: 1033654260",
+                        "monto": "7,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "06-feb-25",
+                        "descripcion": "traspaso 0000250206 , de la cuenta: 1183969243 pago",
+                        "monto": "150,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "10-feb-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "17-feb-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01625 referencia 0013f9afl1bf",
+                        "monto": "3,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "17-feb-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01625 referencia 0013f9agt1bf",
+                        "monto": "1,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072108010548205614",
+                "periodo_inicio": "2025-07-01",
+                "periodo_fin": "2025-07-31",
+                "comisiones": 865.0,
+                "depositos": 20224517.51,
+                "cargos": 20138420.73,
+                "saldo_promedio": 150853.29,
+                "depositos_en_efectivo": 92511.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -865.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "07-jul-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "14-jul-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "15-jul-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "76,761.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "28-jul-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-jul-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "9,750.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010548205614",
+                "periodo_inicio": "2025-06-01",
+                "periodo_fin": "2025-06-30",
+                "comisiones": 740.0,
+                "depositos": 18517370.88,
+                "cargos": 17899821.51,
+                "saldo_promedio": 154941.98,
+                "depositos_en_efectivo": 25500.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -740.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "09-jun-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "17,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "09-jun-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "3,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23-jun-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30-jun-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,500.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2025-03-01",
+                "periodo_fin": "2025-03-31",
+                "comisiones": 695.0,
+                "depositos": 20270391.83,
+                "cargos": 19737181.39,
+                "saldo_promedio": 116355.55,
+                "depositos_en_efectivo": 1500.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -695.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "10-mar-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "1,500.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010548205614",
+                "periodo_inicio": "2025-05-01",
+                "periodo_fin": "2025-05-31",
+                "comisiones": 725.0,
+                "depositos": 17196256.83,
+                "cargos": 17433021.76,
+                "saldo_promedio": 143584.57,
+                "depositos_en_efectivo": 26463.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 200000.0,
+                "entradas_TPV_neto": 199275.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "14-may-25",
+                        "descripcion": "traspaso 0000250514 , de la cuenta: 1183969243 pago",
+                        "monto": "200,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "15-may-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "18,915.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "16-may-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "7,548.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2024-11-01",
+                "periodo_fin": "2024-11-30",
+                "comisiones": 710.0,
+                "depositos": 14874678.97,
+                "cargos": 14417493.16,
+                "saldo_promedio": 119347.88,
+                "depositos_en_efectivo": 2800.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 4000.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -710.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "11-nov-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,800.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22-nov-24",
+                        "descripcion": "mban01002411220081914694 spei recibido, bco:0012 bbva bancomer hr liq: 11:59:05 del cliente blanca estela duarte vazquez de la clabe 012180015553479120 con rfc duvb940804e69 concepto: dev de prestamo referencia: 2610240 cve rast: mban01002411220081914694",
+                        "monto": "4,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2024-10-01",
+                "periodo_fin": "2024-10-31",
+                "comisiones": 825.0,
+                "depositos": 18239341.79,
+                "cargos": 18780126.92,
+                "saldo_promedio": 297231.11,
+                "depositos_en_efectivo": 27872.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -825.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "17-oct-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "6,975.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "18-oct-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "15,257.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-oct-24",
+                        "descripcion": "dep.efectivo",
+                        "monto": "5,640.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010548205614",
+                "periodo_inicio": "2025-10-01",
+                "periodo_fin": "2025-10-31",
+                "comisiones": 695.0,
+                "depositos": 19843693.3,
+                "cargos": 20133486.77,
+                "saldo_promedio": 175344.84,
+                "depositos_en_efectivo": 82676.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -695.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "01-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "16,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "03-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "6,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "17-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "4,600.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "21-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "29,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "9,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "27-oct-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "1,500.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-oct-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo oficina telecomm 11038 referencia cliente 0000000000",
+                        "monto": "5,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-oct-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo oficina telecomm 11038 referencia cliente 0000000000",
+                        "monto": "4,576.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-oct-25",
+                        "descripcion": "deposito en efectivo en cajero banorte. te depositaron $7,000.00 mxn a la tarjeta **0000 de alhor de laminacion sa de cv en el cajero de suc san cristobal centro 6, calle 5 de f, san cristobal d a las 18:04 hrs. - n71400",
+                        "monto": "7,000.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANORTE",
+                "rfc": "ALA130208Q26",
+                "nombre_cliente": "ALHOR DE LAMINACION SA DE CV",
+                "clabe_interbancaria": "072180010542805614",
+                "periodo_inicio": "2023-09-01",
+                "periodo_fin": "2023-09-30",
+                "comisiones": 670.0,
+                "depositos": 23164901.62,
+                "cargos": 22944694.89,
+                "saldo_promedio": 218638.33,
+                "depositos_en_efectivo": 40850.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -670.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "08-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,300.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "08-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22-sep-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01625 referencia 0013gfa2w1bf",
+                        "monto": "2,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "6,790.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "22-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "5,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "23-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "16,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "29-sep-25",
+                        "descripcion": "deposito de cuenta de terceros deposito efectivo farm guadalajara 01625 referencia 0013ggb3w1bf",
+                        "monto": "1,000.00",
+                        "tipo": "abono"
+                    },
+                    {
+                        "fecha": "30-sep-25",
+                        "descripcion": "dep.efectivo",
+                        "monto": "5,760.00",
+                        "tipo": "abono"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        }
+    ]
+}
