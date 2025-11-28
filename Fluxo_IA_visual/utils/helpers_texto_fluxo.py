@@ -337,7 +337,7 @@ PROMPT_GENERICO = """
 PROMPTS_POR_BANCO = {
     "bbva": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
-    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas: 
         Reglas de la extracción de una línea: 
             - venta tarjetas
             - venta tdc inter
