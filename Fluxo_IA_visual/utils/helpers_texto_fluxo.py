@@ -354,7 +354,7 @@ PROMPTS_POR_BANCO = {
             - financiamiento # si aparece esta palabra, colocala en la salida
             - credito # si aparece esta palabra, colocala en la salida
             - ventas nal. amex
-        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+        Reglas de la extracción multilinea, para que sea válida debe cumplir con ambas condiciones en la misma transacción:
             la primer línea debe contener:
             - t20 spei recibido santander, banorte, stp, afirme, hsbc, citi mexico
             - spei recibido banorte
@@ -390,7 +390,7 @@ PROMPTS_POR_BANCO = {
             - liquidacion wuzi
             - prestamo
             - anticipo
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba de forma exacta.
     """,
 
     "banbajío": """ 
