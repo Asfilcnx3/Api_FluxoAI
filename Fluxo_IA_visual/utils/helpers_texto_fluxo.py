@@ -22,7 +22,7 @@ PALABRAS_TRASPASO_ENTRE_CUENTAS = [
 ]   
 
 PALABRAS_TRASPASO_FINANCIAMIENTO = [
-    "prestamo", "anticipo de ventas", "anticipo de venta", "financiamiento", "credito"
+    "prestamo", "anticipo de ventas", "anticipo de venta", "financiamiento"
 ]
 
 PALABRAS_BMRCASH = [
@@ -594,11 +594,10 @@ PROMPTS_POR_BANCO = {
         Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
             la primer línea debe contener:
             - deposito spei
-            las demás líneas deben contener:
+            alguna de las demás líneas deben contener:
             - kiwi international payment technologies
             - cobra online sapi de cv
             - operadora paypal de mexico s de rl
-            - clave de rastreo
     IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
     """,
 
