@@ -369,7 +369,7 @@ def total_depositos_verificacion(
     total_depositos = 0.0
     for resultado in resultados_portada:
         if not isinstance(resultado, Exception):
-            datos_ia, _, _, _, _ = resultado
+            datos_ia, _, _, _, _, _ = resultado
             if datos_ia:
                 depo = datos_ia.get("depositos") or 0.0
                 total_depositos += float(depo)
@@ -487,6 +487,29 @@ def _crear_prompt_agente_unificado(
     """
     return prompt_final.strip()
 
+def calcular_rangos_de_cuentas(total_paginas: int, puntos_de_corte: List[int]) -> List[List[int]]:
+    """
+    Convierte una lista de páginas de inicio en rangos de páginas para procesar.
+    Ej: total=10, cortes=[1, 6] -> Retorna [[1,2,3,4,5], [6,7,8,9,10]]
+    """
+    if not puntos_de_corte:
+        return [list(range(1, total_paginas + 1))] # Un solo rango con todo
+
+    # Aseguramos que estén ordenados y únicos
+    cortes = sorted(list(set(puntos_de_corte)))
+    
+    rangos = []
+    for i, inicio in enumerate(cortes):
+        # El fin es el siguiente corte - 1, o el final del documento
+        fin = cortes[i+1] - 1 if i + 1 < len(cortes) else total_paginas
+        
+        # Generamos la lista de páginas para este rango
+        rango_paginas = list(range(inicio, fin + 1))
+        if rango_paginas:
+            rangos.append(rango_paginas)
+            
+    return rangos
+
 def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion: # no estamos usandola (identificar si se usará o eliminar)
     """
     Transforma un diccionario plano de resultados en un objeto Pydantic
@@ -496,6 +519,7 @@ def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion:
         # 1. Creamos el sub-objeto AnalisisIA
         analisis_ia = AnalisisTPV.ResultadoAnalisisIA(
             banco=datos_dict.get("banco"),
+            tipo_moneda=datos_dict.get("tipo_moneda"),
             rfc=datos_dict.get("rfc"),
             nombre_cliente=datos_dict.get("nombre_cliente"),
             clabe_interbancaria=datos_dict.get("clabe_interbancaria"),

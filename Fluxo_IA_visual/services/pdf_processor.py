@@ -135,6 +135,8 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List
     """
     resultados_por_pagina = {}
     texto_por_pagina = {}
+    puntos_de_corte = [] 
+    FRASE_GATILLO = "detalle de la cuenta"
 
     # Diccionario de términos para buscar encabezados
     KEYWORDS_MAPPING = {
@@ -156,6 +158,13 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List
                 
                 texto_por_pagina[page_num] = page_text
                 resultados_por_pagina[page_num] = []
+
+                # --- DETECCIÓN DE PUNTOS DE CORTE ---
+                if FRASE_GATILLO in page_text:
+                    # IGNORAR SI ES LA PÁGINA 1 (Para evitar crear un rango [1, 1] redundante)
+                    if page_num > 1: 
+                        logging.info(f"Página {page_num}: Detectado inicio de SEGUNDA cuenta ('{FRASE_GATILLO}').")
+                        puntos_de_corte.append(page_num)
                 
                 # --- PASO 1: DETECTAR UBICACIÓN DE ENCABEZADOS ---
                 # Guardamos el centro X de cada encabezado encontrado
@@ -250,4 +259,4 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List
     except Exception as e:
         logging.error(f"Error al procesar posiciones en documento: {e}", exc_info=True)
         
-    return resultados_por_pagina, texto_por_pagina
+    return resultados_por_pagina, texto_por_pagina, puntos_de_corte

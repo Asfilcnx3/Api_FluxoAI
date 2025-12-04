@@ -35,7 +35,7 @@ PALABRAS_TRASPASO_MORATORIO = [ # Faltan ejemplos
 
 # Definimos los campos esperados y sus tipos (No funcionan aún)
 CAMPOS_STR = [
-    "banco", "rfc", "nombre_cliente", "clabe_interbancaria", "periodo_inicio", "periodo_fin"
+    "banco", "rfc", "nombre_cliente", "clabe_interbancaria", "periodo_inicio", "periodo_fin", "tipo_moneda"
     
 ]
 
@@ -196,20 +196,22 @@ Eres un experto extractor de datos de estados de cuenta bancarios. Analiza las i
 
 INSTRUCCIONES CRÍTICAS (CAMPOS A EXTRAER):
 1. NOMBRE DEL BANCO: Busca cerca de "Banco:", "Institución:", o en el encabezado. Debe ser el nombre corto, por ejemplo, "banco del bajío" es banbajío.
-2. NOMBRE DEL CLIENTE: Busca cerca de "Titular:", "Cliente:", o "Razón Social:". Es el texto en mayúsculas después de estas palabras.
-3. CLABE: Son EXACTAMENTE 18 dígitos consecutivos. Busca cerca de "CLABE", "Clabe Interbancaria" o en la sección de datos de cuenta.
-4. RFC: Son 12-13 caracteres alfanuméricos. Busca cerca de "RFC:", "R.F.C." o después del nombre.
-5. PERIODO DE INICIO: La primera fecha del periodo en formato "YYYY-MM-DD".
-6. PERIODO DE FIN: La segunda fecha del periodo en formato "YYYY-MM-DD".
-7. COMISIONES: Busca "Comisiones", "Cargos por servicio", o "Total comisiones". Toma el valor numérico más grande.
-8. CARGOS: Busca "Cargos", "Retiros", o "Total cargos". Toma el valor numérico más grande.
-9. DEPÓSITOS: Busca "Depósitos", "Abonos", o "Total depósitos". Toma el valor numérico más grande.
-10. SALDO PROMEDIO: Busca "Saldo promedio", "Saldo medio", o "Saldo promedio del periodo".
+2. TIPO DE MONEDA: Busca cerca de "Moneda:", "Tipo de moneda:", o en la sección de resumen. Debe ser su versión resumida como "MXN" para pesos mexicanos o "USD" para dólares estadounidenses EUR para euros, etc.
+3. NOMBRE DEL CLIENTE: Busca cerca de "Titular:", "Cliente:", o "Razón Social:". Es el texto en mayúsculas después de estas palabras.
+4. CLABE: Son EXACTAMENTE 18 dígitos consecutivos. Busca cerca de "CLABE", "Clabe Interbancaria" o en la sección de datos de cuenta.
+5. RFC: Son 12-13 caracteres alfanuméricos. Busca cerca de "RFC:", "R.F.C." o después del nombre.
+6. PERIODO DE INICIO: La primera fecha del periodo en formato "YYYY-MM-DD".
+7. PERIODO DE FIN: La segunda fecha del periodo en formato "YYYY-MM-DD".
+8. COMISIONES: Busca "Comisiones", "Cargos por servicio", o "Total comisiones". Toma el valor numérico más grande.
+9. CARGOS: Busca "Cargos", "Retiros", o "Total cargos". Toma el valor numérico más grande.
+10. DEPÓSITOS: Busca "Depósitos", "Abonos", o "Total depósitos". Toma el valor numérico más grande.
+11. SALDO PROMEDIO: Busca "Saldo promedio", "Saldo medio", o "Saldo promedio del periodo".
 
 FORMATO DE RESPUESTA (JSON):
 ```json
 {
     "banco": "NOMBRE_BANCO",
+    "tipo_moneda": "MXN",
     "nombre_cliente": "NOMBRE COMPLETO EN MAYUSCULAS",
     "clabe_interbancaria": "012345678901234567",
     "rfc": "XXX000000XXX",

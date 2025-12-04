@@ -308,6 +308,7 @@ def test_limpiar_texto_con_saltos_de_linea():
 def test_crear_objeto_resultado_completo():
     datos = {
         "banco": "BANORTE",
+        "tipo_moneda": "MXN",
         "rfc": "ABC123456XYZ",
         "nombre_cliente": "JUAN PEREZ",
         "clabe_interbancaria": "123456789012345678",
