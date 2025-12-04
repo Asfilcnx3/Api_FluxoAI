@@ -34,7 +34,7 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
     ws1.title = "Resumen por Cuenta"
     
     encabezados_resumen = [
-        "Mes", "Cuenta", "Depósitos", "Cargos", "TPV Bruto", 
+        "Mes", "Cuenta", "Tipo Moneda", "Depósitos", "Cargos", "TPV Bruto", 
         "Financiamientos", "Efectivo", "Traspaso entre cuentas", "BMR CASH"
     ]
     ws1.append(encabezados_resumen)
@@ -45,12 +45,14 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
         
         periodo = ia.get("periodo_fin") or ia.get("periodo_inicio") or "Desc."
         banco = ia.get("banco", "BANCO")
+        tipo_moneda = ia.get("tipo_moneda", "MXN")
         clabe = ia.get("clabe_interbancaria", "")
         cuenta_str = f"{banco}-{clabe[-4:]}" if len(clabe) >= 4 else banco
         
         ws1.append([
             periodo,
             cuenta_str,
+            tipo_moneda,
             ia.get("depositos", 0.0),
             ia.get("cargos", 0.0),
             ia.get("entradas_TPV_bruto", 0.0),

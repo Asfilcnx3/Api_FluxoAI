@@ -103,6 +103,7 @@ class AnalisisTPV:
     class ResultadoAnalisisIA(BaseModel):
         """Clase de respuesta para un analisis de carátula exitóso."""
         banco: str
+        tipo_moneda: Optional[str] = None
         rfc: Optional[str] = None
         nombre_cliente: Optional[str] = None
         clabe_interbancaria: Optional[str] = None

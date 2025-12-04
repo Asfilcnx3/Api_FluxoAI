@@ -136,7 +136,7 @@ async def procesar_pdf_api(
                 continue # Pasamos al siguiente archivo
             
             # Si no hubo error, desempacamos los resultados
-            datos_ia, es_digital, texto_inicial, movimientos_pagina, texto_por_pagina = resultado_bruto
+            datos_ia, es_digital, texto_inicial, movimientos_pagina, texto_por_pagina, puntos_de_corte = resultado_bruto
             # Intenta procesar este archivo, preparado para cualquier error
             try:
                 # Sea digital o escaneado se prepara para extracción
@@ -146,13 +146,15 @@ async def procesar_pdf_api(
                         "filename": filename,
                         "ia_data": datos_ia, 
                         "texto_por_pagina": texto_por_pagina, 
-                        "movimientos": movimientos_pagina
+                        "movimientos": movimientos_pagina,
+                        "content": docs[i]["content"],
+                        "puntos_de_corte": puntos_de_corte
                     })
                 else:
                     documentos_escaneados.append({
                         "index": i, 
                         "filename": filename,
-                        "content": archivos_en_memoria[i]["content"], 
+                        "content": docs[i]["content"], 
                         "ia_data": datos_ia
                     })
 
@@ -186,7 +188,9 @@ async def procesar_pdf_api(
                     doc_info["ia_data"],
                     doc_info["texto_por_pagina"],
                     doc_info["movimientos"],
-                    doc_info["filename"] 
+                    doc_info["filename"],
+                    doc_info["content"],          # <--- ¡FALTABA ESTA LÍNEA! (pdf_bytes)
+                    doc_info.get("puntos_de_corte") # Opcional: Si agregaste puntos de corte al doc_info en el paso 2
                 )
                 tareas_digitales.append((doc_info["index"], tarea))
 
@@ -219,7 +223,6 @@ async def procesar_pdf_api(
                         )
 
             # 3.D - Esperar a que los workers terminen (EN DOS GRUPOS SEPARADOS)
-
             # Grupo 1: Digitales (sin timeout)
             resultados_brutos_digitales = []
             if tareas_digitales:
@@ -258,46 +261,77 @@ async def procesar_pdf_api(
                         )
         logger.info("Etapa 3: Todos los procesos han terminado.")
 
-        # --- 4. RECOLECTAR Y ENSAMBLAR RESULTADOS ---
-        logger.info("Etapa 4: Ensamblando respuesta final.")
+        # --- 4. RECOLECTAR RESULTADOS (ESTO ES LO QUE FALTABA) ---
+        logger.info("Etapa 4: Procesando resultados crudos de los workers...")
 
-        # Recolectar resultados digitales
-        for i, (index, _) in enumerate(tareas_digitales):
-            resultado = resultados_brutos_digitales[i]
-            filename = archivos_en_memoria[index]["filename"]
+        # Una lista temporal para aplanar todos los resultados (cuentas y sub-cuentas)
+        resultados_acumulados = [] 
 
-            if isinstance(resultado, Exception):
-                error_msg = f"Fallo el procesamiento completo (Digital) de '{filename}': {str(resultado)}"
-                resultados_finales[index] = AnalisisTPV.ResultadoExtraccion(
-                    AnalisisIA=None, # Asumimos que si el worker falla, no hay datos fiables
-                    DetalleTransacciones=AnalisisTPV.ErrorRespuesta(error=error_msg)
-                )
-            else:
-                resultados_finales[index] = resultado
-
-        # Recolectar resultados OCR (solo si no hubo timeout)
-        if not ocr_timed_out:
-            for i, (index, _) in enumerate(tareas_ocr):
-                resultado = resultados_brutos_ocr[i]
-                filename = archivos_en_memoria[index]["filename"]
+        # --- A. Procesar Resultados Digitales ---
+        if tareas_digitales:
+            for i, (index_original, _) in enumerate(tareas_digitales):
+                resultado = resultados_brutos_digitales[i]
+                filename = archivos_en_memoria[index_original]["filename"]
 
                 if isinstance(resultado, Exception):
-                    error_msg = f"Fallo el procesamiento completo (OCR) de '{filename}': {str(resultado)}"
-                    resultados_finales[index] = AnalisisTPV.ResultadoExtraccion(
+                    # Falló el worker completo
+                    error_msg = f"Fallo crítico en worker digital para '{filename}': {str(resultado)}"
+                    resultados_acumulados.append(AnalisisTPV.ResultadoExtraccion(
                         AnalisisIA=None,
                         DetalleTransacciones=AnalisisTPV.ErrorRespuesta(error=error_msg)
-                    )
+                    ))
+                elif isinstance(resultado, list):
+                    # El worker devolvió una LISTA de resultados (Multicuenta o normal)
+                    # Los agregamos todos a la lista final
+                    resultados_acumulados.extend(resultado)
                 else:
-                    resultados_finales[index] = resultado
+                    # Caso raro (por si acaso devuelve un objeto único)
+                    resultados_acumulados.append(resultado)
 
-        # --- 5. ENSAMBLE DE LA RESPUESTA FINAL ---
-        resultados_limpios = [res for res in resultados_finales if res is not None]
-        resultados_generales = [res.AnalisisIA for res in resultados_limpios if res.AnalisisIA is not None]
+        # --- B. Procesar Resultados OCR ---
+        if tareas_ocr:
+            if ocr_timed_out:
+                # Si hubo timeout, ya llenamos resultados_finales en el bloque 'except',
+                # pero necesitamos pasarlos a nuestra lista acumulada.
+                for index, _ in tareas_ocr:
+                    if resultados_finales[index]: # Si ya tiene el error de timeout asignado
+                        resultados_acumulados.append(resultados_finales[index])
+            else:
+                for i, (index_original, _) in enumerate(tareas_ocr):
+                    resultado = resultados_brutos_ocr[i]
+                    filename = archivos_en_memoria[index_original]["filename"]
 
-        # Recalculamos el total de depósitos basado en los resultados exitosos
+                    if isinstance(resultado, Exception):
+                        error_msg = f"Fallo crítico en worker OCR para '{filename}': {str(resultado)}"
+                        resultados_acumulados.append(AnalisisTPV.ResultadoExtraccion(
+                            AnalisisIA=None,
+                            DetalleTransacciones=AnalisisTPV.ErrorRespuesta(error=error_msg)
+                        ))
+                    elif isinstance(resultado, list):
+                        resultados_acumulados.extend(resultado)
+                    else:
+                        resultados_acumulados.append(resultado)
+
+        # --- C. Agregar los que se saltaron OCR (Omitidos) ---
+        # Buscamos en resultados_finales aquellos que ya tengan un error asignado (paso 3.C)
+        # y que no hayan sido procesados por las tareas anteriores.
+        indices_procesados = {t[0] for t in tareas_digitales} | {t[0] for t in tareas_ocr}
+
+        for i, res in enumerate(resultados_finales):
+            if i not in indices_procesados and res is not None:
+                resultados_acumulados.append(res)
+
+        # --- 5. ENSAMBLE FINAL ---
+        resultados_validos = [res for res in resultados_acumulados if res is not None]
+        
+        resultados_generales = [
+            res.AnalisisIA for res in resultados_validos 
+            if res.AnalisisIA is not None
+        ]
+
         total_depositos_final = sum(
-            res.AnalisisIA.depositos for res in resultados_limpios 
-            if res.AnalisisIA and res.AnalisisIA.depositos
+            (res.AnalisisIA.depositos or 0.0) for res in resultados_validos 
+            if res.AnalisisIA
         )
         es_mayor_final = total_depositos_final > 250000
 
@@ -306,7 +340,7 @@ async def procesar_pdf_api(
             total_depositos = total_depositos_final,
             es_mayor_a_250 = es_mayor_final,
             resultados_generales = resultados_generales,
-            resultados_individuales = resultados_limpios
+            resultados_individuales = resultados_validos # <--- Usamos la lista aplanada
         )
 
         # 1. Convertir a Excel (Bytes)

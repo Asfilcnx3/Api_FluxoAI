@@ -1,13 +1,13 @@
 from ..utils.helpers import (
     es_escaneado_o_no, extraer_datos_por_banco, extraer_json_del_markdown, limpiar_monto, sanitizar_datos_ia, 
-    reconciliar_resultados_ia, detectar_tipo_contribuyente, crear_chunks_con_superposicion, crear_objeto_resultado
+    reconciliar_resultados_ia, detectar_tipo_contribuyente, crear_chunks_con_superposicion, crear_objeto_resultado, calcular_rangos_de_cuentas
     
 )
 from .ia_extractor import (
     analizar_gpt_fluxo, analizar_gemini_fluxo, analizar_gpt_nomi, _extraer_datos_con_ia, llamar_agente_tpv, llamar_agente_ocr_vision
 )
 from ..utils.helpers_texto_fluxo import (
-    PALABRAS_BMRCASH, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO
+    PALABRAS_BMRCASH, PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, PALABRAS_TRASPASO_FINANCIAMIENTO, prompt_base_fluxo
 )
 from ..utils.helpers_texto_nomi import (
     PROMPT_COMPROBANTE, PROMPT_ESTADO_CUENTA, PROMPT_NOMINA, SEGUNDO_PROMPT_NOMINA
@@ -23,7 +23,7 @@ from .pdf_processor import (
 from ..utils.helpers import extraer_rfc_curp_por_texto
 from ..models.responses import NomiFlash, CSF, AnalisisTPV
 
-from typing import Dict, Any, Tuple, Optional, Union
+from typing import Dict, Any, Tuple, Optional, Union, List
 from fastapi import UploadFile
 from io import BytesIO
 import logging
@@ -33,6 +33,34 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 # ----- FUNCIONES ORQUESTADORAS DE FLUXO -----
+async def analizar_metadatos_rango(
+    pdf_bytes: bytes, 
+    paginas_a_analizar: List[int],
+    prompt: str
+) -> Dict[str, Any]:
+    """
+    Ejecuta el análisis de IA (Visión) para un conjunto específico de páginas 
+    (usualmente la primera de una cuenta nueva) para obtener metadatos.
+    """
+    # 1. Llamadas en paralelo a las IAs
+    tarea_gpt = analizar_gpt_fluxo(prompt, pdf_bytes, paginas_a_procesar=paginas_a_analizar)
+    tarea_gemini = analizar_gemini_fluxo(prompt, pdf_bytes, paginas_a_procesar=paginas_a_analizar)
+    
+    resultados_ia_brutos = await asyncio.gather(tarea_gpt, tarea_gemini, return_exceptions=True)
+    res_gpt_str, res_gemini_str = resultados_ia_brutos
+
+    # 2. Extracción de JSON
+    datos_gpt = extraer_json_del_markdown(res_gpt_str) if not isinstance(res_gpt_str, Exception) else {}
+    datos_gemini = extraer_json_del_markdown(res_gemini_str) if not isinstance(res_gemini_str, Exception) else {}
+
+    # 3. Sanitización
+    datos_gpt_sanitizados = sanitizar_datos_ia(datos_gpt)
+    datos_gemini_sanitizados = sanitizar_datos_ia(datos_gemini)
+
+    # 4. Reconciliación
+    datos_reconciliados = reconciliar_resultados_ia(datos_gpt_sanitizados, datos_gemini_sanitizados)
+    
+    return datos_reconciliados
 
 # ESTA FUNCIÓN ES PARA OBTENER Y PROCESAR LAS PORTADAS DE LOS PDF
 async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool, str, Dict[int, Any]]:
@@ -47,7 +75,7 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     loop = asyncio.get_running_loop()
 
     # --- 1. PRIMERO: Extraer Texto Y Movimientos en una sola llamada --- La ejecutamos en un hilo separado para no bloquear el programa.
-    movimientos_por_pagina, texto_por_pagina = await loop.run_in_executor(
+    movimientos_por_pagina, texto_por_pagina, puntos_de_corte = await loop.run_in_executor(
         None,
         extraer_movimientos_con_posiciones,
         pdf_bytes
@@ -122,252 +150,211 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     if depositos_estanarizadas is not None:
         datos_ia_reconciliados["depositos"] = depositos_estanarizadas
     
-    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina, texto_por_pagina
+    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina, texto_por_pagina, puntos_de_corte
     
 async def procesar_documento_con_agentes_async(
-    ia_data: dict, 
+    ia_data_inicial: dict, 
     texto_por_pagina: Dict[int, str], 
     movimientos_por_pagina: Dict[int, Any],
-    filename: str, # Para logging
-) -> Dict[str, Any]:
-    """
-    Orquesta el procesamiento de un documento digital usando Agentes LLM.
-    Utiliza 'movimientos_por_pagina' como un mapa de calor para saber exactamente qué páginas contienen información valiosa y descartar el resto.
-    Crea chunks, llama a los agentes en paralelo, deduplica y calcula los totales.
-    """
-    logger.info(f"Iniciando procesamiento con Agentes LLM para: {filename}")
+    filename: str,
+    pdf_bytes: bytes, 
+    puntos_de_corte: List[int] = None
+) -> List[Dict[str, Any]]:
     
-    # --- 1. Preparación ---
-    banco = ia_data.get("banco", "generico")
+    logger.info(f"Iniciando procesamiento multicuenta para: {filename}")
+    banco = ia_data_inicial.get("banco", "generico").lower()
     
-    # --- 2. FILTRADO DE PÁGINAS (El "Handshake") ---
-    # Aquí es donde las dos funciones se dan la mano.
-    # Solo seleccionamos páginas donde la función de coordenadas encontró ALGO.
-    paginas_relevantes = []
-    paginas_descartadas = []
+    # 1. Definir Rangos
+    rangos_a_procesar = []
+    if banco == "banbajío" and puntos_de_corte:
+        rangos_a_procesar = calcular_rangos_de_cuentas(len(texto_por_pagina), puntos_de_corte)
+        # LOG IMPORTANTE
+        logger.info(f"MULTICUENTA DETECTADA: Se procesarán {len(rangos_a_procesar)} cuentas separadas.")
+    else:
+        rangos_a_procesar = [sorted(list(texto_por_pagina.keys()))]
 
-    for page_num, movimientos in movimientos_por_pagina.items():
-        # Si hay movimientos detectados Y la lista no está vacía
-        if movimientos and len(movimientos) > 0:
-            paginas_relevantes.append(page_num)
+    resultados_multiples_cuentas = []
+
+    # 2. Procesar cada "Sub-Cuenta"
+    for i, rango_paginas in enumerate(rangos_a_procesar):
+        if not rango_paginas: continue 
+
+        pagina_inicio_rango = rango_paginas[0]
+        # Nombre virtual para identificar en el Excel
+        nombre_subcuenta = f"{filename} (Cuenta {i+1})" if len(rangos_a_procesar) > 1 else filename
+        logger.info(f"Procesando: {nombre_subcuenta} (Págs {rango_paginas[0]}-{rango_paginas[-1]})")
+        
+        # --- A. LÓGICA DE METADATOS (PORTADA) ---
+        if i == 0:
+            ia_data_seccion = ia_data_inicial
         else:
-            paginas_descartadas.append(page_num)
-    
-    paginas_relevantes.sort() # Ordenamos para mantener la secuencia temporal
-    
-    # LOGS DE DIAGNÓSTICO (Para que veas el filtro en acción)
-    if paginas_descartadas:
-        rango_descartado = f"{min(paginas_descartadas)}-{max(paginas_descartadas)}" if len(paginas_descartadas) > 1 else str(paginas_descartadas[0])
-        logger.info(f"FILTRO ACTIVADO: Se omitirán {len(paginas_descartadas)} páginas irrelevantes (Ej: {rango_descartado}).")
-    
-    logger.info(f"ANÁLISIS LLM: Se procesarán {len(paginas_relevantes)} páginas confirmadas como tablas de transacciones.")
+            # Lógica: Página del corte + Página anterior
+            paginas_para_metadata = [pagina_inicio_rango - 1, pagina_inicio_rango]
+            # Aseguramos no pedir página 0 si el corte es en la 1 (aunque el helper ya maneja cortes >1)
+            paginas_para_metadata = [p for p in paginas_para_metadata if p > 0]
+            
+            logger.info(f"Re-analizando metadatos para {nombre_subcuenta} en páginas {paginas_para_metadata}...")
+            try:
+                ia_data_seccion = await analizar_metadatos_rango(
+                    pdf_bytes, paginas_para_metadata, prompt_base_fluxo
+                )
+                ia_data_seccion["banco"] = ia_data_inicial.get("banco") 
+            except Exception as e:
+                logger.error(f"Fallo al re-analizar portada para {nombre_subcuenta}: {e}")
+                ia_data_seccion = ia_data_inicial.copy()
 
-    # Validación de seguridad
-    if not paginas_relevantes:
-        logger.warning(f"El filtro de coordenadas fue demasiado estricto para {filename}. Ninguna página pasó.")
-        return {
-            **ia_data, 
-            "transacciones": [], 
-            "error_transacciones": "No se detectaron tablas válidas (Cargos/Abonos) en el documento."
-        }
-    
-    # --- 3. Chunking Inteligente ---
-    # Solo pasamos las páginas relevantes a la función de chunking
-    chunks_de_texto = crear_chunks_con_superposicion(
-        texto_por_pagina=texto_por_pagina,
-        paginas_con_movimientos=paginas_relevantes, # <--- Solo lo útil
-        tamano_chunk=5,
-        superposicion=1 
-    )
-    
-    if not chunks_de_texto:
-        logger.warning(f"Error al generar chunks para {filename}.")
-        return {**ia_data, "transacciones": [], "error_transacciones": "Error interno generando chunks."}
+        # --- B. FILTRAR INPUTS ---
+        texto_subset = {k: v for k, v in texto_por_pagina.items() if k in rango_paginas}
+        movimientos_subset = {k: v for k, v in movimientos_por_pagina.items() if k in rango_paginas}
+        paginas_con_movimientos = [p for p, m in movimientos_subset.items() if m]
+        
+        if not paginas_con_movimientos:
+            logger.warning(f"La cuenta {nombre_subcuenta} no tiene movimientos. Generando reporte vacío.")
+            # ERROR CORREGIDO: No hacer continue sin guardar un resultado vacío
+            resultado_vacio = {
+                **ia_data_seccion,
+                "nombre_archivo_virtual": nombre_subcuenta,
+                "transacciones": [],
+                "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
+                "error_transacciones": "Sin movimientos detectados en esta sección."
+            }
+            resultados_multiples_cuentas.append(resultado_vacio)
+            continue
 
-    # --- 4. Llamar Agentes en Paralelo ---
-    tareas_agente = []
-    for texto_chunk, paginas in chunks_de_texto:
-        tareas_agente.append(
-            llamar_agente_tpv(banco, texto_chunk, paginas)
+        # --- C. CHUNKING Y AGENTES ---
+        chunks = crear_chunks_con_superposicion(
+            texto_por_pagina=texto_subset,
+            paginas_con_movimientos=paginas_con_movimientos,
+            tamano_chunk=5, superposicion=1
         )
         
-    resultados_chunks = await asyncio.gather(*tareas_agente, return_exceptions=True)
-    
-    # --- 5. Consolidar y Deduplicar ---
-    transacciones_totales_crudas = []
-    ids_unicos = set()
-    
-    for resultado in resultados_chunks:
-        if isinstance(resultado, Exception):
-            logger.warning(f"Un chunk falló para {filename}: {resultado}")
-            continue
+        tareas = [llamar_agente_tpv(banco, txt, pags) for txt, pags in chunks]
+        res_chunks = await asyncio.gather(*tareas, return_exceptions=True)
         
-        for trx in resultado: 
-            fecha = trx.get("fecha")
-            monto = trx.get("monto")
-            # ID único para evitar duplicados por la superposición
-            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:15]}" 
-            if id_trx not in ids_unicos:
-                transacciones_totales_crudas.append(trx)
-                ids_unicos.add(id_trx)
-
-    # --- 6. Clasificación de Negocio (Tu lógica existente) ---
-    if not transacciones_totales_crudas:
-        logger.error(f"¡Error de lógica! 'transacciones_totales_crudas' está vacía para {filename} a pesar de que los chunks terminaron.")
-
-        ia_data.update({
-            "transacciones": [], 
-            "depositos_en_efectivo": 0.0, 
-            "entradas_TPV_bruto": 0.0, 
-            "entradas_TPV_neto": 0.0, 
-            "traspaso_entre_cuentas": 0.0, 
-            "total_entradas_financiamiento": 0.0,
-            "entradas_bmrcash": 0.0,
-            "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
-        })
-        return ia_data
-
-    total_depositos_efectivo = 0.0
-    total_traspaso_entre_cuentas = 0.0
-    total_entradas_financiamiento = 0.0
-    total_entradas_bmrcash = 0.0
-    total_entradas_tpv = 0.0
-    transacciones_clasificadas = []
-
-    for trx in transacciones_totales_crudas:
-        monto_float = trx.get("monto", 0.0)
-        if not isinstance(monto_float, (int, float)):
-            monto_float = limpiar_monto(str(monto_float))
+        # --- D. CONSOLIDACIÓN ---
+        transacciones_totales = []
+        ids_unicos = set()
+        for res in res_chunks:
+            if not isinstance(res, Exception):
+                for trx in res:
+                    id_trx = f"{trx.get('fecha')}-{trx.get('monto')}-{trx.get('descripcion', '')[:15]}"
+                    if id_trx not in ids_unicos:
+                        transacciones_totales.append(trx)
+                        ids_unicos.add(id_trx)
         
-        descripcion_limpia = trx.get("descripcion", "").lower()
+        # --- ERROR ANTERIOR CORREGIDO AQUI ---
+        if not transacciones_totales:
+            logger.warning(f"Agentes no encontraron transacciones en {nombre_subcuenta}.")
+            resultado_sin_trx = {
+                **ia_data_seccion,
+                "nombre_archivo_virtual": nombre_subcuenta,
+                "transacciones": [],
+                "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
+                "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
+            }
+            resultados_multiples_cuentas.append(resultado_sin_trx)
+            continue # ¡CONTINUAR, NO RETORNAR!
         
-        if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
-            if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
-                total_depositos_efectivo += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
-                total_traspaso_entre_cuentas += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
-                total_entradas_financiamiento += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
-                total_entradas_bmrcash += monto_float
-            else:
-                total_entradas_tpv += monto_float
-            
-            transacciones_clasificadas.append({
-                "fecha": trx.get("fecha"),
-                "descripcion": trx.get("descripcion"),
-                "monto": f"{monto_float:,.2f}", # Formateamos como string
-                "tipo": trx.get("tipo", "abono") 
-            })
+        # --- E. CLASIFICACIÓN DE NEGOCIO ---
+        total_depositos_efectivo = 0.0
+        total_traspaso_entre_cuentas = 0.0
+        total_entradas_financiamiento = 0.0
+        total_entradas_bmrcash = 0.0
+        total_entradas_tpv = 0.0
+        transacciones_clasificadas = []
 
-    # --- 6. Ensamblar Resultado Final ---
-    comisiones_str = ia_data.get("comisiones", "0.0")
-    comisiones = limpiar_monto(comisiones_str)
-    entradas_TPV_neto = total_entradas_tpv - comisiones
+        for trx in transacciones_totales:
+            monto_float = trx.get("monto", 0.0)
+            if not isinstance(monto_float, (int, float)):
+                monto_float = limpiar_monto(str(monto_float))
 
-    resultado_final = {
-        **ia_data,
-        "transacciones": transacciones_clasificadas,
-        "depositos_en_efectivo": total_depositos_efectivo,
-        "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
-        "total_entradas_financiamiento": total_entradas_financiamiento,
-        "entradas_bmrcash": total_entradas_bmrcash,
-        "entradas_TPV_bruto": total_entradas_tpv,
-        "entradas_TPV_neto": entradas_TPV_neto,
-        "error_transacciones": None
-    }
-    
-    return resultado_final
+            descripcion_limpia = trx.get("descripcion", "").lower()
+
+            if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
+                if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
+                    total_depositos_efectivo += monto_float
+                elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                    total_traspaso_entre_cuentas += monto_float
+                elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                    total_entradas_financiamiento += monto_float
+                elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
+                    total_entradas_bmrcash += monto_float
+                else:
+                    total_entradas_tpv += monto_float
+                
+                transacciones_clasificadas.append({
+                    "fecha": trx.get("fecha"),
+                    "descripcion": trx.get("descripcion"),
+                    "monto": f"{monto_float:,.2f}",
+                    "tipo": trx.get("tipo", "abono") 
+                })
+
+        # --- F. ENSAMBLE FINAL ---
+        comisiones_str = ia_data_seccion.get("comisiones", "0.0")
+        comisiones = limpiar_monto(comisiones_str)
+        entradas_TPV_neto = total_entradas_tpv - comisiones
+
+        resultado_cuenta = {
+            **ia_data_seccion,
+            "nombre_archivo_virtual": nombre_subcuenta,
+            "transacciones": transacciones_clasificadas,
+            "depositos_en_efectivo": total_depositos_efectivo,
+            "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
+            "total_entradas_financiamiento": total_entradas_financiamiento,
+            "entradas_bmrcash": total_entradas_bmrcash,
+            "entradas_TPV_bruto": total_entradas_tpv,
+            "entradas_TPV_neto": entradas_TPV_neto,
+            "error_transacciones": None
+        }
+        resultados_multiples_cuentas.append(resultado_cuenta)
+
+    return resultados_multiples_cuentas
 
 async def procesar_documento_escaneado_con_agentes_async(
     ia_data: dict, 
     pdf_bytes: bytes, 
     filename: str
-) -> Dict[str, Any]:
-    """
-    Orquesta el procesamiento de un documento escaneado usando Agentes LLM de Visión.
-    Crea chunks de PÁGINAS, llama a los agentes en paralelo, deduplica y calcula los totales.
-    """
-    logger.info(f"Iniciando procesamiento con Agentes de Visión para: {filename}")
+) -> List[Dict[str, Any]]: 
     
-    # --- 1. Preparación ---
+    logger.info(f"Iniciando procesamiento OCR-Visión para: {filename}")
     banco = ia_data.get("banco", "generico")
     
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             total_paginas = len(doc)
-    except Exception as e:
-        logger.error(f"No se pudo abrir el PDF escaneado '{filename}' para contar páginas: {e}")
-        return {**ia_data, "error_transacciones": "No se pudo leer el PDF para procesar con OCR."}
+    except Exception:
+        return [{**ia_data, "error_transacciones": "No se pudo leer el PDF (corrupto)."}]
 
-    # --- 2. Crear Chunks de Números de Página ---
-    TAMANO_CHUNK = 1  # 1 página por llamada de IA
-    SUPERPOSICION = 0 # 0 páginas de superposición (DEMO)
-    
-    chunks_de_paginas = []
+    # Chunking por páginas
+    TAMANO_CHUNK, SUPERPOSICION = 2, 1
+    chunks_paginas = []
     i = 0
     while i < total_paginas:
-        # Los números de página de fitz son 0-indexados, pero los nuestros son 1-indexados
-        paginas_chunk = list(range(i + 1, min(i + TAMANO_CHUNK, total_paginas) + 1))
-        if not paginas_chunk:
-            break
-        chunks_de_paginas.append(paginas_chunk)
+        paginas = list(range(i + 1, min(i + TAMANO_CHUNK, total_paginas) + 1))
+        if not paginas: break
+        chunks_paginas.append(paginas)
         i += (TAMANO_CHUNK - SUPERPOSICION)
 
-    if not chunks_de_paginas:
-        return {
-            **ia_data, 
-            "transacciones": [], 
-            "error_transacciones": 
-            "No se generaron chunks de páginas."
-        }
+    # Llamadas a Agente
+    tareas = [llamar_agente_ocr_vision(banco, pdf_bytes, pags) for pags in chunks_paginas]
+    res_chunks = await asyncio.gather(*tareas, return_exceptions=True)
 
-    # --- 3. Llamar Agentes de Visión en Paralelo ---
-    tareas_agente_ocr = []
-    for paginas in chunks_de_paginas:
-        tareas_agente_ocr.append(
-            llamar_agente_ocr_vision(banco, pdf_bytes, paginas)
-        )
-    
-    # 'gather' lanzará todas las tareas del chunk en paralelo (dentro de este proceso)
-    resultados_chunks = await asyncio.gather(*tareas_agente_ocr, return_exceptions=True)
-    
-    # --- 4. Consolidar y Deduplicar ---
-    transacciones_totales_crudas = []
+    # Consolidación
+    transacciones_totales = []
     ids_unicos = set()
-    logger.debug(f"Procesando {len(resultados_chunks)} chunks para {filename}...") 
+    for res in res_chunks:
+        if not isinstance(res, Exception):
+            for trx in res:
+                id_trx = f"{trx.get('fecha')}-{trx.get('monto')}-{trx.get('descripcion', '')[:15]}"
+                if id_trx not in ids_unicos:
+                    transacciones_totales.append(trx)
+                    ids_unicos.add(id_trx)
 
-    for i, resultado in enumerate(resultados_chunks):
-        logger.debug(f"Contenido del Chunk {i} para {filename}: {resultado}")
-
-        if isinstance(resultado, Exception):
-            logger.warning(f"Un chunk de OCR falló para {filename}: {resultado}")
-            continue
-        
-        for trx in resultado: 
-            fecha = trx.get("fecha")
-            monto = trx.get("monto")
-            id_trx = f"{fecha}-{monto}-{trx.get('descripcion', '')[:20]}" 
-            if id_trx not in ids_unicos:
-                transacciones_totales_crudas.append(trx)
-                ids_unicos.add(id_trx)
-
-    # --- 5. Lógica de Negocio y Cálculo de Totales ---
-    if not transacciones_totales_crudas:
-        logger.error(f"¡Error de lógica! 'transacciones_totales_crudas' está vacía para {filename} a pesar de que los chunks terminaron.")
-
-        ia_data.update({
-            "transacciones": [], 
-            "depositos_en_efectivo": 0.0, 
-            "entradas_TPV_bruto": 0.0, 
-            "entradas_TPV_neto": 0.0, 
-            "traspaso_entre_cuentas": 0.0, 
-            "total_entradas_financiamiento": 0.0,
-            "entradas_bmrcash": 0.0,
-            "error_transacciones": "Agentes LLM de Visión no encontraron transacciones TPV."
-        })
-        return ia_data
-
+    # --- E. CLASIFICACIÓN DE NEGOCIO (AHORA FUERA DEL BUCLE) ---
     total_depositos_efectivo = 0.0
     total_traspaso_entre_cuentas = 0.0
     total_entradas_financiamiento = 0.0
@@ -375,13 +362,13 @@ async def procesar_documento_escaneado_con_agentes_async(
     total_entradas_tpv = 0.0
     transacciones_clasificadas = []
 
-    for trx in transacciones_totales_crudas:
+    for trx in transacciones_totales:
         monto_float = trx.get("monto", 0.0)
         if not isinstance(monto_float, (int, float)):
             monto_float = limpiar_monto(str(monto_float))
-        
+
         descripcion_limpia = trx.get("descripcion", "").lower()
-        
+
         if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
             if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
                 total_depositos_efectivo += monto_float
@@ -397,17 +384,19 @@ async def procesar_documento_escaneado_con_agentes_async(
             transacciones_clasificadas.append({
                 "fecha": trx.get("fecha"),
                 "descripcion": trx.get("descripcion"),
-                "monto": f"{monto_float:,.2f}", # Formateamos como string
+                "monto": f"{monto_float:,.2f}",
                 "tipo": trx.get("tipo", "abono") 
             })
 
-    # --- 6. Ensamblar Resultado Final ---
+    # --- F. ENSAMBLE FINAL DE LA CUENTA ---
     comisiones_str = ia_data.get("comisiones", "0.0")
     comisiones = limpiar_monto(comisiones_str)
     entradas_TPV_neto = total_entradas_tpv - comisiones
 
-    resultado_final = {
-        **ia_data,
+    # Retorno (Envuelto en lista)
+    return [{
+        **ia_data, 
+        "nombre_archivo_virtual": filename,
         "transacciones": transacciones_clasificadas,
         "depositos_en_efectivo": total_depositos_efectivo,
         "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
@@ -416,57 +405,42 @@ async def procesar_documento_escaneado_con_agentes_async(
         "entradas_TPV_bruto": total_entradas_tpv,
         "entradas_TPV_neto": entradas_TPV_neto,
         "error_transacciones": None
-    }
-    
-    return resultado_final
+    }]
 
 def procesar_digital_worker_sync(
-    ia_data: dict, 
+    ia_data_inicial: dict, 
     texto_por_pagina: Dict[int, str], 
-    movimientos: Dict[int, Any], 
-    filename: str
-) -> Union[AnalisisTPV.ResultadoExtraccion, Exception]:
-    """
-    WORKER SÍNCRONO (para ProcessPool): Inicia un nuevo loop de asyncio
-    y ejecuta el orquestador de Agentes LLM para un documento digital.
-    """
+    movimientos_por_pagina: Dict[int, Any], 
+    filename: str,
+    pdf_bytes: bytes, 
+    puntos_de_corte: List[int] = None
+) -> Union[List[AnalisisTPV.ResultadoExtraccion], Exception]:
     try:
-        # asyncio.run() crea un nuevo loop de eventos en este proceso separado
-        resultado_dict = asyncio.run(
+        lista_dicts = asyncio.run(
             procesar_documento_con_agentes_async(
-                ia_data=ia_data,
-                texto_por_pagina=texto_por_pagina,
-                movimientos_por_pagina=movimientos,
-                filename=filename
+                ia_data_inicial, texto_por_pagina, movimientos_por_pagina, 
+                filename, pdf_bytes, puntos_de_corte
             )
         )
-        return crear_objeto_resultado(resultado_dict)
+        return [crear_objeto_resultado(d) for d in lista_dicts]
     except Exception as e:
-        logger.error(f"Error en el worker 'procesar_digital_worker_sync' para {filename}: {e}", exc_info=True)
-        return e # Devolvemos la excepción para que el endpoint la maneje
+        logger.error(f"Error Worker Digital ({filename}): {e}", exc_info=True)
+        return e
 
 def procesar_ocr_worker_sync(
     ia_data: dict, 
     pdf_content: bytes, 
     filename: str
-) -> Union[AnalisisTPV.ResultadoExtraccion, Exception]:
-    """
-    WORKER SÍNCRONO (para ProcessPool): Inicia un nuevo loop de asyncio
-    y ejecuta el orquestador de Agentes de VISIÓN para un documento escaneado.
-    """
+) -> Union[List[AnalisisTPV.ResultadoExtraccion], Exception]:
     try:
-        # Inicia un nuevo loop de asyncio en este proceso
-        # y ejecuta el orquestador de agentes de visión
-        resultado_dict = asyncio.run(
+        lista_dicts = asyncio.run(
             procesar_documento_escaneado_con_agentes_async(
-                ia_data=ia_data,
-                pdf_bytes=pdf_content,
-                filename=filename
+                ia_data, pdf_content, filename
             )
         )
-        return crear_objeto_resultado(resultado_dict)
+        return [crear_objeto_resultado(d) for d in lista_dicts]
     except Exception as e:
-        logger.error(f"Error en el worker 'procesar_ocr_worker_sync' para {filename}: {e}", exc_info=True)
+        logger.error(f"Error Worker OCR ({filename}): {e}", exc_info=True)
         return e
 
 ### ----- FUNCIONES ORQUESTADORAS PARA NOMIFLASH -----
