@@ -103,17 +103,18 @@ async def procesar_pdf_api(
         logger.info("Etapa 1: Análisis de portada finalizado.")
 
         # --- 2. SEPARACIÓN DE DOCUMENTOS DIGITALES Y ESCANEADOS (Y CALCULOS TOTALES) ---
-        # Preparamos las listas para el siguiente paso.
         documentos_digitales = []
         documentos_escaneados = []
-
-        # Creamos una lista final de resultados, pre-llenada para mantener el orden.
+        
+        # Lista final con el tamaño de los archivos originales (se expandirá dinámicamente)
         resultados_finales: List[Union[AnalisisTPV.ResultadoExtraccion, None]] = [None] * len(archivos_en_memoria)
 
-        # Obtenemos el total de depósitos para la decisión de OCR
+        # Nota: total_depositos_verificacion necesitará ajustes si recibe listas, 
+        # por ahora asumimos que no bloquea el flujo crítico.
         total_depositos_calculado, es_mayor = total_depositos_verificacion(resultados_portada) # la primer variable puede ser usada en el futuro
 
-        logger.info("Empezando la separación de documentos")
+        logger.info("Empezando la separación de documentos y desglose de cuentas múltiples")
+        
         for i, resultado_bruto in enumerate(resultados_portada):
             filename = archivos_en_memoria[i]["filename"]
             # VERIFICACIÓN 1: ¿La tarea falló por completo?
@@ -135,37 +136,44 @@ async def procesar_pdf_api(
                     )
                 continue # Pasamos al siguiente archivo
             
-            # Si no hubo error, desempacamos los resultados
-            datos_ia, es_digital, texto_inicial, movimientos_pagina, texto_por_pagina, puntos_de_corte = resultado_bruto
+            # SI NO HUBO ERROR: Desempacamos. 
+            # Ahora desempacamos también 'rangos_detectados' (la lista de tuplas)
+            lista_cuentas_ia, es_digital, texto_inicial, movimientos_pagina, texto_por_pagina, rangos_detectados = resultado_bruto
+
             # Intenta procesar este archivo, preparado para cualquier error
             try:
-                # Sea digital o escaneado se prepara para extracción
-                if es_digital:
-                    documentos_digitales.append({
-                        "index": i, 
-                        "filename": filename,
-                        "ia_data": datos_ia, 
-                        "texto_por_pagina": texto_por_pagina, 
-                        "movimientos": movimientos_pagina,
-                        "content": docs[i]["content"],
-                        "puntos_de_corte": puntos_de_corte
-                    })
-                else:
-                    documentos_escaneados.append({
-                        "index": i, 
-                        "filename": filename,
-                        "content": docs[i]["content"], 
-                        "ia_data": datos_ia
-                    })
+                for cuenta_index, datos_cuenta in enumerate(lista_cuentas_ia):
+                    # OBTENEMOS EL RANGO CORRESPONDIENTE A ESTA CUENTA
+                    # Como lista_cuentas_ia y rangos_detectados están alineados 1 a 1:
+                    rango_actual = rangos_detectados[cuenta_index] # Ejemplo: (1, 4)
+                    
+                    if es_digital:
+                        documentos_digitales.append({
+                            "index": i,
+                            "sub_index": cuenta_index,
+                            "filename": f"{filename} (Cta {cuenta_index + 1})",
+                            "ia_data": datos_cuenta,
+                            "texto_por_pagina": texto_por_pagina,
+                            "movimientos": movimientos_pagina,
+                            # "content": ... ya no lo pasamos si quitamos pdf_bytes del worker
+                            "rango_paginas": rango_actual # <--- AQUÍ PASAMOS LA TUPLA
+                        })
+                    else:
+                        documentos_escaneados.append({
+                            "index": i,
+                            "sub_index": cuenta_index,
+                            "filename": f"{filename} (Cta {cuenta_index + 1})",
+                            "content": archivos_en_memoria[i]["content"],
+                            "ia_data": datos_cuenta # <--- PASAMOS SOLO EL DICCIONARIO
+                        })
 
-            # Red de validación
             except Exception as e:
-                logger.error("La separación de documentos falló durante la etapa 2.")
-                # Si algo falla en el 'try' (como una ValidationError de Pydantic), se capturamos.
+                logger.error(f"Error al separar cuentas en '{filename}': {e}", exc_info=True)
                 resultados_finales[i] = AnalisisTPV.ErrorRespuesta(
-                    error=f"Error al procesar los datos de la extracción inicial en: '{filename}'. Vuelve a mandar este archivo."
+                    error=f"Error procesando cuentas internas en '{filename}'."
                 )
-        logger.info(f"Separación finalizada. Digitales: {len(documentos_digitales)}, Escaneados: {len(documentos_escaneados)}")
+
+        logger.info(f"Separación finalizada. Tareas Digitales: {len(documentos_digitales)}, Tareas Escaneadas: {len(documentos_escaneados)}")
 
         # --- ETAPA 3: PROCESAMIENTO PRINCIPAL (CPU PESADO) ---
         loop = asyncio.get_running_loop()
@@ -184,13 +192,13 @@ async def procesar_pdf_api(
             for doc_info in documentos_digitales:
                 tarea = loop.run_in_executor(
                     executor,
-                    procesar_digital_worker_sync, # Worker para digitales
+                    procesar_digital_worker_sync,
                     doc_info["ia_data"],
                     doc_info["texto_por_pagina"],
                     doc_info["movimientos"],
                     doc_info["filename"],
-                    doc_info["content"],          # <--- ¡FALTABA ESTA LÍNEA! (pdf_bytes)
-                    doc_info.get("puntos_de_corte") # Opcional: Si agregaste puntos de corte al doc_info en el paso 2
+                    # doc_info["content"], <--- Quitar si el worker ya no usa pdf_bytes
+                    doc_info["rango_paginas"] # Pasamos la tupla (start, end)
                 )
                 tareas_digitales.append((doc_info["index"], tarea))
 

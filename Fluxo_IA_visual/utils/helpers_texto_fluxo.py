@@ -51,7 +51,7 @@ CONFIGURACION_BANCOS = {
         "depositos_pattern": [r"total de depósitos\s*\$\s*([\d,]+\.\d{2})"]
     },
     "banbajío": {
-        "alias": ["banco del bajio"],
+        "alias": ["banco del bajio", "banco del bajío"],
         "rfc_pattern": [r"r\.f\.c\.\s*([a-zñ&]{3,4}\d{6}[a-z0-9]{2,3})"],
         "comisiones_pattern": [r"comisiones efectivamente cobradas\s*\$\s*([\d,]+\.\d{2})"],
         "depositos_pattern": [r"saldo anterior \(\+\) depositos \(\-\) cargos saldo actual\s*\n\$\s*[\d,.]+\s+\$\s*([\d,]+\.\d{2})"]
@@ -188,6 +188,19 @@ for nombre_str, config in CONFIGURACION_BANCOS.items():
             nombre_clave = key.replace("_pattern", "")
             PATRONES_COMPILADOS[nombre_str][nombre_clave] = re.compile(patron_combinado)
 
+# Configuración de triggers más robusta
+TRIGGERS_CONFIG = {
+    # Palabras que indican INEQUÍVOCAMENTE que empieza una cuenta
+    "inicio": [
+        'la gat real es el rendimiento que obtendría después de descontar la inflación estimada"',
+        'detalle de la cuenta'
+    ],
+    # Palabras que indican el FINAL (generalmente pies de página legales o timbres SAT)
+    "fin": [
+        "este documento es una representación impresa de un cfdi",
+    ]
+}
+
 # Creamos el prompt del modelo a utilizar
 prompt_base_fluxo = """
 Eres un experto extractor de datos de estados de cuenta bancarios. Analiza las imágenes y extrae EXACTAMENTE los siguientes datos.
@@ -234,24 +247,29 @@ REGLAS IMPORTANTES:
 """
 
 PROMPT_TEXTO_INSTRUCCIONES_BASE = """
-INSTRUCCIONES DE FORMATO (TOON - Token Oriented Object Notation):
+INSTRUCCIONES DE FORMATO (TOON):
 1.  NO USES JSON. Genera una salida de texto plano ultra-compacta.
 2.  Una línea por transacción.
 3.  Delimitador: Usa el caracter `|` (pipe) para separar los campos.
-4.  Estructura: `FECHA | DESCRIPCION COMPLETA | MONTO | TIPO`
+4.  Estructura: `FECHA | DESCRIPCION COMPLETA | MONTO | TIPO | ETIQUETA`
     * `FECHA`: dd/mm o formato original.
     * `DESCRIPCION`: Todo el texto del concepto.
     * `MONTO`: Solo números y puntos (ej. 1500.50).
     * `TIPO`: "cargo" o "abono".
+    * `ETIQUETA`: "TPV" (si cumple las reglas) o "GENERAL" (si es cualquier otro movimiento).
 
 INSTRUCCIONES CLAVE DE PROCESAMIENTO:
 1. Ignora el inicio si está incompleto: Si el texto comienza a mitad de una transacción (por ejemplo, sin una fecha o referencia clara), ignora esa primera transacción incompleta. El fragmento anterior ya la procesó.
 2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
-3. Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información. Si un dato no está, déjalo como null.
+3.  Extrae TODOS los movimientos (gastos, cheques, comisiones, depósitos).
+4.  Para la columna `ETIQUETA`, revisa minuciosamente las reglas del banco.
+    * Si es un cargo, la etiqueta siempre es "GENERAL".
+    * Si es un abono y cumple las reglas de palabras clave o multilínea, es "TPV".
+5. Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información. Si un dato no está, déjalo como null.
 
 EJEMPLO DE SALIDA, SIEMPRE EN MINUSCULAS:
-05/MAY | VENTAS TARJETAS 123456 | 15200.50 | abono
-06/MAY | COMISION POR APERTURA | 500.00 | cargo
+05/MAY | VENTAS TARJETAS 123456 | 15200.50 | abono | GENERAL
+06/MAY | COMISION POR APERTURA | 500.00 | cargo | TPV
 """
 
 PROMPT_OCR_INSTRUCCIONES_BASE = """
@@ -392,7 +410,7 @@ PROMPTS_POR_BANCO = {
             - liquidacion wuzi
             - prestamo
             - anticipo
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba de forma exacta.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba de forma exacta, son tratados como 'generales'.
     """,
 
     "banbajío": """ 
@@ -403,7 +421,7 @@ PROMPTS_POR_BANCO = {
             - deposito negocios afiliados adquiriente
             - deposito negocios afiliados adquiriente optblue amex
     
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "banorte": """ 
@@ -428,7 +446,7 @@ PROMPTS_POR_BANCO = {
             - traspaso entre cuentas propias
             - prestamo
             - dal sapi de cv
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "afirme": """ 
@@ -442,7 +460,7 @@ PROMPTS_POR_BANCO = {
             - deposito efectivo
             - deposito en efectivo
             - dep.efectivo
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "hsbc": """ 
@@ -455,7 +473,7 @@ PROMPTS_POR_BANCO = {
             - deposito bpu y 10 numeros
             - transf rec hsbcnet dep tpv (comnibaciones de numeros)
             - deposito bpu (varias combinaciones)
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "mifel": """ 
@@ -476,7 +494,7 @@ PROMPTS_POR_BANCO = {
             las demás líneas deben contener:
             - dispersion ed fondos
             - cuentas
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "scotiabank": """ 
@@ -494,16 +512,16 @@ PROMPTS_POR_BANCO = {
             - pocket de latinoamerica sapi
             - first data merchant services m
             - american express company mexic
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "banregio": """ 
     CRITERIO DE ACEPTACIÓN EXCLUSIVO:
-    Una transacción SOLO es válida si su descripción contiene alguna de estas frases exactas:
+    Una transacción SOLO es válida como TPV si su descripción contiene alguna de estas frases exactas:
         Reglas de la extracción de una línea:
             - abono ventas tdd 
             - abono ventas tdc
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "santander": """ 
@@ -520,7 +538,7 @@ PROMPTS_POR_BANCO = {
             las demás líneas deben contener:
             - deposito bpu
             - traspaso entre cuentas
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "multiva": """ 
@@ -540,7 +558,7 @@ PROMPTS_POR_BANCO = {
             las demás líneas deben contener:
             - latinoamerica sapi de cv
             - bpu2437419281
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "citibanamex": """ 
@@ -556,7 +574,7 @@ PROMPTS_POR_BANCO = {
             las demás líneas deben contener:
             - por evopay
             - suc
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "banamex": """ 
@@ -573,7 +591,7 @@ PROMPTS_POR_BANCO = {
             las demás líneas deben contener:
             - por evopay
             - suc
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "azteca": """ 
@@ -587,7 +605,7 @@ PROMPTS_POR_BANCO = {
             - emisor: santander
             - payclip s de rl decv
             - gananciasclip
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "inbursa": """ 
@@ -600,7 +618,7 @@ PROMPTS_POR_BANCO = {
             - kiwi international payment technologies
             - cobra online sapi de cv
             - operadora paypal de mexico s de rl
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "intercam": """ 
@@ -613,7 +631,7 @@ PROMPTS_POR_BANCO = {
             - recepcion spei banorte
             la última línea deben contener:
             - 136180018635900157
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
     "vepormas": """ 
@@ -626,6 +644,6 @@ PROMPTS_POR_BANCO = {
             - recepcion spei banorte
             la última línea deben contener:
             - 136180018635900157
-    IMPORTANTE: Ignora cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 }

@@ -198,33 +198,34 @@ def parsear_respuesta_toon(texto_toon: str) -> List[Dict[str, Any]]:
 
         partes = linea.split('|')
         
-        # Esperamos 4 partes. Si hay más (ej. pipe en la descripción), intentamos unirlas
-        if len(partes) < 3: # Mínimo fecha, desc, monto
+        # Esperamos 4 o 5 partes. Si hay más (ej. pipe en la descripción), intentamos unirlas
+        if len(partes) < 4: # Mínimo fecha, desc, monto
             logger.debug(f"Línea TOON ignorada (formato incorrecto): {linea}")
             continue
             
         try:
-            # Asignación inteligente
             fecha = partes[0].strip()
             
-            # El tipo suele ser el último
-            tipo_raw = partes[-1].strip().lower()
+            # El último es la etiqueta, el penúltimo el tipo
+            etiqueta_raw = partes[-1].strip().upper() # "TPV" o "GENERAL"
+            tipo_raw = partes[-2].strip().lower()
+            monto_str = partes[-3].strip()
+            
+            # Descripción es lo que sobra en medio
+            descripcion = " ".join(p.strip() for p in partes[1:-3])
+            
+            # Normalización de tipo
             tipo = "abono" if "abono" in tipo_raw else "cargo" if "cargo" in tipo_raw else "indefinido"
             
-            # El monto suele ser el penúltimo
-            monto_str = partes[-2].strip()
-            
-            # La descripción es todo lo que está en medio (por si hubo pipes extra)
-            descripcion = " ".join(p.strip() for p in partes[1:-2])
-            
-            # Validación básica: Si el monto no parece número, algo anda mal
-            # (limpiar_monto ya lo tienes, úsalo aquí si quieres validar)
-            
+            # Validación de etiqueta (fallback por seguridad)
+            es_tpv_ia = "TPV" in etiqueta_raw
+
             transacciones.append({
                 "fecha": fecha,
                 "descripcion": descripcion,
-                "monto": monto_str, # Se limpiará más adelante en la lógica de negocio
-                "tipo": tipo
+                "monto": monto_str,
+                "tipo": tipo,
+                "categoria": es_tpv_ia
             })
             
         except Exception as e:
@@ -368,11 +369,12 @@ def total_depositos_verificacion(
     """
     total_depositos = 0.0
     for resultado in resultados_portada:
-        if not isinstance(resultado, Exception):
-            datos_ia, _, _, _, _, _ = resultado
-            if datos_ia:
-                depo = datos_ia.get("depositos") or 0.0
-                total_depositos += float(depo)
+        if isinstance(resultado, Exception): continue
+        lista_cuentas, _, _, _, _, _ = resultado
+        for cuenta in lista_cuentas:
+            depo = cuenta.get("depositos", 0) or 0
+            total_depositos += float(depo)
+
     es_mayor = total_depositos >= 250_000
     return total_depositos, es_mayor
 
@@ -475,40 +477,22 @@ def _crear_prompt_agente_unificado(
     # 3. Construir el prompt final
     prompt_final = f"""
     {intro}
-    Tu tarea es analizar el documento y extraer ÚNICAMENTE las transacciones que cumplan con los criterios específicos del banco detallados abajo.
     
-    --- CRITERIOS ESPECÍFICOS DEL BANCO ({banco}) ---
+    TU OBJETIVO PRINCIPAL:
+    1. Analizar el documento completo.
+    2. Extraer TODAS las transacciones visibles (Cargos y Abonos).
+    3. Clasificar cada transacción en la columna `ETIQUETA` usando las reglas del banco.
+
+    --- REGLAS DE CLASIFICACIÓN PARA '{banco}' ---
+    Si una transacción cumple CUALQUIERA de las siguientes condiciones estrictas, su `ETIQUETA` debe ser "TPV".
+    Si NO cumple ninguna, su `ETIQUETA` debe ser "GENERAL".
+
     {pistas_especificas}
     --------------------------------------------------
-
-    Si las pistas de arriba no especifican reglas, entonces extrae todas las transacciones de ingresos TPV, depósitos en efectivo o traspasos entre cuentas propias.
 
     {instrucciones_base}
     """
     return prompt_final.strip()
-
-def calcular_rangos_de_cuentas(total_paginas: int, puntos_de_corte: List[int]) -> List[List[int]]:
-    """
-    Convierte una lista de páginas de inicio en rangos de páginas para procesar.
-    Ej: total=10, cortes=[1, 6] -> Retorna [[1,2,3,4,5], [6,7,8,9,10]]
-    """
-    if not puntos_de_corte:
-        return [list(range(1, total_paginas + 1))] # Un solo rango con todo
-
-    # Aseguramos que estén ordenados y únicos
-    cortes = sorted(list(set(puntos_de_corte)))
-    
-    rangos = []
-    for i, inicio in enumerate(cortes):
-        # El fin es el siguiente corte - 1, o el final del documento
-        fin = cortes[i+1] - 1 if i + 1 < len(cortes) else total_paginas
-        
-        # Generamos la lista de páginas para este rango
-        rango_paginas = list(range(inicio, fin + 1))
-        if rango_paginas:
-            rangos.append(rango_paginas)
-            
-    return rangos
 
 def crear_objeto_resultado(datos_dict: dict) -> AnalisisTPV.ResultadoExtraccion: # no estamos usandola (identificar si se usará o eliminar)
     """

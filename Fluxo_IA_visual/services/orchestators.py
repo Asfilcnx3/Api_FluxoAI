@@ -1,6 +1,6 @@
 from ..utils.helpers import (
     es_escaneado_o_no, extraer_datos_por_banco, extraer_json_del_markdown, limpiar_monto, sanitizar_datos_ia, 
-    reconciliar_resultados_ia, detectar_tipo_contribuyente, crear_chunks_con_superposicion, crear_objeto_resultado, calcular_rangos_de_cuentas
+    reconciliar_resultados_ia, detectar_tipo_contribuyente, crear_chunks_con_superposicion, crear_objeto_resultado
     
 )
 from .ia_extractor import (
@@ -65,254 +65,239 @@ async def analizar_metadatos_rango(
 # ESTA FUNCIÓN ES PARA OBTENER Y PROCESAR LAS PORTADAS DE LOS PDF
 async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict[str, Any], bool, str, Dict[int, Any]]:
     """
-    Orquesta el proceso de forma secuencial siguiendo el siguiente roadmap:
-    1. Extrae texto por página Y movimientos con coordenadas.
-    2. Reconoce el banco.
-    3. Decide qué páginas enviar a la IA.
-    4. Llama a la IA con las páginas correctas.
-    5. Corrige su respuesta.
+    Orquesta el proceso detectando múltiples cuentas dentro del mismo PDF.
+    Devuelve una lista de resultados (uno por cada cuenta detectada).
     """
     loop = asyncio.get_running_loop()
 
-    # --- 1. PRIMERO: Extraer Texto Y Movimientos en una sola llamada --- La ejecutamos en un hilo separado para no bloquear el programa.
-    movimientos_por_pagina, texto_por_pagina, puntos_de_corte = await loop.run_in_executor(
+    # --- 1. PRIMERO: Extraer Texto Y Movimientos (Detectar cortes) ---
+    # Esta función ya nos devuelve los puntos donde cambia de cuenta
+    movimientos_por_pagina, texto_por_pagina, rangos_cuentas = await loop.run_in_executor(
         None,
         extraer_movimientos_con_posiciones,
         pdf_bytes
     )
 
-    # Construimos el texto de verificación completo a partir de las páginas
-    texto_verificacion = "\n".join(texto_por_pagina.values())
+    # Construimos el texto completo
+    texto_verificacion_global = "\n".join(texto_por_pagina.values())
+    es_documento_digital = es_escaneado_o_no(texto_verificacion_global)
 
-    # Determinamos si es escaneado o digital
-    es_documento_digital = es_escaneado_o_no(texto_verificacion)
+    logger.info(f"Se detectaron {len(rangos_cuentas)} cuentas en los rangos: {rangos_cuentas}")
 
-    # --- 2. SEGUNDO: Reconocer el banco y el RFC a partir del texto (con regex) ---
-    datos_regex = extraer_datos_por_banco(texto_verificacion.lower())
-    banco_estandarizado = datos_regex.get("banco")
-    logger.debug(banco_estandarizado)
-    rfc_estandarizado = datos_regex.get("rfc")
-    logger.debug(rfc_estandarizado)
-    comisiones_estanarizadas = datos_regex.get("comisiones")
-    logger.debug(comisiones_estanarizadas)
-    depositos_estanarizadas = datos_regex.get("depositos")
-    logger.debug(depositos_estanarizadas)
+    resultados_acumulados = []
 
-    # --- 3. TERCERO: Decidir qué páginas procesar ---
-    paginas_para_ia = [1, 2] # Por defecto, las primeras dos
-    
-    if banco_estandarizado == "BANREGIO":
-        logger.debug("Banco BANREGIO detectado. Ajustando páginas para el análisis de IA.")
-        try:
-            # Usamos fitz de nuevo, pero solo para un rápido conteo de páginas.
-            # Es muy eficiente y no procesa el contenido.
-            with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
-                total_paginas = len(doc)
-            
-            if total_paginas > 5:
-                # Creamos la lista de páginas: la primera y las últimas 5
-                paginas_finales = list(range(total_paginas - 4, total_paginas + 1))
+    # --- BUCLE PRINCIPAL: PROCESAR CADA CUENTA (RANGO) ---
+    for inicio_rango, fin_rango in rangos_cuentas:
+        logger.info(f"Procesando cuenta en rango: {inicio_rango} a {fin_rango}")
+
+        # A. Construir texto específico de este rango para regex
+        # (Esto aísla el contexto: el regex solo verá texto de ESTA cuenta)
+        texto_rango = []
+        for p in range(inicio_rango, fin_rango + 1):
+            texto_rango.append(texto_por_pagina.get(p, ""))
+        texto_verificacion_rango = "\n".join(texto_rango)
+
+        # B. Reconocer banco y datos por Regex para ESTE rango
+        datos_regex = extraer_datos_por_banco(texto_verificacion_rango.lower())
+        banco_estandarizado = datos_regex.get("banco")
+        rfc_estandarizado = datos_regex.get("rfc")
+        comisiones_est = datos_regex.get("comisiones")
+        depositos_est = datos_regex.get("depositos")
+
+        # C. Decidir qué páginas enviar a la IA (Relativo al rango actual)
+        # Lógica: Mandamos la primera del rango y la segunda (si existe)
+        paginas_para_ia = [inicio_rango]
+        if (inicio_rango + 1) <= fin_rango:
+            paginas_para_ia.append(inicio_rango + 1)
+
+        # Lógica especial para BANREGIO (u otros que requieran final del documento)
+        if banco_estandarizado == "BANREGIO":
+            longitud_rango = (fin_rango - inicio_rango) + 1
+            if longitud_rango > 5:
+                # Primeras del rango + Últimas 5 DEL RANGO
+                paginas_finales = list(range(fin_rango - 4, fin_rango + 1))
                 paginas_para_ia = sorted(list(set(paginas_para_ia + paginas_finales)))
             else:
-                # Si el doc es corto, tomamos todas las páginas
-                paginas_para_ia = list(range(1, total_paginas + 1))
+                # Todas las páginas del rango si es corto
+                paginas_para_ia = list(range(inicio_rango, fin_rango + 1))
 
-        except Exception as e:
-            logger.debug(f"No se pudo determinar el total de páginas para Banregio: {e}. Usando páginas por defecto.")
-            paginas_para_ia = [1, 2]
-    
-    # --- 4. CUARTO: Llamar a las IA de forma PARALELA con las páginas correctas ---
-    tarea_gpt = analizar_gpt_fluxo(prompt, pdf_bytes, paginas_a_procesar = paginas_para_ia)
-    tarea_gemini = analizar_gemini_fluxo(prompt, pdf_bytes, paginas_a_procesar = paginas_para_ia)
-    
-    resultados_ia_brutos = await asyncio.gather(tarea_gpt, tarea_gemini, return_exceptions=True)
+        # D. Llamar a las IA (Enviando las páginas calculadas)
+        tarea_gpt = analizar_gpt_fluxo(prompt, pdf_bytes, paginas_a_procesar=paginas_para_ia)
+        tarea_gemini = analizar_gemini_fluxo(prompt, pdf_bytes, paginas_a_procesar=paginas_para_ia)
 
-    res_gpt_str, res_gemini_str = resultados_ia_brutos # la respuesta de gemini tiene un error en los tokens
+        resultados_ia_brutos = await asyncio.gather(tarea_gpt, tarea_gemini, return_exceptions=True)
+        res_gpt_str, res_gemini_str = resultados_ia_brutos
 
-    datos_gpt = extraer_json_del_markdown(res_gpt_str) if not isinstance(res_gpt_str, Exception) else {}
-    datos_gemini = extraer_json_del_markdown(res_gemini_str) if not isinstance(res_gemini_str, Exception) else {}
+        # Extracción segura de JSON (Validamos que no sea Exception Y que tenga contenido)
+        datos_gpt = {}
+        if res_gpt_str and not isinstance(res_gpt_str, Exception):
+            datos_gpt = extraer_json_del_markdown(res_gpt_str)
+        
+        datos_gemini = {}
+        if res_gemini_str and not isinstance(res_gemini_str, Exception):
+            datos_gemini = extraer_json_del_markdown(res_gemini_str)
 
-    # --- SANITIZACION ---
-    datos_gpt_sanitizados = sanitizar_datos_ia(datos_gpt)
-    datos_gemini_sanitizados = sanitizar_datos_ia(datos_gemini)
+        # E. Sanitización y Reconciliación
+        datos_gpt_sanitizados = sanitizar_datos_ia(datos_gpt)
+        datos_gemini_sanitizados = sanitizar_datos_ia(datos_gemini)
+        
+        datos_ia_reconciliados = reconciliar_resultados_ia(datos_gpt_sanitizados, datos_gemini_sanitizados)
 
-    # --- RECONCILIACIÓN ---
-    datos_ia_reconciliados = reconciliar_resultados_ia(datos_gpt_sanitizados, datos_gemini_sanitizados)
+        # F. Merge con datos Regex (Prioridad al texto detectado)
+        if banco_estandarizado: datos_ia_reconciliados["banco"] = banco_estandarizado
+        if rfc_estandarizado: datos_ia_reconciliados["rfc"] = rfc_estandarizado
+        if comisiones_est: datos_ia_reconciliados["comisiones"] = comisiones_est
+        if depositos_est: datos_ia_reconciliados["depositos"] = depositos_est
 
-    # --- 5. QUINTO: Corregir el resultado de la IA y devolver ---
-    # Usamos el banco que reconocimos por texto, que es más fiable.
-    if banco_estandarizado is not None:
-        datos_ia_reconciliados["banco"] = banco_estandarizado
-    if rfc_estandarizado is not None:
-        datos_ia_reconciliados["rfc"] = rfc_estandarizado
-    if comisiones_estanarizadas is not None:
-        datos_ia_reconciliados["comisiones"] = comisiones_estanarizadas
-    if depositos_estanarizadas is not None:
-        datos_ia_reconciliados["depositos"] = depositos_estanarizadas
-    
-    return datos_ia_reconciliados, es_documento_digital, texto_verificacion, movimientos_por_pagina, texto_por_pagina, puntos_de_corte
+        # Agregamos metadatos útiles para saber de qué páginas vino en el frontend/DB
+        datos_ia_reconciliados["_metadatos_paginas"] = {
+            "inicio": inicio_rango,
+            "fin": fin_rango,
+            "paginas_analizadas_ia": paginas_para_ia
+        }
+        
+        resultados_acumulados.append(datos_ia_reconciliados)
+
+    # Retornamos la lista de resultados y los datos globales
+    # OJO: Ahora el primer elemento es una LISTA, no un Dict único.
+    return resultados_acumulados, es_documento_digital, texto_verificacion_global, movimientos_por_pagina, texto_por_pagina, rangos_cuentas
     
 async def procesar_documento_con_agentes_async(
-    ia_data_inicial: dict, 
-    texto_por_pagina: Dict[int, str], 
-    movimientos_por_pagina: Dict[int, Any],
+    ia_data_cuenta: dict,            # Ya viene con los datos correctos de ESTA cuenta
+    texto_total: Dict[int, str],     # Texto de todo el PDF
+    movimientos_total: Dict[int, Any], # Movimientos de todo el PDF
     filename: str,
-    pdf_bytes: bytes, 
-    puntos_de_corte: List[int] = None
-) -> List[Dict[str, Any]]:
+    rango_paginas: Tuple[int, int]   # <--- NUEVO: Tupla (Inicio, Fin) explícita
+) -> Dict[str, Any]:                 # <--- Retorna UN dict, no una lista
     
-    logger.info(f"Iniciando procesamiento multicuenta para: {filename}")
-    banco = ia_data_inicial.get("banco", "generico").lower()
+    start_pg, end_pg = rango_paginas
+    nombre_cuenta = f"{filename} (Págs {start_pg}-{end_pg})"
     
-    # 1. Definir Rangos
-    rangos_a_procesar = []
-    if banco == "banbajío" and puntos_de_corte:
-        rangos_a_procesar = calcular_rangos_de_cuentas(len(texto_por_pagina), puntos_de_corte)
-        # LOG IMPORTANTE
-        logger.info(f"MULTICUENTA DETECTADA: Se procesarán {len(rangos_a_procesar)} cuentas separadas.")
-    else:
-        rangos_a_procesar = [sorted(list(texto_por_pagina.keys()))]
-
-    resultados_multiples_cuentas = []
-
-    # 2. Procesar cada "Sub-Cuenta"
-    for i, rango_paginas in enumerate(rangos_a_procesar):
-        if not rango_paginas: continue 
-
-        pagina_inicio_rango = rango_paginas[0]
-        # Nombre virtual para identificar en el Excel
-        nombre_subcuenta = f"{filename} (Cuenta {i+1})" if len(rangos_a_procesar) > 1 else filename
-        logger.info(f"Procesando: {nombre_subcuenta} (Págs {rango_paginas[0]}-{rango_paginas[-1]})")
-        
-        # --- A. LÓGICA DE METADATOS (PORTADA) ---
-        if i == 0:
-            ia_data_seccion = ia_data_inicial
-        else:
-            # Lógica: Página del corte + Página anterior
-            paginas_para_metadata = [pagina_inicio_rango - 1, pagina_inicio_rango]
-            # Aseguramos no pedir página 0 si el corte es en la 1 (aunque el helper ya maneja cortes >1)
-            paginas_para_metadata = [p for p in paginas_para_metadata if p > 0]
-            
-            logger.info(f"Re-analizando metadatos para {nombre_subcuenta} en páginas {paginas_para_metadata}...")
-            try:
-                ia_data_seccion = await analizar_metadatos_rango(
-                    pdf_bytes, paginas_para_metadata, prompt_base_fluxo
-                )
-                ia_data_seccion["banco"] = ia_data_inicial.get("banco") 
-            except Exception as e:
-                logger.error(f"Fallo al re-analizar portada para {nombre_subcuenta}: {e}")
-                ia_data_seccion = ia_data_inicial.copy()
-
-        # --- B. FILTRAR INPUTS ---
-        texto_subset = {k: v for k, v in texto_por_pagina.items() if k in rango_paginas}
-        movimientos_subset = {k: v for k, v in movimientos_por_pagina.items() if k in rango_paginas}
-        paginas_con_movimientos = [p for p, m in movimientos_subset.items() if m]
-        
-        if not paginas_con_movimientos:
-            logger.warning(f"La cuenta {nombre_subcuenta} no tiene movimientos. Generando reporte vacío.")
-            # ERROR CORREGIDO: No hacer continue sin guardar un resultado vacío
-            resultado_vacio = {
-                **ia_data_seccion,
-                "nombre_archivo_virtual": nombre_subcuenta,
-                "transacciones": [],
-                "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
-                "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
-                "error_transacciones": "Sin movimientos detectados en esta sección."
-            }
-            resultados_multiples_cuentas.append(resultado_vacio)
-            continue
-
-        # --- C. CHUNKING Y AGENTES ---
-        chunks = crear_chunks_con_superposicion(
-            texto_por_pagina=texto_subset,
-            paginas_con_movimientos=paginas_con_movimientos,
-            tamano_chunk=5, superposicion=1
-        )
-        
-        tareas = [llamar_agente_tpv(banco, txt, pags) for txt, pags in chunks]
-        res_chunks = await asyncio.gather(*tareas, return_exceptions=True)
-        
-        # --- D. CONSOLIDACIÓN ---
-        transacciones_totales = []
-        ids_unicos = set()
-        for res in res_chunks:
-            if not isinstance(res, Exception):
-                for trx in res:
-                    id_trx = f"{trx.get('fecha')}-{trx.get('monto')}-{trx.get('descripcion', '')[:15]}"
-                    if id_trx not in ids_unicos:
-                        transacciones_totales.append(trx)
-                        ids_unicos.add(id_trx)
-        
-        # --- ERROR ANTERIOR CORREGIDO AQUI ---
-        if not transacciones_totales:
-            logger.warning(f"Agentes no encontraron transacciones en {nombre_subcuenta}.")
-            resultado_sin_trx = {
-                **ia_data_seccion,
-                "nombre_archivo_virtual": nombre_subcuenta,
-                "transacciones": [],
-                "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
-                "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
-                "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
-                "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
-            }
-            resultados_multiples_cuentas.append(resultado_sin_trx)
-            continue # ¡CONTINUAR, NO RETORNAR!
-        
-        # --- E. CLASIFICACIÓN DE NEGOCIO ---
-        total_depositos_efectivo = 0.0
-        total_traspaso_entre_cuentas = 0.0
-        total_entradas_financiamiento = 0.0
-        total_entradas_bmrcash = 0.0
-        total_entradas_tpv = 0.0
-        transacciones_clasificadas = []
-
-        for trx in transacciones_totales:
-            monto_float = trx.get("monto", 0.0)
-            if not isinstance(monto_float, (int, float)):
-                monto_float = limpiar_monto(str(monto_float))
-
-            descripcion_limpia = trx.get("descripcion", "").lower()
-
-            if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
-                if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
-                    total_depositos_efectivo += monto_float
-                elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
-                    total_traspaso_entre_cuentas += monto_float
-                elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
-                    total_entradas_financiamiento += monto_float
-                elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
-                    total_entradas_bmrcash += monto_float
-                else:
-                    total_entradas_tpv += monto_float
-                
-                transacciones_clasificadas.append({
-                    "fecha": trx.get("fecha"),
-                    "descripcion": trx.get("descripcion"),
-                    "monto": f"{monto_float:,.2f}",
-                    "tipo": trx.get("tipo", "abono") 
-                })
-
-        # --- F. ENSAMBLE FINAL ---
-        comisiones_str = ia_data_seccion.get("comisiones", "0.0")
-        comisiones = limpiar_monto(comisiones_str)
-        entradas_TPV_neto = total_entradas_tpv - comisiones
-
-        resultado_cuenta = {
-            **ia_data_seccion,
-            "nombre_archivo_virtual": nombre_subcuenta,
-            "transacciones": transacciones_clasificadas,
-            "depositos_en_efectivo": total_depositos_efectivo,
-            "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
-            "total_entradas_financiamiento": total_entradas_financiamiento,
-            "entradas_bmrcash": total_entradas_bmrcash,
-            "entradas_TPV_bruto": total_entradas_tpv,
-            "entradas_TPV_neto": entradas_TPV_neto,
-            "error_transacciones": None
+    logger.info(f"Worker iniciando para: {nombre_cuenta}")
+    banco = ia_data_cuenta.get("banco", "generico").lower()
+    
+    # 1. FILTRAR INPUTS (Solo lo que pertenece a este rango)
+    # Generamos la lista de páginas [1, 2, 3...]
+    lista_paginas = list(range(start_pg, end_pg + 1))
+    
+    texto_subset = {k: v for k, v in texto_total.items() if k in lista_paginas}
+    movimientos_subset = {k: v for k, v in movimientos_total.items() if k in lista_paginas}
+    paginas_con_movimientos = [p for p, m in movimientos_subset.items() if m]
+    
+    # --- CASO: SIN MOVIMIENTOS ---
+    if not paginas_con_movimientos:
+        logger.warning(f"La cuenta {nombre_cuenta} no tiene páginas con movimientos numéricos.")
+        return {
+            **ia_data_cuenta,
+            "nombre_archivo_virtual": nombre_cuenta,
+            "transacciones": [],
+            "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
+            "error_transacciones": "Sin movimientos detectados en el rango asignado."
         }
-        resultados_multiples_cuentas.append(resultado_cuenta)
 
-    return resultados_multiples_cuentas
+    # 2. CHUNKING Y AGENTES
+    chunks = crear_chunks_con_superposicion(
+        texto_por_pagina=texto_subset,
+        paginas_con_movimientos=paginas_con_movimientos,
+        tamano_chunk=5, superposicion=1
+    )
+    
+    tareas = [llamar_agente_tpv(banco, txt, pags) for txt, pags in chunks]
+    res_chunks = await asyncio.gather(*tareas, return_exceptions=True)
+    
+    # 3. CONSOLIDACIÓN
+    transacciones_totales = []
+    ids_unicos = set()
+    for res in res_chunks:
+        if not isinstance(res, Exception):
+            for trx in res:
+                # ID simple para deduplicar superposiciones
+                id_trx = f"{trx.get('fecha')}-{trx.get('monto')}-{trx.get('descripcion', '')[:15]}"
+                if id_trx not in ids_unicos:
+                    transacciones_totales.append(trx)
+                    ids_unicos.add(id_trx)
+    
+    # --- CASO: AGENTES NO ENCONTRARON NADA ---
+    if not transacciones_totales:
+        return {
+            **ia_data_cuenta,
+            "nombre_archivo_virtual": nombre_cuenta,
+            "transacciones": [],
+            "depositos_en_efectivo": 0.0, "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0, "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0, "entradas_TPV_neto": 0.0,
+            "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
+        }
+    
+    # 4. CLASIFICACIÓN (Igual que antes)
+    total_depositos_efectivo = 0.0
+    total_traspaso_entre_cuentas = 0.0
+    total_entradas_financiamiento = 0.0
+    total_entradas_bmrcash = 0.0
+    total_entradas_tpv = 0.0
+    todas_las_transacciones = []
+
+    for trx in transacciones_totales:
+        monto_float = trx.get("monto", 0.0)
+        if not isinstance(monto_float, (int, float)):
+            monto_float = limpiar_monto(str(monto_float))
+
+        descripcion_limpia = trx.get("descripcion", "").lower()
+        es_tpv_ia = trx.get("categoria", False)
+
+        trx_procesada = {
+            "fecha": trx.get("fecha"),
+            "descripcion": trx.get("descripcion"),
+            "monto": f"{monto_float:,.2f}",
+            "tipo": trx.get("tipo"),
+            "categoria": "GENERAL"
+        }
+
+        if trx.get("tipo") == "abono":
+            if all(p in descripcion_limpia for p in PALABRAS_EXCLUIDAS):
+                if any(p in descripcion_limpia for p in PALABRAS_EFECTIVO):
+                    total_depositos_efectivo += monto_float
+                    trx_procesada["categoria"] = "EFECTIVO"
+                elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                    total_traspaso_entre_cuentas += monto_float
+                    trx_procesada["categoria"] = "TRASPASO"
+                elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                    total_entradas_financiamiento += monto_float
+                    trx_procesada["categoria"] = "FINANCIAMIENTO"
+                elif any(p in descripcion_limpia for p in PALABRAS_BMRCASH):
+                    total_entradas_bmrcash += monto_float
+                    trx_procesada["categoria"] = "BMRCASH"
+                else:
+                    if es_tpv_ia:
+                        total_entradas_tpv += monto_float
+                        trx_procesada["categoria"] = "TPV"
+        
+        elif trx.get("tipo") == "cargo":
+            trx_procesada["categoria"] = "CARGO"
+
+        todas_las_transacciones.append(trx_procesada)
+
+    # 5. RETORNO FINAL
+    comisiones_str = ia_data_cuenta.get("comisiones", "0.0")
+    if comisiones_str is None: comisiones_str = "0.0" # Seguridad
+    comisiones = limpiar_monto(str(comisiones_str))
+    
+    entradas_TPV_neto = total_entradas_tpv - comisiones
+
+    return {
+        **ia_data_cuenta,
+        "nombre_archivo_virtual": nombre_cuenta,
+        "transacciones": todas_las_transacciones,
+        "depositos_en_efectivo": total_depositos_efectivo,
+        "traspaso_entre_cuentas": total_traspaso_entre_cuentas,
+        "total_entradas_financiamiento": total_entradas_financiamiento,
+        "entradas_bmrcash": total_entradas_bmrcash,
+        "entradas_TPV_bruto": total_entradas_tpv,
+        "entradas_TPV_neto": entradas_TPV_neto,
+        "error_transacciones": None
+    }
 
 async def procesar_documento_escaneado_con_agentes_async(
     ia_data: dict, 
@@ -412,17 +397,18 @@ def procesar_digital_worker_sync(
     texto_por_pagina: Dict[int, str], 
     movimientos_por_pagina: Dict[int, Any], 
     filename: str,
-    pdf_bytes: bytes, 
-    puntos_de_corte: List[int] = None
-) -> Union[List[AnalisisTPV.ResultadoExtraccion], Exception]:
+    rango_paginas: Tuple[int, int]
+) -> Union[AnalisisTPV.ResultadoExtraccion, Exception]:
     try:
-        lista_dicts = asyncio.run(
+        # Ejecutamos la función async que ahora devuelve UN solo dict
+        resultado_dict = asyncio.run(
             procesar_documento_con_agentes_async(
                 ia_data_inicial, texto_por_pagina, movimientos_por_pagina, 
-                filename, pdf_bytes, puntos_de_corte
+                filename, rango_paginas
             )
         )
-        return [crear_objeto_resultado(d) for d in lista_dicts]
+        # Lo envolvemos en el objeto Pydantic esperado
+        return crear_objeto_resultado(resultado_dict)
     except Exception as e:
         logger.error(f"Error Worker Digital ({filename}): {e}", exc_info=True)
         return e
