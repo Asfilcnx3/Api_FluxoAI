@@ -1,6 +1,6 @@
 # Aqui irán todas las funciones de extracción de PDF (sin IA)
 from ..core.exceptions import PDFCifradoError
-from ..utils.helpers_texto_nomi import PATTERNS_COMPILADOS_RFC_CURP
+from ..utils.helpers_texto_fluxo import TRIGGERS_CONFIG
 
 from typing import Dict, List, Optional, Tuple, Any
 import re
@@ -126,86 +126,103 @@ def extraer_texto_de_pdf(pdf_bytes: bytes, num_paginas: Optional[int] = None) ->
     return texto_extraido
 
 # --- FUNCIÓN PARA EXTRAER MOVIMIENTOS CON POSICIONES ---
-def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[int, str]]:
+def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List[Dict[str, Any]]], Dict[int, str], List[Tuple[int, int]]]:
     """
-    Extrae movimientos basándose ESTRICTAMENTE en la alineación vertical 
-    con encabezados clave (Cargos/Abonos).
-    
-    Si hay 5 columnas pero solo 2 tienen encabezados válidos, solo extrae esas 2.
+    Extrae movimientos y detecta RANGOS EXACTOS de cuentas (Inicio -> Fin).
+    Si no encuentra rangos, devuelve el documento completo como un solo rango.
     """
     resultados_por_pagina = {}
     texto_por_pagina = {}
-    puntos_de_corte = [] 
-    FRASE_GATILLO = "detalle de la cuenta"
-
-    # Diccionario de términos para buscar encabezados
+    
+    # Ahora almacenamos TUPLAS (inicio, fin)
+    rangos_detectados: List[Tuple[int, int]] = [] 
+    
+    # Variables de control de estado
+    inicio_actual: Optional[int] = None
+    
+    # Regex y Mappings (Igual que antes)
     KEYWORDS_MAPPING = {
         "cargo": ["cargos", "retiros", "retiro", "debitos", "débitos", "cargo", "debe", "signo"],
-        "abono": ["abonos", "depositos", "depósito", "depósitos", "creditos", "créditos", "abono", "haber"]
+        "abono": ["abonos", "depositos", "depósito", "depósitos", "creditos", "créditos", "abono"]
     }
-    
-    # Regex estricta para montos (requiere punto decimal)
     MONTO_REGEX = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}$')
 
     try:
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            total_paginas = len(doc)
+            
             for page_index, page in enumerate(doc):
                 page_num = page_index + 1
                 
-                # Extracción inicial
+                # Extracción de texto
                 page_text = page.get_text("text").lower()
-                words = page.get_text("words") # (x0, y0, x1, y1, text, block_no, line_no, word_no)
+                words = page.get_text("words") 
                 
                 texto_por_pagina[page_num] = page_text
                 resultados_por_pagina[page_num] = []
+                
+                # --- LÓGICA DE DETECCIÓN DE RANGOS ---
+                
+                # 1. Si NO tenemos un inicio activo, buscamos palabras de INICIO
+                if inicio_actual is None:
+                    if any(trig in page_text for trig in TRIGGERS_CONFIG["inicio"]):
+                        logging.info(f"Página {page_num}: Inicio de cuenta detectado.")
+                        inicio_actual = page_num
+                        # OJO: No hacemos 'continue', porque la cuenta podría empezar y acabar en esta misma página.
 
-                # --- DETECCIÓN DE PUNTOS DE CORTE ---
-                if FRASE_GATILLO in page_text:
-                    # IGNORAR SI ES LA PÁGINA 1 (Para evitar crear un rango [1, 1] redundante)
-                    if page_num > 1: 
-                        logging.info(f"Página {page_num}: Detectado inicio de SEGUNDA cuenta ('{FRASE_GATILLO}').")
-                        puntos_de_corte.append(page_num)
+                # 2. Si TENEMOS un inicio activo, buscamos palabras de FIN o un NUEVO INICIO (cascada)
+                if inicio_actual is not None:
+                    encontrado_fin = False
+                    
+                    # A. ¿Hay palabra de fin?
+                    if any(trig in page_text for trig in TRIGGERS_CONFIG["fin"]):
+                        logging.info(f"Página {page_num}: Fin de cuenta detectado (Cierre normal).")
+                        rangos_detectados.append((inicio_actual, page_num))
+                        inicio_actual = None # Reseteamos para buscar la siguiente cuenta
+                        encontrado_fin = True
+                    
+                    # B. Seguridad: ¿Aparece un NUEVO INICIO sin haber cerrado el anterior?
+                    # Esto pasa si el banco no pone footer legal entre cuentas pegadas.
+                    elif page_num > inicio_actual and any(trig in page_text for trig in TRIGGERS_CONFIG["inicio"]):
+                        logging.info(f"Página {page_num}: Nuevo inicio detectado. Cerrando cuenta anterior en pág {page_num - 1}.")
+                        rangos_detectados.append((inicio_actual, page_num - 1))
+                        inicio_actual = page_num # El inicio actual es esta página
+                    
+                    # C. Si estamos en la última página y sigue abierta, cerramos a la fuerza
+                    if not encontrado_fin and inicio_actual is not None and page_num == total_paginas:
+                        logging.info(f"Página {page_num}: Fin de documento. Cerrando cuenta abierta.")
+                        rangos_detectados.append((inicio_actual, total_paginas))
+                        inicio_actual = None
+
+                # --- LÓGICA DE EXTRACCIÓN DE COLUMNAS (Solo si estamos dentro de una posible cuenta) ---
+                # (Optimizacion: Si inicio_actual es None, técnicamente no deberíamos extraer, 
+                # pero lo dejamos correr por si el fallback se activa al final).
                 
                 # --- PASO 1: DETECTAR UBICACIÓN DE ENCABEZADOS ---
-                # Guardamos el centro X de cada encabezado encontrado
                 headers_found = {"cargo": [], "abono": []}
-                
                 for w in words:
                     text_clean = w[4].lower().strip().replace(":", "").replace(".", "")
-                    
-                    # Revisamos si la palabra es un encabezado de cargo
                     if text_clean in KEYWORDS_MAPPING["cargo"]:
-                        center_x = (w[0] + w[2]) / 2
-                        headers_found["cargo"].append(center_x)
-                        
-                    # Revisamos si la palabra es un encabezado de abono
+                        headers_found["cargo"].append((w[0] + w[2]) / 2)
                     elif text_clean in KEYWORDS_MAPPING["abono"]:
-                        center_x = (w[0] + w[2]) / 2
-                        headers_found["abono"].append(center_x)
+                        headers_found["abono"].append((w[0] + w[2]) / 2)
 
-                # Si no encontramos NINGÚN encabezado en toda la página, es arriesgado procesarla
-                # (A menos que quieras mantener un fallback, pero pediste no inferir)
                 if not headers_found["cargo"] and not headers_found["abono"]:
-                    logging.debug(f"Página {page_num}: Ignorada. No se encontraron encabezados de Cargos/Abonos.")
                     continue
 
                 # --- PASO 2: AGRUPAR NÚMEROS EN COLUMNAS ---
-                # Filtramos todo lo que parece un monto
                 candidatos_montos = [
                     {"centro_x": (w[0] + w[2]) / 2, "monto": float(w[4].replace(',', '')), "coords": w[:4], "x0": w[0], "x1": w[2]}
                     for w in words if MONTO_REGEX.fullmatch(w[4].strip())
                 ]
 
-                if len(candidatos_montos) < 3:
-                    continue # Página sin datos numéricos suficientes
+                if len(candidatos_montos) < 3: continue 
 
-                # Agrupamos por proximidad horizontal (Clustering)
                 candidatos_montos.sort(key=lambda x: x['centro_x'])
                 columnas = []
                 if candidatos_montos:
                     columna_actual = [candidatos_montos[0]]
                     for i in range(len(candidatos_montos)-1):
-                        # Si la distancia entre centros X es pequeña (<20px), es la misma columna
                         diff = candidatos_montos[i+1]['centro_x'] - candidatos_montos[i]['centro_x']
                         if diff < 20: 
                             columna_actual.append(candidatos_montos[i+1])
@@ -214,49 +231,38 @@ def extraer_movimientos_con_posiciones(pdf_bytes: bytes) -> Tuple[Dict[int, List
                             columna_actual = [candidatos_montos[i+1]]
                     columnas.append(columna_actual)
 
-                # Filtramos columnas "basura" (muy pocos elementos)
                 columnas_validas = [col for col in columnas if len(col) >= 3]
                 
-                logging.info(f"Página {page_num}: Se detectaron {len(columnas_validas)} columnas numéricas. Buscando coincidencia con encabezados...")
-
-                # --- PASO 3: VINCULAR COLUMNAS CON ENCABEZADOS ---
+                # --- PASO 3: VINCULAR COLUMNAS ---
                 for columna in columnas_validas:
-                    # Calculamos el rango X que ocupa esta columna
                     col_min_x = min(m['x0'] for m in columna)
                     col_max_x = max(m['x1'] for m in columna)
-                    
                     tipo_asignado = "indefinido"
-                    
-                    # Verificamos si algún encabezado de CARGO cae sobre esta columna
-                    # Damos un margen de tolerancia (ej. 15px)
                     margin = 15
                     
-                    # Check Cargos
                     for header_x in headers_found["cargo"]:
                         if (col_min_x - margin) <= header_x <= (col_max_x + margin):
-                            tipo_asignado = "cargo"
-                            break
+                            tipo_asignado = "cargo"; break
                     
-                    # Check Abonos (Si ya es cargo, no sobreescribimos a menos que sea corrección, pero asumimos exclusividad)
                     if tipo_asignado == "indefinido":
                         for header_x in headers_found["abono"]:
                             if (col_min_x - margin) <= header_x <= (col_max_x + margin):
-                                tipo_asignado = "abono"
-                                break
+                                tipo_asignado = "abono"; break
                     
-                    # --- PASO 4: GUARDAR RESULTADOS ---
                     if tipo_asignado != "indefinido":
-                        logging.debug(f"  -> Columna en X~{int((col_min_x+col_max_x)/2)} asignada como {tipo_asignado.upper()}")
                         for item in columna:
                             resultados_por_pagina[page_num].append({
-                                "monto": item["monto"],
-                                "tipo": tipo_asignado,
-                                "coords": item["coords"]
+                                "monto": item["monto"], "tipo": tipo_asignado, "coords": item["coords"]
                             })
-                    else:
-                        logging.debug(f"  -> Columna en X~{int((col_min_x+col_max_x)/2)} ignorada (Sin encabezado coincidente).")
 
     except Exception as e:
-        logging.error(f"Error al procesar posiciones en documento: {e}", exc_info=True)
-        
-    return resultados_por_pagina, texto_por_pagina, puntos_de_corte
+        logging.error(f"Error al procesar posiciones: {e}", exc_info=True)
+    
+    # --- FALLBACK ---
+    # Si no detectamos ningún rango (ni inicio ni fin), asumimos que TODO el PDF es una cuenta
+    if not rangos_detectados:
+        logging.warning("No se detectaron triggers de inicio/fin. Usando fallback (Todo el documento).")
+        rangos_detectados = [(1, len(texto_por_pagina))]
+
+    # Retornamos los RANGOS ya calculados
+    return resultados_por_pagina, texto_por_pagina, rangos_detectados

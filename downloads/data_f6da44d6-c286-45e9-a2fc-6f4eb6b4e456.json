@@ -1,0 +1,1204 @@
+{
+    "total_depositos": 3987918.79,
+    "es_mayor_a_250": true,
+    "resultados_generales": [
+        {
+            "banco": "BANBAJÍO",
+            "tipo_moneda": "MXN",
+            "rfc": "MTC150130NI5",
+            "nombre_cliente": "MADERAS Y TABLEROS CRUMSA",
+            "clabe_interbancaria": "072601002803356470",
+            "periodo_inicio": "2024-03-01",
+            "periodo_fin": "2024-03-31",
+            "comisiones": 500.0,
+            "depositos": 2008260.79,
+            "cargos": 217266.0,
+            "saldo_promedio": 0.0,
+            "depositos_en_efectivo": 0.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -500.0
+        },
+        {
+            "banco": "BANBAJÍO",
+            "tipo_moneda": "USD",
+            "rfc": "MTC150130NI5",
+            "nombre_cliente": "MADERAS Y TABLEROS CRUMSA SA DE CV",
+            "clabe_interbancaria": "072601011640681726",
+            "periodo_inicio": "2025-03-03",
+            "periodo_fin": "2025-03-11",
+            "comisiones": 3.0,
+            "depositos": 1979658.0,
+            "cargos": 1979660.11,
+            "saldo_promedio": 2283.49,
+            "depositos_en_efectivo": 0.0,
+            "traspaso_entre_cuentas": 0.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 0.0,
+            "entradas_TPV_bruto": 0.0,
+            "entradas_TPV_neto": -3.0
+        }
+    ],
+    "resultados_individuales": [
+        {
+            "AnalisisIA": {
+                "banco": "BANBAJÍO",
+                "tipo_moneda": "MXN",
+                "rfc": "MTC150130NI5",
+                "nombre_cliente": "MADERAS Y TABLEROS CRUMSA",
+                "clabe_interbancaria": "072601002803356470",
+                "periodo_inicio": "2024-03-01",
+                "periodo_fin": "2024-03-31",
+                "comisiones": 500.0,
+                "depositos": 2008260.79,
+                "cargos": 217266.0,
+                "saldo_promedio": 0.0,
+                "depositos_en_efectivo": 0.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -500.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,620,084.74",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "2935750 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:04:34 clave de rastreo:bb293575020703",
+                        "monto": "1,692,230.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "comision administracion de paquete de servicos",
+                        "monto": "500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "iva comision administracion de paquete de servicos",
+                        "monto": "80.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,034,012.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:13:24:24 clave de rastreo:bb3763034018372",
+                        "monto": "2,034,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "1904770 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:17:46:48 clave de rastreo:7875apr2202503033848075863",
+                        "monto": "170,900.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "1905781 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:13:42:40 clave de rastreo:7875apr1202503043850157588",
+                        "monto": "5.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,274,542.74",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:13:49:52 clave de rastreo:bb2911333018380",
+                        "monto": "1,444,880.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "5,190.81",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "2985230 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:15:37:14 clave de rastreo:bb298523020613",
+                        "monto": "5,191.90",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,768,695.78",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:00:46 clave de rastreo:bb2864206020433",
+                        "monto": "1,768,690.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "6 mar",
+                        "descripcion": "1908911 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:16:44:16 clave de rastreo:7875apr2202503063856105221",
+                        "monto": "209,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,008,260.79",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "9722740 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:23:04 clave de rastreo:bb972274020788",
+                        "monto": "2,217,266.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "1909998 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:12:40:00 clave de rastreo:7875apr1202503073858395256",
+                        "monto": "210,400.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "4017720 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:16:31:36 clave de rastreo:bb401772020668",
+                        "monto": "210,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "1911028 depósito spei:pago factura 13206 institución emisora:bbva mexico ordenante:zurich muebles sa de  cv cuenta ordenante:012700001632780852 referencia:70325 hora:18:13:26 clave de rastreo:bnet01002503100027782834",
+                        "monto": "100,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,032,031.02",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "9922860 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:18:34 clave de rastreo:bb992286020783",
+                        "monto": "2,132,030.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,408,686.93",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "4064460 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:12:16:54 clave de rastreo:bb406446020668",
+                        "monto": "1,408,688.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "1913876 depósito spei:transferencia de adan ruiz olivo institución emisora:banregio ordenante:adan ruiz olivo cuenta ordenante:058700000150387530 referencia:100325 hora:16:57:16 clave de rastreo:058-10/03/2025/10-122oguj099",
+                        "monto": "17,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "1913877 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:16:57:46 clave de rastreo:7875apr1202503103866845725",
+                        "monto": "31,200.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "pago de servicio : tarjetacredito-bbtotalsystem(bi-1465665018592 gp referencia: 4201994000554405(bi-1465665018592 gp",
+                        "monto": "21,686.49",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "pago de servicio : tarjetacredito-bbtotalsystem(bi-978537018432 gpo referencia: 4201994000616642(bi-978537018432 gpo",
+                        "monto": "9,471.79",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "9981420 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:17:14:52 clave de rastreo:bb998142020753",
+                        "monto": "10,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "3095090 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:17:18:10 clave de rastreo:bb309509020688",
+                        "monto": "1,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,609,962.44",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "3501980 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:12:01:18 clave de rastreo:bb350198020658",
+                        "monto": "1,615,504.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "135,844.06",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:15:34:42 clave de rastreo:bb1928447020773",
+                        "monto": "135,844.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "1915258 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:17:11:06 clave de rastreo:7875apr2202503113869371990",
+                        "monto": "153,465.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "pago a interes-capital de credito",
+                        "monto": "153,461.65",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "13 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,986,789.94",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "13 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:37:28 clave de rastreo:bb1934896020773",
+                        "monto": "1,986,790.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "3,066,427.10",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:38:32 clave de rastreo:bb1889045018852",
+                        "monto": "3,066,430.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "473,932.27",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "986,248.61",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:13:43:04 clave de rastreo:bb1942255020773",
+                        "monto": "1,460,180.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "1920288 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:17:39:54 clave de rastreo:7875apr1202503143879980922",
+                        "monto": "400,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:10:13:54 clave de rastreo:bb1015490020753",
+                        "monto": "400,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "1923436 depósito spei:transferencia de adan ruiz olivo institución emisora:banregio ordenante:adan ruiz olivo cuenta ordenante:058700000150387530 referencia:180325 hora:11:26:50 clave de rastreo:058-18/03/2025/18-122olay010",
+                        "monto": "15,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,381,963.66",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "9877810 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:13:25:42 clave de rastreo:bb987781020768",
+                        "monto": "1,396,960.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "956,536.69",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:16:22:42 clave de rastreo:bb2941192018380",
+                        "monto": "956,540.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,003,709.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "3689400 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:12:39:10 clave de rastreo:bb368940020653",
+                        "monto": "2,003,700.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "49,545.48",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "4379370 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:16:23:12 clave de rastreo:bb437937020623",
+                        "monto": "49,556.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "20 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "7,336.34",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "20 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:09:49:04 clave de rastreo:bb3097147020353",
+                        "monto": "7,337.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "20 mar",
+                        "descripcion": "1926848 depósito spei:pago de factura de triplay  13735 institución emisora:hsbc ordenante:claudio  umaa?a montiel cuenta ordenante:021814040276024320 referencia:869 hora:17:06:42 clave de rastreo:hsbc636948",
+                        "monto": "30,249.90",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "3,000,034.29",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "4377680 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:30:52 clave de rastreo:bb437768020618",
+                        "monto": "3,030,284.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "1928027 depósito spei:pruebamaderas institución emisora:stp ordenante:limitless financial services sapi de cv cuenta ordenante:646180613400000009 referencia:2103 hora:13:51:40 clave de rastreo:maderasprueba",
+                        "monto": "0.01",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "1928356 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:15:46:50 clave de rastreo:7875apr2202503213899131590",
+                        "monto": "251,900.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "251,867.51",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "1928360 depósito spei:prestamo limitless institución emisora:bbva mexico ordenante:limitless financial  services sapi de cv cuenta ordenante:012180001237715554 referencia:2103258 hora:15:48:30 clave de rastreo:002601002503210000107614",
+                        "monto": "1,242,696.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "3751020 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:16:28:26 clave de rastreo:bb375102020653",
+                        "monto": "242,728.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "traspaso de recursos a su prlv 1-6 dias # 2285",
+                        "monto": "1,000,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24 mar",
+                        "descripcion": "1930701 depósito spei:transferencia de adan ruiz olivo institución emisora:banregio ordenante:adan ruiz olivo cuenta ordenante:058700000150387530 referencia:240325 hora:11:14:40 clave de rastreo:058-24/03/2025/24-122oohb618",
+                        "monto": "15,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "991,485.30",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:14:14:26 clave de rastreo:bb3762686018532",
+                        "monto": "1,006,486.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,587,176.18",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "3817450 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:23:14 clave de rastreo:bb381745020653",
+                        "monto": "2,587,175.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,989,059.05",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:11:45:10 clave de rastreo:bb3764406018532",
+                        "monto": "1,989,060.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "1932580 depósito spei:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072580002803356478 referencia:150130 hora:16:13:58 clave de rastreo:7875apr2202503253908950930",
+                        "monto": "150,576.80",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "envío spei:pago credito(bi- ) institución receptora:fondeadora beneficiario:fondeadora (dato no verificado por esta institución) cuenta beneficiaria:699180600006873027 referencia:150130 hora:16:19:08 clave de rastreo:bb2914876020443",
+                        "monto": "50,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "envío spei:pago credito(bi- ) institución receptora:fondeadora beneficiario:fondeadora (dato no verificado por esta institución) cuenta beneficiaria:699180600006873027 referencia:150130 hora:16:23:08 clave de rastreo:bb1012294020788",
+                        "monto": "100,576.80",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "27 mar",
+                        "descripcion": "6732203 traspaso de recursos de la cuenta conecta banbajio# 65426580201(bi-67322 ordenante:   maderas matlapa s.a de c.v. (bi-67322031634)",
+                        "monto": "30,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:10:59:04 clave de rastreo:bb3276655020343",
+                        "monto": "30,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "221,457.13",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:14:36:34 clave de rastreo:bb7169216018692",
+                        "monto": "221,450.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "1,040,816.36",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:10:47:04 clave de rastreo:bb1023675020808",
+                        "monto": "1,040,820.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "1940509 depósito spei:transferencia de adan ruiz olivo institución emisora:banregio ordenante:adan ruiz olivo cuenta ordenante:058700000150387530 referencia:310325 hora:14:08:58 clave de rastreo:058-31/03/2025/31-122osma764",
+                        "monto": "12,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "2,027,122.87",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "3611040 envío spei:a cuenta crumsa(bi- ) institución receptora:banorte beneficiario:maderas y tableros crumsa (dato no verificado por esta institución) cuenta beneficiaria:072601002803356470 referencia:150130 hora:15:00:12 clave de rastreo:bb361104020613",
+                        "monto": "2,039,125.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        },
+        {
+            "AnalisisIA": {
+                "banco": "BANBAJÍO",
+                "tipo_moneda": "USD",
+                "rfc": "MTC150130NI5",
+                "nombre_cliente": "MADERAS Y TABLEROS CRUMSA SA DE CV",
+                "clabe_interbancaria": "072601011640681726",
+                "periodo_inicio": "2025-03-03",
+                "periodo_fin": "2025-03-11",
+                "comisiones": 3.0,
+                "depositos": 1979658.0,
+                "cargos": 1979660.11,
+                "saldo_promedio": 2283.49,
+                "depositos_en_efectivo": 0.0,
+                "traspaso_entre_cuentas": 0.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 0.0,
+                "entradas_TPV_bruto": 0.0,
+                "entradas_TPV_neto": -3.0
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "799777 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:10:58:06 clave de rastreo:20250303400727875cap4003984752",
+                        "monto": "80,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "80,002.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "799942 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:16:52 clave de rastreo:20250303400727875cap3003985518",
+                        "monto": "100,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "3 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "100,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "800472 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:36:40 clave de rastreo:20250304400727875cap1003988027",
+                        "monto": "60,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "800481 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:44:26 clave de rastreo:20250304400727875cap2003988062",
+                        "monto": "5.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "800482 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:45:20 clave de rastreo:20250304400727875cap4003988066",
+                        "monto": "2,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "62,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "800607 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:15:33:20 clave de rastreo:20250304400727875apac003988598",
+                        "monto": "250.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "4 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "255.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "800738 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:10:02:26 clave de rastreo:20250305400727875apac003989167",
+                        "monto": "98,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "87,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "9861750 envío spid: a cuenta monex(bi-1000359012509) institución receptora:bmonex beneficiario:banco monex sa institucion (dato no verificado por esta institución) cuenta beneficiaria:112962000029315744 referencia:150130 hora:16:45:04 clave de rastreo:2025030540030dl986175012509",
+                        "monto": "10,495.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "9861750 comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "5 mar",
+                        "descripcion": "9861750 iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "802093 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:18:50 clave de rastreo:20250307400727875apab003995546",
+                        "monto": "100,006.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "7 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "100,006.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "803051 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:10032025 hora:11:14:24 clave de rastreo:20250310400727875apa7003999885",
+                        "monto": "101,089.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "101,090.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "803113 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:12:11:30 clave de rastreo:20250310400727875apa7004000176",
+                        "monto": "140,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "70,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "803584 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:48:46 clave de rastreo:20250311400727875cap2004002640",
+                        "monto": "9,989.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "79,989.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "803835 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:15:22:20 clave de rastreo:20250311400727875cap4004003872",
+                        "monto": "25,095.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "1963001 envío spid: f345842(bi-1003707012509) institución receptora:jp morgan beneficiario:araucomex (dato no verificado por esta institución) cuenta beneficiaria:110180000776457616 referencia:150130 hora:15:24:44 clave de rastreo:2025031140030dl19630012510",
+                        "monto": "18,314.13",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "1963001 comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "1963001 iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "6,778.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "13 mar",
+                        "descripcion": "804587 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:32:20 clave de rastreo:20250313400727875apac004007755",
+                        "monto": "99,992.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "13 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "99,992.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "805350 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:22:24 clave de rastreo:20250314400727875cap2004011417",
+                        "monto": "19,880.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "9912870 envío spid: f345935(bi-1005564012509) institución receptora:jp morgan beneficiario:araucomex (dato no verificado por esta institución) cuenta beneficiaria:110180000776457616 referencia:150130 hora:11:23:32 clave de rastreo:2025031440030dl991287012509",
+                        "monto": "19,872.85",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "9912870 comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "9912870 iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "805391 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:36:10 clave de rastreo:20250314400727875apac004011586",
+                        "monto": "156,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "156,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "805462 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:12:04:58 clave de rastreo:20250314400727875cap2004011902",
+                        "monto": "24,107.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "24,110.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "805710 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:32:52 clave de rastreo:20250314400727875apac004013145",
+                        "monto": "49,990.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "14 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "49,990.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "806495 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:13:23:20 clave de rastreo:20250318400727875cap4004017076",
+                        "monto": "118,597.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "70,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "18 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "48,597.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "807018 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:12:33:20 clave de rastreo:20250319400727875cap1004019605",
+                        "monto": "119,223.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "101,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "9937390 envío spid: f346061(bi-1008026012509) institución receptora:jp morgan beneficiario:araucomex (dato no verificado por esta institución) cuenta beneficiaria:110180000776457616 referencia:150130 hora:15:51:26 clave de rastreo:2025031940030dl993739012509",
+                        "monto": "15,351.51",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "9937390 comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "9937390 iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "19 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "2,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "20 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "368.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "808345 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:13:18 clave de rastreo:20250321400727875apac004025670",
+                        "monto": "149,993.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "149,993.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "deposito por operacion cambios",
+                        "monto": "12,380.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "9959230 envío spid: a cuenta monex(bi-1010218012509) institución receptora:bmonex beneficiario:banco monex sa institucion (dato no verificado por esta institución) cuenta beneficiaria:112962000029315744 referencia:150130 hora:15:51:10 clave de rastreo:2025032140030dl995923012509",
+                        "monto": "12,375.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "9959230 comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21 mar",
+                        "descripcion": "9959230 iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24 mar",
+                        "descripcion": "809514 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:14:11:56 clave de rastreo:20250324400727875cap2004031065",
+                        "monto": "49,998.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "50,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "809783 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:16:00 clave de rastreo:20250325400727875cap4004032635",
+                        "monto": "129,992.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "129,992.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "809821 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:11:41:38 clave de rastreo:20250325400727875apa7004032787",
+                        "monto": "99,994.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "99,994.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "812195 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:14:33:16 clave de rastreo:20250328400727875cap2004044546",
+                        "monto": "11,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "11,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "812338 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:15:31:58 clave de rastreo:20250328400727875apab004045144",
+                        "monto": "36,637.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "envío spid: f3123 f3124(bi-1014479012509) institución receptora:jp morgan beneficiario:araucomex (dato no verificado por esta institución) cuenta beneficiaria:110180000776457616 referencia:150130 hora:15:33:40 clave de rastreo:2025032840030dl1000184012509",
+                        "monto": "36,628.26",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "comision por transferencia - envio; en usd (spid; banca por internet)",
+                        "monto": "3.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "iva comision por transferencia - envio; en usd (spid; banca por internet",
+                        "monto": "0.48",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "812398 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:16:05:18 clave de rastreo:20250328400727875apab004045466",
+                        "monto": "34,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28 mar",
+                        "descripcion": "envío spid: a cuenta monex(bi-1014558012509) institución receptora:bmonex beneficiario:banco monex sa institucion (dato no verificado por esta institución) cuenta beneficiaria:112962000029315744 referencia:150130 hora:16:08:02 clave de rastreo:2025032840030dl1000266012509",
+                        "monto": "34,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "812604 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:10:41:18 clave de rastreo:20250331400727875apa7004046495",
+                        "monto": "51,447.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "51,449.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "813100 depósito spid:a cuenta bajio institución emisora:banorte ordenante:maderas y tableros crumsa sa de cv cuenta ordenante:072601011640681726 referencia:150130 hora:14:54:16 clave de rastreo:20250331400727875cap1004048782",
+                        "monto": "99,994.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31 mar",
+                        "descripcion": "retiro por operacion cambios",
+                        "monto": "99,994.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        }
+    ]
+}

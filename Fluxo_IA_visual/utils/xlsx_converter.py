@@ -1,17 +1,17 @@
 import io
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, NamedStyle
-from typing import Dict, Any, List
+from typing import Dict, Any
 
-from ..utils.helpers_texto_fluxo import (
-    PALABRAS_EXCLUIDAS, PALABRAS_EFECTIVO, PALABRAS_TRASPASO_ENTRE_CUENTAS, 
-    PALABRAS_TRASPASO_FINANCIAMIENTO, PALABRAS_BMRCASH
+from .helpers_texto_fluxo import (
+    PALABRAS_EFECTIVO, 
+    PALABRAS_TRASPASO_ENTRE_CUENTAS,
+    PALABRAS_TRASPASO_FINANCIAMIENTO,
+    PALABRAS_BMRCASH,
+    PALABRAS_EXCLUIDAS
 )
 
 def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
-    """
-    Genera un archivo Excel (.xlsx) reorganizado según requerimientos del cliente.
-    """
     wb = Workbook()
     
     # --- ESTILOS ---
@@ -28,16 +28,14 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
     resultados = data_json.get("resultados_individuales", [])
 
     # ==========================================
-    # 1. PESTAÑA: RESUMEN POR CUENTA (Antes la 4, ahora la 1)
+    # 1. RESUMEN POR CUENTA
     # ==========================================
     ws1 = wb.active
     ws1.title = "Resumen por Cuenta"
-    
-    encabezados_resumen = [
-        "Mes", "Cuenta", "Tipo Moneda", "Depósitos", "Cargos", "TPV Bruto", 
+    ws1.append([
+        "Mes", "Cuenta", "Depósitos", "Moneda", "Cargos", "TPV Bruto", 
         "Financiamientos", "Efectivo", "Traspaso entre cuentas", "BMR CASH"
-    ]
-    ws1.append(encabezados_resumen)
+    ])
     
     for res in resultados:
         ia = res.get("AnalisisIA") or {}
@@ -45,15 +43,13 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
         
         periodo = ia.get("periodo_fin") or ia.get("periodo_inicio") or "Desc."
         banco = ia.get("banco", "BANCO")
-        tipo_moneda = ia.get("tipo_moneda", "MXN")
-        clabe = ia.get("clabe_interbancaria", "")
+        clabe = str(ia.get("clabe_interbancaria") or "")
         cuenta_str = f"{banco}-{clabe[-4:]}" if len(clabe) >= 4 else banco
         
         ws1.append([
-            periodo,
-            cuenta_str,
-            tipo_moneda,
+            periodo, cuenta_str,
             ia.get("depositos", 0.0),
+            ia.get("tipo_moneda", "MXN"),
             ia.get("cargos", 0.0),
             ia.get("entradas_TPV_bruto", 0.0),
             ia.get("total_entradas_financiamiento", 0.0),
@@ -64,47 +60,39 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
 
     aplicar_estilo_header(ws1)
     ws1.column_dimensions['B'].width = 25
-    for row in ws1.iter_rows(min_row=2, min_col=3, max_col=9):
-        for cell in row:
-            cell.style = currency_style
+    for row in ws1.iter_rows(min_row=2, min_col=3, max_col=10):
+        for cell in row: cell.style = currency_style
 
     # ==========================================
-    # 2. PESTAÑA: RESUMEN PORTADAS
+    # 2. RESUMEN PORTADAS
     # ==========================================
     ws2 = wb.create_sheet("Resumen Portadas")
-    headers_portadas = [
+    ws2.append([
         "Banco", "RFC", "Cliente", "CLABE / Cuenta", 
         "Periodo Inicio", "Periodo Fin", 
         "Depósitos", "Cargos", "Saldo Promedio", "Comisiones"
-    ]
-    ws2.append(headers_portadas)
+    ])
     
     for res in resultados:
         ia = res.get("AnalisisIA") or {}
+        clabe_segura = str(ia.get("clabe_interbancaria") or "")
         ws2.append([
-            ia.get("banco", "Desconocido"),
-            ia.get("rfc", ""),
-            ia.get("nombre_cliente", ""),
-            ia.get("clabe_interbancaria", ""),
-            ia.get("periodo_inicio", ""),
-            ia.get("periodo_fin", ""),
-            ia.get("depositos", 0.0),
-            ia.get("cargos", 0.0),
-            ia.get("saldo_promedio", 0.0),
-            ia.get("comisiones", 0.0)
+            ia.get("banco", "Desconocido"), ia.get("rfc", ""), ia.get("nombre_cliente", ""),
+            clabe_segura, ia.get("periodo_inicio", ""), ia.get("periodo_fin", ""),
+            ia.get("depositos", 0.0), ia.get("cargos", 0.0),
+            ia.get("saldo_promedio", 0.0), ia.get("comisiones", 0.0)
         ])
     
     aplicar_estilo_header(ws2)
-    for col in ['A', 'B', 'C', 'D']: ws2.column_dimensions[col].width = 25
     for row in ws2.iter_rows(min_row=2, min_col=7, max_col=10):
         for cell in row: cell.style = currency_style
 
     # ==========================================
-    # HELPER PARA PESTAÑAS DE DETALLE
+    # HELPER GENERADOR DE HOJAS
     # ==========================================
     def crear_hoja_detalle(nombre_hoja, criterio_filtro_func):
         ws = wb.create_sheet(nombre_hoja)
-        ws.append(["Banco", "Fecha", "Descripción", "Monto", "Tipo"])
+        ws.append(["Banco", "Fecha", "Descripción", "Monto", "Tipo", "Categoría (IA)"])
         
         for res in resultados:
             ia = res.get("AnalisisIA") or {}
@@ -114,21 +102,21 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
             
             if isinstance(transacciones, list):
                 for tx in transacciones:
-                    descripcion = str(tx.get("descripcion", "")).lower()
+                    desc = str(tx.get("descripcion", "")).lower()
+                    tipo = str(tx.get("tipo", "")).lower()
+                    # AHORA EXTRAEMOS LA CATEGORÍA PARA EL FILTRO
+                    cat = str(tx.get("categoria", "GENERAL")).upper()
                     
-                    # Aplicamos el filtro específico para esta hoja
-                    if criterio_filtro_func(descripcion):
+                    # --- FILTRADO ---
+                    # Pasamos (Descripción, Tipo, Categoría) al filtro
+                    if criterio_filtro_func(desc, tipo, cat):
                         try:
                             monto_val = float(str(tx.get("monto", "0")).replace(",", ""))
-                        except:
-                            monto_val = 0.0
+                        except: monto_val = 0.0
 
                         ws.append([
-                            banco_nom,
-                            tx.get("fecha", ""),
-                            tx.get("descripcion", ""),
-                            monto_val,
-                            tx.get("tipo", "")
+                            banco_nom, tx.get("fecha", ""), tx.get("descripcion", ""),
+                            monto_val, tx.get("tipo", ""), cat
                         ])
         
         aplicar_estilo_header(ws)
@@ -137,51 +125,66 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
             for cell in row: cell.style = currency_style
 
     # ==========================================
-    # PESTAÑAS 3-7: DETALLES DESGLOSADOS
+    # DEFINICIÓN DE FILTROS
     # ==========================================
+
+    def es_excluido(desc):
+        return any(p in desc for p in PALABRAS_EXCLUIDAS)
+
+    # 3. TODOS LOS MOVIMIENTOS
+    # Nota: Agregamos 'c' (categoría) al lambda aunque no lo usemos, para cumplir con el helper
+    crear_hoja_detalle("Todos los Movimientos", lambda d, t, c: not es_excluido(d))
+
+    # 4. TRANSACCIONES TPV (Lógica Estricta + Check Categoría)
+    def filtro_tpv_estricto(desc, tipo, cat):
+        # 1. Filtro de basura
+        if es_excluido(desc): return False
+        
+        # 2. Solo Abonos
+        if "abono" not in tipo and "depósito" not in tipo: return False
+
+        # 3. NUEVO REQUISITO: La categoría NO puede ser GENERAL
+        if cat == "GENERAL": return False
+
+        # 4. Filtro negativo (No debe ser ninguna de las otras categorías especiales)
+        if any(p in desc for p in PALABRAS_EFECTIVO): return False
+        if any(p in desc for p in PALABRAS_TRASPASO_ENTRE_CUENTAS): return False
+        if any(p in desc for p in PALABRAS_TRASPASO_FINANCIAMIENTO): return False
+        if any(p in desc for p in PALABRAS_BMRCASH): return False
+        
+        return True
     
-    # 3. Transacciones TPV (Todo lo que NO sea efectivo, traspaso, financiamiento o bmr)
-    def filtro_tpv(desc):
-        return not (
-            any(p in desc for p in PALABRAS_EFECTIVO) or
-            any(p in desc for p in PALABRAS_TRASPASO_ENTRE_CUENTAS) or
-            any(p in desc for p in PALABRAS_TRASPASO_FINANCIAMIENTO) or
-            any(p in desc for p in PALABRAS_BMRCASH)
-        )
-    crear_hoja_detalle("Transacciones TPV", filtro_tpv)
+    crear_hoja_detalle("Transacciones TPV", filtro_tpv_estricto)
 
-    # 4. Efectivo
-    crear_hoja_detalle("Efectivo", lambda desc: any(p in desc for p in PALABRAS_EFECTIVO))
+    # 5. EFECTIVO
+    crear_hoja_detalle("Efectivo", lambda d, t, c: not es_excluido(d) and any(p in d for p in PALABRAS_EFECTIVO))
 
-    # 5. Financiamientos
-    crear_hoja_detalle("Financiamientos", lambda desc: any(p in desc for p in PALABRAS_TRASPASO_FINANCIAMIENTO))
+    # 6. FINANCIAMIENTOS
+    crear_hoja_detalle("Financiamientos", lambda d, t, c: not es_excluido(d) and any(p in d for p in PALABRAS_TRASPASO_FINANCIAMIENTO))
 
-    # 6. Traspaso entre Cuentas
-    crear_hoja_detalle("Traspaso entre Cuentas", lambda desc: any(p in desc for p in PALABRAS_TRASPASO_ENTRE_CUENTAS))
+    # 7. TRASPASO ENTRE CUENTAS
+    crear_hoja_detalle("Traspaso entre Cuentas", lambda d, t, c: not es_excluido(d) and any(p in d for p in PALABRAS_TRASPASO_ENTRE_CUENTAS))
 
-    # 7. BMRCASH
-    crear_hoja_detalle("BMRCASH", lambda desc: any(p in desc for p in PALABRAS_BMRCASH))
+    # 8. BMRCASH
+    crear_hoja_detalle("BMRCASH", lambda d, t, c: not es_excluido(d) and any(p in d for p in PALABRAS_BMRCASH))
 
     # ==========================================
-    # 8. PESTAÑA: RESUMEN GENERAL (Ahora la última)
+    # 9. RESUMEN GENERAL
     # ==========================================
     ws_final = wb.create_sheet("Resumen General")
     ws_final.append(["Métrica", "Valor"])
     
     total_dep = data_json.get("total_depositos", 0.0)
     es_mayor = "SÍ" if data_json.get("es_mayor_a_250") else "NO"
-    num_docs = len(data_json.get("resultados_individuales", []))
     
     ws_final.append(["Total Depósitos Calculados", total_dep])
     ws_final.append(["¿Es Mayor a 250k?", es_mayor])
-    ws_final.append(["Documentos Procesados", num_docs])
+    ws_final.append(["Documentos Procesados", len(resultados)])
     
     ws_final['B2'].style = currency_style
     aplicar_estilo_header(ws_final)
     ws_final.column_dimensions['A'].width = 30
-    ws_final.column_dimensions['B'].width = 25
 
-    # --- GUARDAR ---
     output = io.BytesIO()
     wb.save(output)
     return output.getvalue()
