@@ -163,12 +163,12 @@ async def obtener_y_procesar_portada(prompt:str, pdf_bytes: bytes) -> Tuple[Dict
     return resultados_acumulados, es_documento_digital, texto_verificacion_global, movimientos_por_pagina, texto_por_pagina, rangos_cuentas
     
 async def procesar_documento_con_agentes_async(
-    ia_data_cuenta: dict,            # Ya viene con los datos correctos de ESTA cuenta
-    texto_total: Dict[int, str],     # Texto de todo el PDF
-    movimientos_total: Dict[int, Any], # Movimientos de todo el PDF
+    ia_data_cuenta: dict, 
+    texto_total: Dict[int, str], 
+    movimientos_total: Dict[int, Any], 
     filename: str,
-    rango_paginas: Tuple[int, int]   # <--- NUEVO: Tupla (Inicio, Fin) explícita
-) -> Dict[str, Any]:                 # <--- Retorna UN dict, no una lista
+    rango_paginas: Tuple[int, int]
+) -> Dict[str, Any]:
     
     start_pg, end_pg = rango_paginas
     nombre_cuenta = f"{filename} (Págs {start_pg}-{end_pg})"
@@ -176,17 +176,14 @@ async def procesar_documento_con_agentes_async(
     logger.info(f"Worker iniciando para: {nombre_cuenta}")
     banco = ia_data_cuenta.get("banco", "generico").lower()
     
-    # 1. FILTRAR INPUTS (Solo lo que pertenece a este rango)
-    # Generamos la lista de páginas [1, 2, 3...]
+    # 1. FILTRAR INPUTS
     lista_paginas = list(range(start_pg, end_pg + 1))
-    
     texto_subset = {k: v for k, v in texto_total.items() if k in lista_paginas}
     movimientos_subset = {k: v for k, v in movimientos_total.items() if k in lista_paginas}
     paginas_con_movimientos = [p for p, m in movimientos_subset.items() if m]
     
-    # --- CASO: SIN MOVIMIENTOS ---
     if not paginas_con_movimientos:
-        logger.warning(f"La cuenta {nombre_cuenta} no tiene páginas con movimientos numéricos.")
+        logger.warning(f"La cuenta {nombre_cuenta} no tiene movimientos.")
         return {
             **ia_data_cuenta,
             "nombre_archivo_virtual": nombre_cuenta,
@@ -213,13 +210,11 @@ async def procesar_documento_con_agentes_async(
     for res in res_chunks:
         if not isinstance(res, Exception):
             for trx in res:
-                # ID simple para deduplicar superposiciones
                 id_trx = f"{trx.get('fecha')}-{trx.get('monto')}-{trx.get('descripcion', '')[:15]}"
                 if id_trx not in ids_unicos:
                     transacciones_totales.append(trx)
                     ids_unicos.add(id_trx)
     
-    # --- CASO: AGENTES NO ENCONTRARON NADA ---
     if not transacciones_totales:
         return {
             **ia_data_cuenta,
@@ -231,7 +226,7 @@ async def procesar_documento_con_agentes_async(
             "error_transacciones": "Agentes LLM no encontraron transacciones TPV."
         }
     
-    # 4. CLASIFICACIÓN (Igual que antes)
+    # 4. CLASIFICACIÓN (Lógica correjida POR DESCARTE)
     total_depositos_efectivo = 0.0
     total_traspaso_entre_cuentas = 0.0
     total_entradas_financiamiento = 0.0
@@ -245,34 +240,55 @@ async def procesar_documento_con_agentes_async(
             monto_float = limpiar_monto(str(monto_float))
 
         descripcion_limpia = trx.get("descripcion", "").lower()
-        es_tpv_ia = trx.get("categoria", False)
+        
+        # dependencia directa de la decisión de la IA para la categorización final
+        es_tpv_ia = trx.get("categoria", False) 
 
         trx_procesada = {
             "fecha": trx.get("fecha"),
             "descripcion": trx.get("descripcion"),
             "monto": f"{monto_float:,.2f}",
             "tipo": trx.get("tipo"),
-            "categoria": "GENERAL"
+            "categoria": "GENERAL" # Por defecto
         }
 
         if trx.get("tipo") == "abono":
-            if all(p in descripcion_limpia for p in PALABRAS_EXCLUIDAS):
+            # 1. FILTRO DE EXCLUSIÓN
+            # Nota: Usamos 'any' para que si encuentra CUALQUIER palabra prohibida, lo descarte.
+            if any(p in descripcion_limpia for p in PALABRAS_EXCLUIDAS):
+                # Se queda como GENERAL (o EXCLUIDO si prefieres etiquetarlo)
+                pass 
+            
+            else:
+                # 2. FILTROS ESPECÍFICOS (Efectivo, Traspaso, BMR...)
                 if any(p in descripcion_limpia for p in PALABRAS_EFECTIVO):
                     total_depositos_efectivo += monto_float
                     trx_procesada["categoria"] = "EFECTIVO"
+                
                 elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_ENTRE_CUENTAS):
                     total_traspaso_entre_cuentas += monto_float
                     trx_procesada["categoria"] = "TRASPASO"
+                
                 elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_FINANCIAMIENTO):
                     total_entradas_financiamiento += monto_float
                     trx_procesada["categoria"] = "FINANCIAMIENTO"
+                
                 elif any(p in descripcion_limpia for p in PALABRAS_BMRCASH):
                     total_entradas_bmrcash += monto_float
                     trx_procesada["categoria"] = "BMRCASH"
+                
                 else:
+                    # --- AQUÍ ESTÁ EL CAMBIO SOLICITADO ---
+                    # Ya pasó todos los filtros de lo que "NO ES".
+                    # Ahora preguntamos: ¿La IA cree que ES TPV?
+                    
                     if es_tpv_ia:
                         total_entradas_tpv += monto_float
                         trx_procesada["categoria"] = "TPV"
+                    else:
+                        # Pasó los filtros negativos, pero la IA no está segura.
+                        # Lo dejamos como GENERAL para revisión manual o descarte.
+                        trx_procesada["categoria"] = "GENERAL"
         
         elif trx.get("tipo") == "cargo":
             trx_procesada["categoria"] = "CARGO"
@@ -281,7 +297,7 @@ async def procesar_documento_con_agentes_async(
 
     # 5. RETORNO FINAL
     comisiones_str = ia_data_cuenta.get("comisiones", "0.0")
-    if comisiones_str is None: comisiones_str = "0.0" # Seguridad
+    if comisiones_str is None: comisiones_str = "0.0"
     comisiones = limpiar_monto(str(comisiones_str))
     
     entradas_TPV_neto = total_entradas_tpv - comisiones

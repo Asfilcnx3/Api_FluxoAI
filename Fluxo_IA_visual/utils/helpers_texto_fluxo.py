@@ -410,7 +410,7 @@ PROMPTS_POR_BANCO = {
             - liquidacion wuzi
             - prestamo
             - anticipo
-    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba de forma exacta, son tratados como 'generales'.
+    IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba de forma exacta, son tratados como 'GENERALES'.
     """,
 
     "banbajío": """ 

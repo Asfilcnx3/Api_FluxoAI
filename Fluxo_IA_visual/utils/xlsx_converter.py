@@ -135,18 +135,19 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
     # Nota: Agregamos 'c' (categoría) al lambda aunque no lo usemos, para cumplir con el helper
     crear_hoja_detalle("Todos los Movimientos", lambda d, t, c: not es_excluido(d))
 
-    # 4. TRANSACCIONES TPV (Lógica Estricta + Check Categoría)
+    # 4. TRANSACCIONES TPV (Lógica Estricta Final)
     def filtro_tpv_estricto(desc, tipo, cat):
-        # 1. Filtro de basura
+        # 1. Filtro de basura (Excluidos)
         if es_excluido(desc): return False
         
         # 2. Solo Abonos
         if "abono" not in tipo and "depósito" not in tipo: return False
 
-        # 3. NUEVO REQUISITO: La categoría NO puede ser GENERAL
+        # 3. REQUERIMIENTO CLAVE: Categoría NO puede ser GENERAL
+        # Como arreglamos el worker, ahora las TPV vendrán etiquetadas como "TPV"
         if cat == "GENERAL": return False
 
-        # 4. Filtro negativo (No debe ser ninguna de las otras categorías especiales)
+        # 4. Filtro negativo (Redundancia de seguridad)
         if any(p in desc for p in PALABRAS_EFECTIVO): return False
         if any(p in desc for p in PALABRAS_TRASPASO_ENTRE_CUENTAS): return False
         if any(p in desc for p in PALABRAS_TRASPASO_FINANCIAMIENTO): return False
