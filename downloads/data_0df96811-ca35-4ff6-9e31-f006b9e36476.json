@@ -1,0 +1,2272 @@
+{
+    "total_depositos": 2173027.25,
+    "es_mayor_a_250": true,
+    "resultados_generales": [
+        {
+            "banco": "BBVA",
+            "tipo_moneda": "MXN",
+            "rfc": "GMC240312421",
+            "nombre_cliente": "GRUPO MATEOS CUEVAS AGENCIA DE VIAJES Y TRANSP S DE RL",
+            "clabe_interbancaria": "012396001235372770",
+            "periodo_inicio": "2024-10-01",
+            "periodo_fin": "2024-10-31",
+            "comisiones": 10399.12,
+            "depositos": 2173027.25,
+            "cargos": 2169954.54,
+            "saldo_promedio": 82570.95,
+            "depositos_en_efectivo": 551022.0,
+            "traspaso_entre_cuentas": 14970.0,
+            "total_entradas_financiamiento": 0.0,
+            "entradas_bmrcash": 11513.44,
+            "entradas_TPV_bruto": 325138.69,
+            "entradas_TPV_neto": 314739.57
+        }
+    ],
+    "resultados_individuales": [
+        {
+            "AnalisisIA": {
+                "banco": "BBVA",
+                "tipo_moneda": "MXN",
+                "rfc": "GMC240312421",
+                "nombre_cliente": "GRUPO MATEOS CUEVAS AGENCIA DE VIAJES Y TRANSP S DE RL",
+                "clabe_interbancaria": "012396001235372770",
+                "periodo_inicio": "2024-10-01",
+                "periodo_fin": "2024-10-31",
+                "comisiones": 10399.12,
+                "depositos": 2173027.25,
+                "cargos": 2169954.54,
+                "saldo_promedio": 82570.95,
+                "depositos_en_efectivo": 551022.0,
+                "traspaso_entre_cuentas": 14970.0,
+                "total_entradas_financiamiento": 0.0,
+                "entradas_bmrcash": 11513.44,
+                "entradas_TPV_bruto": 325138.69,
+                "entradas_TPV_neto": 314739.57
+            },
+            "DetalleTransacciones": {
+                "transacciones": [
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "t20 spei recibidobanamex 0011024transferencia interbancaria ref. 0172023819 002",
+                        "monto": "4,580.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1504020728 x ref. 6786093193",
+                        "monto": "750.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "t20 spei recibidonu mexico 001102416 pax - 11 pax - 5 octubre ref. 0173326467 638",
+                        "monto": "6,700.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct01 20:27 prac d000 folio:4061 ref. ******7277",
+                        "monto": "8,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144736282",
+                        "monto": "7,639.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "v43 comision ventas debito terminales punto de venta ref. 174736282",
+                        "monto": "152.01",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "v44 iva com. ventas debito terminales punto de venta ref. 174736282",
+                        "monto": "24.32",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1544838739 chiapas vale oro ref. 6850448124",
+                        "monto": "3,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1595269370 pago viaje ref. 6865115813",
+                        "monto": "9,800.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1521990235 vuelo sacramento ref. 6865270227",
+                        "monto": "3,182.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1586657125 vuelos ref. 6876246555",
+                        "monto": "5,100.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241002pago ref. 0177148983 072",
+                        "monto": "1,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1580331104 pago europa ref. 6878054207",
+                        "monto": "10,950.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2687662548 viaje ref. 6878577086",
+                        "monto": "9,280.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1518817084 carlos casillas ref. 6878797497",
+                        "monto": "9,990.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1127109385 viaje de martha ref. 6878871660",
+                        "monto": "2,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1127109385 viaje a maz ref. 6879533277",
+                        "monto": "4,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "t20 spei recibidobancoppel 9749144agencia ref. 0177416425 137",
+                        "monto": "5,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "02/oct",
+                        "descripcion": "t20 spei recibidostp 0681127 ref. 0177662323 646",
+                        "monto": "4,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144736288",
+                        "monto": "14,392.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "v43 comision ventas debito terminales punto de venta ref. 174736288",
+                        "monto": "286.40",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "v44 iva com. ventas debito terminales punto de venta ref. 174736288",
+                        "monto": "45.82",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1530224157 excursion gusmarar ref. 0044747012",
+                        "monto": "1,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "aa7 deposito efectivo practic pago 5699 folio:9157 ref. ******7277",
+                        "monto": "3,500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1435383587 turq ref. 6962501209",
+                        "monto": "10,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1562493400 pago ref. 6963534653",
+                        "monto": "1,450.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1505777132 abono playa rocio ref. 6968414952",
+                        "monto": "9,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "03/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700vuelo ref. 0182722688 127",
+                        "monto": "19,770.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736292",
+                        "monto": "19,399.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "386.04",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "61.77",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144736282",
+                        "monto": "10,866.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v43 comision ventas debito terminales punto de venta ref. 174736282",
+                        "monto": "216.23",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "v44 iva com. ventas debito terminales punto de venta ref. 174736282",
+                        "monto": "34.60",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 333",
+                        "monto": "81,105.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidohsbc 0041024transferencia spei ref. 0184856018 021",
+                        "monto": "11,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0194979362 655703 oasis octub ref. 7031901243",
+                        "monto": "65,585.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0194979362 649927 canto octub ref. 7032921647",
+                        "monto": "92,732.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct04 12:50 prac 5738 folio:1466 ref. ******7277",
+                        "monto": "900.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidoscotiabank 0041024transferencia a jesus ref. 0185769729 044",
+                        "monto": "2,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1525501295 vuelos nayeli ref. 7039067809",
+                        "monto": "9,621.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidohsbc 0041024transferencia spei ref. 0186119518 021",
+                        "monto": "11,534.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1551933776 abono viaje ref. 7044520607",
+                        "monto": "440.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidobancoppel 1504342anticipo ref. 0186808633 137",
+                        "monto": "12,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidobanamex 0041024transferencia interbancaria ref. 0187049533 002",
+                        "monto": "1,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidoazteca 8156690avanza ref. 0187852100 127",
+                        "monto": "5,200.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "04/oct",
+                        "descripcion": "t20 spei recibidobanamex 0041024 europa 7 al 24 nov ref. 0188433290 002",
+                        "monto": "15,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t20 spei recibidobancoppel 2157971pago cancun ref. 0189864635 137",
+                        "monto": "6,480.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241005hotel ref. 0190283277 072",
+                        "monto": "1,600.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1526817777 seguro ref. 7137447034",
+                        "monto": "3,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1526817777 viaje europa ref. 7138715524",
+                        "monto": "41,800.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2931344846 pago de reserva he ref. 7139694604",
+                        "monto": "3,200.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct05 18:54 prac 4158 folio:5933 ref. ******7277",
+                        "monto": "3,738.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1572138284 3 habitaciones 15- ref. 7146915234",
+                        "monto": "9,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2890524824 pago de viajes ref. 7202180526",
+                        "monto": "11,490.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1551933776 abono viaje slp ref. 7210122203",
+                        "monto": "400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "s39 serv banca internet ref. serv bca intern",
+                        "monto": "250.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "s39 serv banca internet ref. ops serv bca in",
+                        "monto": "15.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "s40 iva com serv bca internet ref. iva com serv bc",
+                        "monto": "42.40",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736282",
+                        "monto": "7,710.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "153.42",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "24.55",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "7,484.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "148.93",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "23.83",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i72 ventas tdc inter 144736288 ref. 144736288",
+                        "monto": "30,766.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i73 com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "922.98",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i74 iva com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "147.68",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736292",
+                        "monto": "15,420.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "306.85",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "49.10",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i72 ventas tdc inter 144736314 ref. 144736314",
+                        "monto": "7,273.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i73 com vtas tdc inter 174736314 ref. 174736314",
+                        "monto": "218.19",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "i74 iva com vtas tdc inter 174736314 ref. 174736314",
+                        "monto": "34.91",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct07 09:35 prac 3383 folio:2597 ref. ******7277",
+                        "monto": "20,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct07 09:39 prac e449 folio:7601 ref. ******7277",
+                        "monto": "15,800.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct07 09:43 prac e449 folio:7603 ref. ******7277",
+                        "monto": "18.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct07 09:45 prac e449 folio:7606 ref. ******7277",
+                        "monto": "10,800.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1526287428 reserva arturo men ref. 7284220985",
+                        "monto": "20,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t17 spei enviado santander 0710240europa noviembre ref. 0041937125 014",
+                        "monto": "100,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7288496486",
+                        "monto": "7,567.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700asientos ref. 0197079648 127",
+                        "monto": "1,031.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1508235413 victor mercado ref. 7291011114",
+                        "monto": "6,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t20 spei recibidobanamex 0071024pago interbancario ref. 0197348156 002",
+                        "monto": "30,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7299298103",
+                        "monto": "21,286.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2959092560 sunscape ref. 7303329952",
+                        "monto": "1,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "t20 spei recibidobancoppel 4345287agencia ref. 0198576589 137",
+                        "monto": "4,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0194979362 643302 locos octub ref. 7313816827",
+                        "monto": "62,016.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1554974673 viaje a vallarta ref. 7321105069",
+                        "monto": "1,300.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero",
+                        "monto": "5,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "07/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0184227700 anticipo viaje tur ref. 7329864423",
+                        "monto": "5,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "16,312.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "324.60",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "51.94",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736292",
+                        "monto": "8,820.24",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "175.52",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736292",
+                        "monto": "28.08",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 396",
+                        "monto": "8,680.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "t20 spei recibidobanamex 0081024donacion ref. 0101136606 002 00002396904835775664 085901351684328240 edgar,diaz/navarro",
+                        "monto": "8,580.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0115291356 disney ref. 7381324241",
+                        "monto": "3,300.52",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1295519136 pago disneylandia ref. 7382336858",
+                        "monto": "3,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241008sin informaci n ref. 0102159259 072 00072320010942488938 3843cp05202410083434963197 adriana alonso macias",
+                        "monto": "10,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7388115284",
+                        "monto": "1,863.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0162956268 transf a undefined ref. 7389801279",
+                        "monto": "10,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241008viaje ref. 0102392310 072 00072320011591110834 38432p02202410083435098106 stephani nayeli lopez alonso",
+                        "monto": "5,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct08 17:39 prac e747 folio:4073 ref. ******7277",
+                        "monto": "8,100.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1586657125 vuelo ref. 7401408816",
+                        "monto": "2,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7402617698",
+                        "monto": "17,680.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2924293223 pago de transporte ref. 7405257511",
+                        "monto": "2,250.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "aa7 deposito efectivo practic laura patricia s e036 folio:3350 ref. ******7277",
+                        "monto": "2,300.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "aa7 deposito efectivo practic patricia sandoval e036 folio:3352 ref. ******7277",
+                        "monto": "600.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "aa7 deposito efectivo practic paty sandoval e036 folio:3354 ref. ******7277",
+                        "monto": "700.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "08/oct",
+                        "descripcion": "aa7 deposito efectivo practic paty sandovl e037 folio:4914 ref. ******7277",
+                        "monto": "1,600.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736301",
+                        "monto": "10,280.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "204.57",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "32.73",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 59483 sunscape oct ref. 7462506926",
+                        "monto": "73,176.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "t20 spei recibidoklar 2468952vane beltrán fiesta mex 18 al ref. 0105497668 661 00661610005218156321 1xgxfl8zw6xiooobcieumt elizabeth vanessa beltran carranza",
+                        "monto": "1,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700prueba ref. 0106307813 127 00127622013587960364 241009015423767694i ruiz gonzalez ana cristina",
+                        "monto": "1.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700vuelo ref. 0106348902 127 00127622013587960364 241009015423998090i ruiz gonzalez ana cristina",
+                        "monto": "9,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1556043379 boletos de avion g ref. 7481496576",
+                        "monto": "7,246.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1505777132 liquido grupo ref. 7483137586",
+                        "monto": "8,920.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7484010286",
+                        "monto": "698.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0460470082 emiliano vazques ref. 7484345319",
+                        "monto": "3,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 62204 vista nov ref. 7487339674",
+                        "monto": "35,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 60297 riu octubre ref. 7487546138",
+                        "monto": "40,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0194979362 645505 fiesta oct ref. 7488028272",
+                        "monto": "70,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "09/oct",
+                        "descripcion": "t20 spei recibidosantander 8948140transferencia a viajar es disf ref. 0107907440 014 2024100940014trap0000496506770 darwin heredia nava",
+                        "monto": "6,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736314",
+                        "monto": "9,766.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "194.34",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "31.09",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 432",
+                        "monto": "123,550.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "t20 spei recibidostp 0251671 ref. 0109154952 646",
+                        "monto": "3,150.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241010mazamitla ref. 0109610068 072 00072396001787631145 38432p01202410103439188202 iliana guadalupe lozano franco",
+                        "monto": "1,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 59306 cid octubre ref. 7572147475",
+                        "monto": "100,547.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 58538 palmas oct ref. 7572663064",
+                        "monto": "28,277.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "t20 spei recibidobancoppel 7063334arianna ramirez ref. 0111459266 137 00137244100901355412 50115412transbpi70633344 arianna guadalupe ramirez munoz",
+                        "monto": "5,980.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1580331104 europa ref. 7589407246",
+                        "monto": "9,450.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1580331104 seguro ref. 7589631436",
+                        "monto": "1,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2687662548 pago seguro ref. 7589810811",
+                        "monto": "3,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "10/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2687662548 pago europa ref. 7589848611",
+                        "monto": "6,280.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736314",
+                        "monto": "769.04",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "15.30",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "2.45",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736282",
+                        "monto": "2,565.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "51.04",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "8.17",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144736288",
+                        "monto": "617.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v43 comision ventas debito terminales punto de venta ref. 174736288",
+                        "monto": "12.27",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "v44 iva com. ventas debito terminales punto de venta ref. 174736288",
+                        "monto": "1.96",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1513668307 primer abono mensu ref. 7632709119",
+                        "monto": "1,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241011pago ref. 0114254281 072 00072320002593323434 3843cp03202410113441996033 beatriz villasenor amezola",
+                        "monto": "6,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0194979362 645505 fiesta octu ref. 7638027012",
+                        "monto": "36,641.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "t20 spei recibidobanamex 0111024sulyz vegas hotel excalibur ref. 0115768555 002 00002320700311612806 085905269174328543 sulyz,aguilar/borunda",
+                        "monto": "5,920.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1158817308 estanbul ref. 7657616044",
+                        "monto": "10,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1551933776 abono viaje slp ref. 7657900012",
+                        "monto": "600.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1511301127 pago ref. 7658391972",
+                        "monto": "400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "t20 spei recibidohsbc 0111024pago de sergio,daniel y angeli ref. 0116657882 021 00021339065879124242 hsbc011563 sergio esqueda villalobos",
+                        "monto": "1,350.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "t20 spei recibidobanamex 0111024saray mora ref. 0116702252 002 00002320701125151413 085906530114328546 saray,mora/zavala",
+                        "monto": "17,580.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "11/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1564537226 abono ref. 7672742848",
+                        "monto": "500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241012pago ref. 0119251953 072 00072396001713037629 38432p02202410123445415264 adriana coronado ramirez",
+                        "monto": "4,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7730078127",
+                        "monto": "6,167.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "t20 spei recibidoazteca 8156690apartado de viaje ref. 0119831803 127 00127320013702579861 241014075516909075i aguirre reyes lizette viridiana",
+                        "monto": "1,400.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 7732013761",
+                        "monto": "4,232.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "n06 pago cuenta de tercero",
+                        "monto": "4,486.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct12 16:23 prac e568 folio:6821 ref. ******7277",
+                        "monto": "22,500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct12 16:27 prac e568 folio:6823 ref. ******7277",
+                        "monto": "20,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "12/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct12 16:31 prac e568 folio:6825 ref. ******7277",
+                        "monto": "2,600.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736298",
+                        "monto": "17,270.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736298",
+                        "monto": "343.67",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736298",
+                        "monto": "54.99",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "i72 ventas tdc inter 144736282 ref. 144736282",
+                        "monto": "29,194.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736274",
+                        "monto": "15,297.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "304.41",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "48.71",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "14/oct",
+                        "descripcion": "aa7 deposito efectivo practic recervacion mazatlan e081 folio:1056 ref. ******7277",
+                        "monto": "3,500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "8,410.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "167.35",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "26.78",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736298",
+                        "monto": "27,641.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736298",
+                        "monto": "550.05",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "15/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736298",
+                        "monto": "88.01",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736274",
+                        "monto": "1,028.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "20.45",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "3.27",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736301",
+                        "monto": "763.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "15.18",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "2.43",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 522",
+                        "monto": "44,950.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "16/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 523",
+                        "monto": "77,591.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "17/oct",
+                        "descripcion": "aa7 deposito efectivo practic pago viaje 4529 folio:8597 ref. ******7277",
+                        "monto": "2,500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "17/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 537",
+                        "monto": "21,870.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "18/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct18 13:48 prac 5562 folio:1116 ref. ******7277",
+                        "monto": "7,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "18/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 555",
+                        "monto": "10,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "19/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct19 21:25 prac a137 folio:5738 ref. ******7277",
+                        "monto": "7,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736274",
+                        "monto": "1,500.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "29.85",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736274",
+                        "monto": "4.78",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736314",
+                        "monto": "1,542.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "30.68",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736314",
+                        "monto": "4.91",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736282",
+                        "monto": "4,112.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "81.82",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "13.09",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "8,204.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "163.25",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "26.12",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "13,158.40",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "261.85",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "41.90",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241021pago anticipo los ngeles loco ref. 0159391965 072",
+                        "monto": "1,400.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "w02 deposito de tercero pago openmx ee1qnlken zystvrv4bmrcash ref. refbntc00439509",
+                        "monto": "11,513.44",
+                        "tipo": "abono",
+                        "categoria": "BMRCASH"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct21 13:12 prac e518 folio:8692 ref. ******7277",
+                        "monto": "4,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "17,555.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "349.34",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "55.89",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 614",
+                        "monto": "3,250.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 8524206397",
+                        "monto": "18,818.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "t20 spei recibidoazteca 8156690apartado de viaje ref. 0161937305 127",
+                        "monto": "5,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "21/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1514569240 transporte los cab ref. 8528543934",
+                        "monto": "900.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144753767",
+                        "monto": "0.01",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "t20 spei recibidobancoppel 6616809anticipo ref. 0164319706 137",
+                        "monto": "20,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1552936895 apartado costa de ref. 8591108083",
+                        "monto": "2,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241022jonathan gonzalez reyes ref. 0165467565 072",
+                        "monto": "1,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "t20 spei recibidohsbc 0000010viaje los cabos ref. 0165558245 021",
+                        "monto": "10,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2731411292 vacacionesmazatlan ref. 8606943297",
+                        "monto": "2,800.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "22/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1543754356 viaje arcos lilia ref. 8620268873",
+                        "monto": "650.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1562493400 pago ref. 8678716559",
+                        "monto": "1,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "t20 spei recibidobancoppel 7757862deposito ref. 0169664869 137",
+                        "monto": "4,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0165163293 punta cana ref. 8693825214",
+                        "monto": "25,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700viaje vallarta ref. 0170124368 127",
+                        "monto": "13,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "23/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 8697962781",
+                        "monto": "14,237.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736301",
+                        "monto": "7,648.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "152.19",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736301",
+                        "monto": "24.35",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "i72 ventas tdc inter 144736288 ref. 144736288",
+                        "monto": "46,000.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "i73 com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "1,380.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "i74 iva com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "220.80",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "t20 spei recibidobancoppel 8140553anticipo ref. 0171379294 137",
+                        "monto": "18,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1598951246 apartado ref. 8753275371",
+                        "monto": "900.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "t20 spei recibidobanamex 0241024saray mora ref. 0172122843 002",
+                        "monto": "10,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "t20 spei recibidobanamex 0241024vuelo pvr ref. 0172941551 002",
+                        "monto": "1,950.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "c09 traspaso entre cuentas de la cuenta 1143953963",
+                        "monto": "14,970.00",
+                        "tipo": "abono",
+                        "categoria": "TRASPASO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "t20 spei recibidosantander 4123125transferencia a paseo al arco ref. 0173541433 014",
+                        "monto": "1,650.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1521089277 pago cambio de lug ref. 8784796285",
+                        "monto": "500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2995297656 pasaje ref. 8785212435",
+                        "monto": "1,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "t17 spei enviado banorte 2510240autobus ref. 0046034267 072",
+                        "monto": "37,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "24/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1518817084 carlos casillas ref. 8967311402",
+                        "monto": "36,116.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v42 ventas debito terminales punto de venta ref. 144753767",
+                        "monto": "3.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v43 comision ventas debito terminales punto de venta ref. 174753767",
+                        "monto": "0.04",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v44 iva com. ventas debito terminales punto de venta ref. 174753767",
+                        "monto": "0.01",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "1,340.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "26.66",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "4.27",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "i72 ventas tdc inter 144736288 ref. 144736288",
+                        "monto": "20,000.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "i73 com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "600.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "i74 iva com vtas tdc inter 174736288 ref. 174736288",
+                        "monto": "96.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1551933776 transf a jonathan ref. 8835314301",
+                        "monto": "1,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241025anticipo brenda karina mtnz m ref. 0176784261 072",
+                        "monto": "1,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 8847887568",
+                        "monto": "8,146.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0165163293 repub dominicana ref. 8847958935",
+                        "monto": "25,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "t20 spei recibidoazteca 3727700vuelo ref. 0177631708 127",
+                        "monto": "2,634.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 8852969196",
+                        "monto": "11,329.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "t20 spei recibidoazteca 8156690pago ref. 0178374255 127",
+                        "monto": "7,800.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "t20 spei recibidoklar 5059198vanessa beltrán/hot fiesta mex ref. 0178509792 661",
+                        "monto": "3,200.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 8864418401",
+                        "monto": "16,136.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "25/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1594981240 renta 2 de noviemb ref. 8868146793",
+                        "monto": "4,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "26/oct",
+                        "descripcion": "t20 spei recibidobanorte 0241026jonathan gonzalez reyes ref. 0181767653 072",
+                        "monto": "7,630.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "26/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1518817084 carlos casillas ref. 8967311402",
+                        "monto": "450.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "27/oct",
+                        "descripcion": "t20 spei recibidoazteca 8156690pago ref. 0185761481 127",
+                        "monto": "15,390.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "27/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1579408421 transporte ref. 9030243147",
+                        "monto": "900.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736288",
+                        "monto": "2,140.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "42.58",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736288",
+                        "monto": "6.81",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736282",
+                        "monto": "1,491.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "29.67",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "4.75",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1574347648 viaje cancun ref. 9097398739",
+                        "monto": "5,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1508235413 victor mercado cab ref. 9099144096",
+                        "monto": "3,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1598951246 apartado ref. 9100737962",
+                        "monto": "500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 63301 vista marzo ref. 9111973391",
+                        "monto": "7,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 59305 cid nov ref. 9112092328",
+                        "monto": "50,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "t20 spei recibidobanorte 0650387por orden de samuel salazar ref. 0190205640 072",
+                        "monto": "6,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "c02 deposito en efectivo ref. 672",
+                        "monto": "9,570.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0151607960 59785 costa nov ref. 9123798868",
+                        "monto": "59,052.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1520621727 viaje guayabitos ref. 9129562699",
+                        "monto": "1,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1526660145 pago ref. 9133126049",
+                        "monto": "2,800.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "t17 spei enviado santander 2910240brasil ref. 0046838033 014",
+                        "monto": "4,297.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1575167901 abono de rito cesa ref. 9188935311",
+                        "monto": "1,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "t20 spei recibidoklar 2436159vane beltrán fiesta mex 18 nov ref. 0194670242 661",
+                        "monto": "3,200.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1246747213 viaje a chiapas ref. 9199943531",
+                        "monto": "4,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2731411292 viaje a mazamitla ref. 9200403875",
+                        "monto": "5,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct29 15:11 prac e449 folio:3304 ref. ******7277",
+                        "monto": "3,000.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 9211490176",
+                        "monto": "1,233.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "t20 spei recibidosantander 5136606transferencia a viajar es difr ref. 0195793616 014",
+                        "monto": "10,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct29 18:23 prac e449 folio:3426 ref. ******7277",
+                        "monto": "14,500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "29/oct",
+                        "descripcion": "aa7 deposito efectivo practic oct29 18:25 prac e449 folio:3428 ref. ******7277",
+                        "monto": "500.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "t20 spei recibidobanamex 0301024monica morales turq ref. 0197500180 002",
+                        "monto": "44,960.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "bnet 0151607960 59305 cid nov ref. 9112092328 n06 pago cuenta de tercero",
+                        "monto": "7,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "28/oct",
+                        "descripcion": "bnet 0151607960 63300 vista feb ref. 9112332747 t20 spei recibidobanorte 0650387por orden de samuel salazar ref. 0190205640 072 00072580001815334298 03140314202410283486513957 servicio uniteller inc",
+                        "monto": "6,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0158287333 20496 costa nov ref. 9270765734",
+                        "monto": "57,631.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "t20 spei recibidobanamex 0301024seguro de viaje europa ref. 0199061520 002 00002320904732243553 085907329500330446 joselyn monserrat,zapien/perez",
+                        "monto": "3,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0118932042 pago individual ref. 9285892358",
+                        "monto": "10,122.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1435383587 hilda gonzalez ref. 9292508169",
+                        "monto": "10,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "aa7 deposito efectivo practic reservacion 6746 folio:3319 ref. ******7277",
+                        "monto": "7,300.00",
+                        "tipo": "abono",
+                        "categoria": "EFECTIVO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 2930280771 pago ref. 9303060022",
+                        "monto": "3,300.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "30/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1594023117 compra de vuelos ref. 9303592159",
+                        "monto": "10,280.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "v45 ventas credito terminales punto de venta ref. 144736282",
+                        "monto": "300.00",
+                        "tipo": "abono",
+                        "categoria": "TPV"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "v46 comision ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "5.97",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "v47 iva com. ventas credito terminales punto de venta ref. 174736282",
+                        "monto": "0.96",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "t17 spei enviado banorte 3110240pago de autobus ref. 0047606349 072 00072290011164431258 bnet01002410310047606349 mastery seat mexico sa de cv",
+                        "monto": "31,500.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 0142652862 pago individual ref. 9369400201",
+                        "monto": "16,802.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1508010749 abono mazatlan ref. 9369621354",
+                        "monto": "1,900.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "t20 spei recibidobancoppel 5219594agencia ref. 0105938242 137 00137320103844120476 50110476transbpi52195941 ana isabel barragan garcia",
+                        "monto": "2,000.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "n06 pago cuenta de tercero bnet 1526660145 pago ref. 9387697319",
+                        "monto": "2,000.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "t17 spei enviado banorte 0111240pago de autobus ref. 0047918648 072",
+                        "monto": "19,400.00",
+                        "tipo": "cargo",
+                        "categoria": "CARGO"
+                    },
+                    {
+                        "fecha": "31/oct",
+                        "descripcion": "t20 spei recibidohsbc 0311024transferencia spei ref. 0108217618 021",
+                        "monto": "4,500.00",
+                        "tipo": "abono",
+                        "categoria": "GENERAL"
+                    }
+                ],
+                "error_transacciones": null
+            }
+        }
+    ]
+}
