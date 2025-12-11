@@ -256,7 +256,7 @@ async def procesar_documento_con_agentes_async(
             # 1. FILTRO DE EXCLUSIÓN
             # Nota: Usamos 'any' para que si encuentra CUALQUIER palabra prohibida, lo descarte.
             if any(p in descripcion_limpia for p in PALABRAS_EXCLUIDAS):
-                # Se queda como GENERAL (o EXCLUIDO si prefieres etiquetarlo)
+                # Se queda como GENERAL
                 pass 
             
             else:
@@ -278,10 +278,7 @@ async def procesar_documento_con_agentes_async(
                     trx_procesada["categoria"] = "BMRCASH"
                 
                 else:
-                    # --- AQUÍ ESTÁ EL CAMBIO SOLICITADO ---
-                    # Ya pasó todos los filtros de lo que "NO ES".
                     # Ahora preguntamos: ¿La IA cree que ES TPV?
-                    
                     if es_tpv_ia:
                         total_entradas_tpv += monto_float
                         trx_procesada["categoria"] = "TPV"

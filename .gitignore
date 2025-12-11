@@ -1,14 +1,18 @@
 # Versiones anteriores de la API
 control_versiones
 
-# variables de entorno 
+# Variables de entorno 
 .env
 .venv
 
-# cache de los pytest
+# Las downloads
+downloads
+
+# Cache de los pytest
 .pytest_cache
 
 .github
 __pycache__
 
+# Cosas que no usamos
 deprecated
