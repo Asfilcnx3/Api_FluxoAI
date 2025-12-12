@@ -44,7 +44,7 @@ CONFIGURACION_CSF = {
             "rfc_pattern": [r"rfc:\s+([a-z0-9]{12,13})"],
             "razon_social_pattern": [r"raz[oó]n social:\s+([a-z\s]+)\n"],
             "regimen_capital_pattern": [r"r[eé]gimen capital:\s+([a-z\s]+)\n"],
-            "nombre_comercial_pattern": [r"nombre comercial:\s*([^\n]+)"],
+            "nombre_comercial_pattern": [r"nombre comercial:\s*([^\n fecha]+)"],
             "inicio_operaciones_pattern": [r"fecha inicio de operaciones:\s+([0-9]{1,2}\s+de\s+[a-z]+\s+de\s+[0-9]{4})"],
             "estatus_padron_pattern": [r"estatus en el padrón:\s+([a-z]+)"],
             "cambio_estado_pattern": [r"fecha de último cambio de estado:\s+([0-9]{1,2}\s+de\s+[a-z]+\s+de\s+[0-9]{4})"]

@@ -48,7 +48,7 @@ class CSF:
 
     class DatosDomicilioRegistrado(BaseModel):
         """Datos de la sección 'Domicilio Registrado'"""
-        codigo_postal: Optional[int] = None
+        codigo_postal: Optional[str] = None
         nombre_vialidad: Optional[str] = None
         nombre_localidad: Optional[str] = None
         entidad_federativa: Optional[str] = None
