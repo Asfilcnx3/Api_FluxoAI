@@ -57,6 +57,7 @@ class CSF:
         numero_exterior: Optional[str] = None
         colonia: Optional[str] = None
         municipio: Optional[str] = None
+        calle: Optional[str] = None
 
         @field_validator('colonia', mode='before')
         @classmethod

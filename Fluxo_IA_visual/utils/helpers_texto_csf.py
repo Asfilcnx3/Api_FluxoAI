@@ -22,7 +22,8 @@ CONFIGURACION_CSF = {
             "vialidad_pattern": [r"tipo de vialidad:\s*([^\n]+)"],
             "numero_exterior_pattern": [r"n[uú]mero exterior:\s*([^\n]+)"],
             "colonia_pattern": [r"nombre de la colonia:\s*([^\n]+)"],
-            "municipio_pattern": [r"nombre del municipio o demarcaci[oó]n territorial:\s*([^\n]+)"]
+            "municipio_pattern": [r"nombre del municipio o demarcaci[oó]n territorial:\s*([^\n]+)"],
+            "calle_pattern": [r"entre calle:\s*([^\n]+)"]
         },
         "actividades_economicas": { # Ajustado para capturar múltiples actividades
             # parte 1: orden 
@@ -58,7 +59,8 @@ CONFIGURACION_CSF = {
             "vialidad_pattern": [r"tipo de vialidad:\s*([^\n]+)"],
             "numero_exterior_pattern": [r"n[uú]mero exterior:\s*([^\n]+)"],
             "colonia_pattern": [r"nombre de la colonia:\s*([^\n]+)"],
-            "municipio_pattern": [r"nombre del municipio o demarcaci[oó]n territorial:\s*([^\n]+)"]
+            "municipio_pattern": [r"nombre del municipio o demarcaci[oó]n territorial:\s*([^\n]+)"],
+            "calle_pattern": [r"entre calle:\s*([^\n]+)"]
         },
         "actividades_economicas": { # Ajustado para capturar múltiples actividades
             # parte 1: orden 
