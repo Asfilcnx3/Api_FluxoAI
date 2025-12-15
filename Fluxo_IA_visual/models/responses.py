@@ -1,5 +1,5 @@
 from typing import List, Optional, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 class RespuestaProcesamientoIniciado(BaseModel):
     mensaje: str
@@ -57,6 +57,26 @@ class CSF:
         numero_exterior: Optional[str] = None
         colonia: Optional[str] = None
         municipio: Optional[str] = None
+
+        @field_validator('colonia', mode='before')
+        @classmethod
+        def normalizar_colonia(cls, v):
+            if not v:
+                return None
+
+            texto = v.strip().lower()
+
+            valores_invalidos = {
+                "otra no especificada en el catálogo",
+                "otra no especificada en el catalogo",
+                "no aplica",
+                "n/a",
+            }
+
+            if texto in valores_invalidos:
+                return None  # o "" si prefieres
+
+            return v.strip()
 
     class ActividadEconomica(BaseModel):
         """Datos de una de las actividades económicas listadas en el CSF"""
