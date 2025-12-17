@@ -33,7 +33,7 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
     ws1 = wb.active
     ws1.title = "Resumen por Cuenta"
     ws1.append([
-        "Mes", "Cuenta", "Depósitos", "Moneda", "Cargos", "TPV Bruto", 
+        "Mes", "Cuenta", "Moneda", "Depósitos", "Cargos", "TPV Bruto", 
         "Financiamientos", "Efectivo", "Traspaso entre cuentas", "BMR CASH"
     ])
     
@@ -48,8 +48,8 @@ def generar_excel_reporte(data_json: Dict[str, Any]) -> bytes:
         
         ws1.append([
             periodo, cuenta_str,
-            ia.get("depositos", 0.0),
             ia.get("tipo_moneda", "MXN"),
+            ia.get("depositos", 0.0),
             ia.get("cargos", 0.0),
             ia.get("entradas_TPV_bruto", 0.0),
             ia.get("total_entradas_financiamiento", 0.0),
