@@ -521,6 +521,13 @@ PROMPTS_POR_BANCO = {
         Reglas de la extracción de una línea:
             - abono ventas tdd 
             - abono ventas tdc
+        Reglas de la extracción multilinea, para que sea válida debe cumplir ambas:
+            la primer línea debe contener:
+            - billpocket
+            la segunda línea deben contener:
+            - pocket de latinoamerica sapi de cv
+            la tercera línea deben contener:
+            - deposito bpu
     IMPORTANTE: Cualquier otro tipo de depósito SPEI, transferencias de otros bancos o pagos de nómina que no coincidan con las frases de arriba, son tratados como 'generales'.
     """,
 
