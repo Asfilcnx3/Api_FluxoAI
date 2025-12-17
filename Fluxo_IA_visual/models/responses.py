@@ -1,5 +1,5 @@
-from typing import List, Optional, Union
-from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional, Self, Union
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 class RespuestaProcesamientoIniciado(BaseModel):
     mensaje: str
@@ -39,6 +39,28 @@ class CSF:
         estatus_padron: Optional[str] = None
         cambio_estado: Optional[str] = None
         nombre_comercial: Optional[str] = None
+
+        @model_validator(mode='after')
+        def calcular_nombre_comercial_si_falta(self) -> Self:
+            # 1. Verificamos si nombre_comercial está vacío, es None, o son solo espacios
+            if not self.nombre_comercial or not self.nombre_comercial.strip():
+                
+                # 2. Recolectamos las partes que sí tengan valor
+                partes = [
+                    valor 
+                    for valor in (self.nombre, self.primer_apellido, self.segundo_apellido)
+                    if valor and valor.strip() # Filtramos Nones y cadenas vacías
+                ]
+                
+                # 3. Si hay partes, las unimos y asignamos
+                if partes:
+                    self.nombre_comercial = " ".join(partes)
+            
+            else:
+                # Opcional: Si ya traía valor, le hacemos un strip por limpieza
+                self.nombre_comercial = self.nombre_comercial.strip()
+    
+            return self
 
     class DatosIdentificacionPersonaMoral(ContribuyenteBaseMoral):
         """Datos de la sección 'Identificación del Contribuyente.' en personas morales."""
