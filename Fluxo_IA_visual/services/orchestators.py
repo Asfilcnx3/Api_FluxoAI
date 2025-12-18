@@ -352,7 +352,7 @@ async def procesar_documento_escaneado_con_agentes_async(
                     transacciones_totales.append(trx)
                     ids_unicos.add(id_trx)
 
-    # --- E. CLASIFICACIÓN DE NEGOCIO (AHORA FUERA DEL BUCLE) ---
+    # --- E. CLASIFICACIÓN DE NEGOCIO (LÓGICA UNIFICADA) ---
     total_depositos_efectivo = 0.0
     total_traspaso_entre_cuentas = 0.0
     total_entradas_financiamiento = 0.0
@@ -366,29 +366,62 @@ async def procesar_documento_escaneado_con_agentes_async(
             monto_float = limpiar_monto(str(monto_float))
 
         descripcion_limpia = trx.get("descripcion", "").lower()
+        
+        # Obtenemos la opinión de la IA si existe (OCR también debería devolver esto)
+        es_tpv_ia = trx.get("categoria", False)
 
-        if all(palabra not in descripcion_limpia for palabra in PALABRAS_EXCLUIDAS):
-            if any(palabra in descripcion_limpia for palabra in PALABRAS_EFECTIVO):
-                total_depositos_efectivo += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_ENTRE_CUENTAS):
-                total_traspaso_entre_cuentas += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_TRASPASO_FINANCIAMIENTO):
-                total_entradas_financiamiento += monto_float
-            elif any(palabra in descripcion_limpia for palabra in PALABRAS_BMRCASH):
-                total_entradas_bmrcash += monto_float
+        # Estructura base
+        trx_procesada = {
+            "fecha": trx.get("fecha"),
+            "descripcion": trx.get("descripcion"),
+            "monto": f"{monto_float:,.2f}",
+            "tipo": trx.get("tipo", "abono"),
+            "categoria": "GENERAL" # Valor por defecto obligatorio
+        }
+
+        tipo_trx = trx.get("tipo", "abono").lower()
+
+        if "abono" in tipo_trx or "depósito" in tipo_trx:
+            # 1. FILTRO DE EXCLUSIÓN
+            if any(p in descripcion_limpia for p in PALABRAS_EXCLUIDAS):
+                # Se queda como GENERAL
+                pass 
             else:
-                total_entradas_tpv += monto_float
-            
-            transacciones_clasificadas.append({
-                "fecha": trx.get("fecha"),
-                "descripcion": trx.get("descripcion"),
-                "monto": f"{monto_float:,.2f}",
-                "tipo": trx.get("tipo", "abono") 
-            })
+                # 2. FILTROS ESPECÍFICOS
+                if any(p in descripcion_limpia for p in PALABRAS_EFECTIVO):
+                    total_depositos_efectivo += monto_float
+                    trx_procesada["categoria"] = "EFECTIVO"
+                
+                elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_ENTRE_CUENTAS):
+                    total_traspaso_entre_cuentas += monto_float
+                    trx_procesada["categoria"] = "TRASPASO"
+                
+                elif any(p in descripcion_limpia for p in PALABRAS_TRASPASO_FINANCIAMIENTO):
+                    total_entradas_financiamiento += monto_float
+                    trx_procesada["categoria"] = "FINANCIAMIENTO"
+                
+                elif any(p in descripcion_limpia for p in PALABRAS_BMRCASH):
+                    total_entradas_bmrcash += monto_float
+                    trx_procesada["categoria"] = "BMRCASH"
+                
+                else:
+                    # 3. DOBLE VALIDACIÓN (FILTRO NEGATIVO + IA POSITIVA)
+                    if es_tpv_ia:
+                        total_entradas_tpv += monto_float
+                        trx_procesada["categoria"] = "TPV"
+                    else:
+                        trx_procesada["categoria"] = "GENERAL"
+        
+        elif "cargo" in tipo_trx or "retiro" in tipo_trx:
+            trx_procesada["categoria"] = "CARGO"
+
+        transacciones_clasificadas.append(trx_procesada)
 
     # --- F. ENSAMBLE FINAL DE LA CUENTA ---
     comisiones_str = ia_data.get("comisiones", "0.0")
-    comisiones = limpiar_monto(comisiones_str)
+    if comisiones_str is None: comisiones_str = "0.0"
+    comisiones = limpiar_monto(str(comisiones_str))
+    
     entradas_TPV_neto = total_entradas_tpv - comisiones
 
     # Retorno (Envuelto en lista)

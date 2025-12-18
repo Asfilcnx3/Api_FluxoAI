@@ -274,19 +274,25 @@ EJEMPLO DE SALIDA, SIEMPRE EN MINUSCULAS:
 
 PROMPT_OCR_INSTRUCCIONES_BASE = """
 INSTRUCCIONES DE FORMATO (TOON):
-1.  NO USES JSON. Genera una salida de texto plano.
-2.  Una línea por transacción. Usa `|` como separador.
-3.  Estructura: `FECHA | DESCRIPCION | MONTO | TIPO`
+1.  NO USES JSON. Genera una salida de texto plano ultra-compacta.
+2.  Una línea por transacción.
+3.  Delimitador: Usa el caracter `|` (pipe) para separar los campos.
+4.  Estructura: `FECHA | DESCRIPCION COMPLETA | MONTO | TIPO | ETIQUETA`
+    * `FECHA`: dd/mm o formato original.
+    * `DESCRIPCION`: Todo el texto del concepto.
+    * `MONTO`: Solo números y puntos (ej. 1500.50).
+    * `TIPO`: "cargo" o "abono".
+    * `ETIQUETA`: "TPV" (si cumple las reglas) o "GENERAL" (si es cualquier otro movimiento).
 
 INSTRUCCIONES CLAVE DE PROCESAMIENTO:
 1.  Analiza las Imágenes de forma horizontal: Las siguientes imágenes son páginas de un estado de cuenta escaneado. Tu tarea es actuar como un OCR experto y un analista financiero analizano línea por línea los estados.
 2. Extrae todo hasta el final: Procesa todas las transacciones que puedas identificar completamente. Si la *última* transacción del texto parece estar cortada o incompleta, extráela también. El siguiente fragmento se encargará de completarla y el sistema la deduplicará.
 3.  Precisión Absoluta: Sé meticuloso con los montos y las fechas. No alucines información, si no ves campos es porque no los hay, dejalos como null.
-4.  procesamiento secuencial obligatorio: Estás recibiendo múltiples imágenes. Debes extraer los datos de la Imagen 1, luego de la Imagen 2, etc., hasta terminar con todas. NO TE SALTES NINGUNA IMAGEN. Tu objetivo es transcribir CADA transacción visible. Si hay 50 transacciones en una página, debes generar 50 objetos en el JSON. No resumas.
+4.  procesamiento secuencial obligatorio: Estás recibiendo solo una imagen. Debes extraer los datos de la Imagen 1. Hasta terminar con todas. NO TE SALTES NINGUNA transacción. Tu objetivo es transcribir CADA transacción visible. Si hay 50 transacciones en una página, debes generar 50 objetos toon. No resumas.
 
 EJEMPLO DE SALIDA:
-05/MAY | DEPOSITO EFECTIVO SUC 02 | 5000.00 | abono
-05/MAY | CHEQUE PAGADO 001 | 2000.00 | cargo
+05/MAY | DEPOSITO EFECTIVO SUC 02 | 5000.00 | abono | GENERAL
+05/MAY | CHEQUE PAGADO 001 | 2000.00 | cargo | GENERAL
 """
 
 PROMPT_GENERICO = """
