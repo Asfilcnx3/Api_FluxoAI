@@ -11,10 +11,7 @@ from concurrent.futures import ProcessPoolExecutor
 from ..models.responses_analisisTPV import AnalisisTPV
 from ..core.exceptions import PDFCifradoError
 from ..core.motor_clasificador import MotorClasificador
-from ..services.storage_service import StorageService
 from ..utils.xlsx_converter import generar_excel_reporte
-
-from .passport_service import PassportService
 
 from ..core.motor_caratulas import MotorCaratulas
 from ..utils.helpers_texto_fluxo import (
@@ -121,7 +118,9 @@ class ProcessingService:
         
         tareas_analisis = []
 
+        # ==========================================================
         # --- ETAPA 1: PORTADAS (I/O Bound -> Threads o Async nativo) ---
+        # ==========================================================
         self.passport.actualizar(job_id, fase=1, nombre_fase="Análisis Inicial", descripcion="Escaneando estructura de archivos...")
 
         for doc_info in lista_archivos:
@@ -156,7 +155,9 @@ class ProcessingService:
             self.passport.actualizar(job_id, error=f"Fallo crítico inicial: {e}")
             return # Detener pipeline
 
+        # ==========================================================
         # --- ETAPA 2: SEPARACIÓN (Digital vs OCR) ---
+        # ==========================================================
         self.passport.actualizar(job_id, fase=2, nombre_fase="Extracción", descripcion="Calculando carga de trabajo...", estado="PROCESANDO")
         
         documentos_digitales = []
@@ -236,10 +237,16 @@ class ProcessingService:
                     rango = rangos[idx_cuenta]
                     movimientos_seguros = movimientos_paginas if movimientos_paginas is not None else {}
                     
+                    # Solo concatenamos "Cta" si realmente hay más de una cuenta en el PDF
+                    nombre_virtual = f"{filename} (Cta {idx_cuenta + 1})" if len(lista_cuentas) > 1 else filename
+                    
+                    #  Inyectamos el nombre en el diccionario de IA antes de que Pydantic lo evalúe
+                    datos_cuenta["nombre_archivo_virtual"] = nombre_virtual
+                    
                     item_info = {
                         "index": i, 
                         "sub_index": idx_cuenta,
-                        "filename": f"{filename} (Cta {idx_cuenta + 1})",
+                        "filename": nombre_virtual, 
                         "file_path": file_path, 
                         "hash_documento": hash_actual,
                         "ia_data": datos_cuenta,
@@ -282,18 +289,31 @@ class ProcessingService:
             descripcion=f"Carga detectada: {total_pags_digitales} páginas digitales."
         )
 
+        # ==========================================================
         # --- ETAPA 3: EJECUCIÓN PARALELA (CPU Bound -> ProcessPool) ---
+        # ==========================================================
         self.passport.actualizar(job_id, descripcion="Ejecutando motores de lectura...")
 
         loop = asyncio.get_running_loop()
         tareas_digitales = []
         tareas_ocr = []
         
-        # Lógica OCR
-        # Vamos a permitir OCR solo si el monto es mayor a 250k Y no hay más de 15 documentos escaneados (para evitar sobrecarga y tiempos excesivos)
-        # procesar_ocr = es_mayor and documentos_escaneados and len(documentos_escaneados) <= 15
-        # Para debugueo, puedes forzar el OCR con: procesar_ocr = True
-        procesar_ocr = True
+        # Recolector para los documentos omitidos
+        documentos_omitidos_lote = []
+        
+        # Lógica OCR (Restaurada)
+        # Opción A (Todo o Nada): OCR solo si supera monto Y son <= 15 docs escaneados.
+        procesar_ocr = es_mayor and documentos_escaneados and len(documentos_escaneados) <= 15
+        
+        # --- DEBUG (Descomentar para forzar OCR ignorando límites) ---
+        # procesar_ocr = True 
+        
+        # --- BASE PARA OPCIÓN B (Solo procesar los primeros 15 y omitir el resto) ---
+        # max_ocr_permitidos = 15
+        # docs_ocr_a_procesar = documentos_escaneados[:max_ocr_permitidos]
+        # docs_ocr_a_omitir = documentos_escaneados[max_ocr_permitidos:]
+        # (Si usaramos esto, iteraríamos 'docs_ocr_a_procesar' en el bloque B, 
+        # y mandaríamos 'docs_ocr_a_omitir' al helper _manejar_ocr_omitidos).
 
         logger.info(f"Ejecutando Workers. Digitales: {len(documentos_digitales)} | OCR: {len(documentos_escaneados)}")
 
@@ -325,8 +345,13 @@ class ProcessingService:
                 )
                 tareas_ocr.append((doc["index"], tarea))
         else:
-            self._manejar_ocr_omitidos(documentos_escaneados, resultados_finales, es_mayor)
-
+            # Inyectamos la lista para recolectar la metadata
+            self._manejar_ocr_omitidos(documentos_escaneados, resultados_finales, es_mayor, documentos_omitidos_lote)
+        
+        # Actualizamos el pasaporte en tiempo real con los documentos omitidos
+        if documentos_omitidos_lote:
+            self.passport.actualizar(job_id, documentos_omitidos=documentos_omitidos_lote)
+        
         # C. Esperar resultados y actualizar Pasaporte dinámicamente
         todos_los_futuros = []
         if tareas_digitales: todos_los_futuros.extend([t[1] for t in tareas_digitales])
@@ -380,7 +405,9 @@ class ProcessingService:
                 ocr_timed_out = True
                 self._manejar_timeout_ocr(tareas_ocr, documentos_escaneados, resultados_finales)
 
+        # ==========================================================
         # --- ETAPA 4: RECOLECCIÓN ---
+        # ==========================================================
         resultados_fase_2 = self._ensamblar_resultados_crudos(
             resultados_finales, 
             tareas_digitales, resultados_brutos_digitales, 
@@ -403,7 +430,9 @@ class ProcessingService:
             if getattr(resultado_doc, "es_digital", True):
                 continue 
 
+        # ==========================================================
         # --- ETAPA 5: CLASIFICACIÓN FINAL Y REGLAS DE NEGOCIO ---
+        # ==========================================================
         self.passport.actualizar(job_id, fase=3, nombre_fase="Clasificación IA", descripcion="Analizando transacciones en paralelo...")
         logger.info(f"Disparando clasificación masiva para {len(resultados_fase_2)} documentos...")
 
@@ -506,15 +535,23 @@ class ProcessingService:
                     
                     # PROTEGER CATEGORÍAS FUERTES
                     cat_previa = str(getattr(tx, "categoria", "GENERAL")).upper().strip()
+                    razon_previa = str(getattr(tx, "razon_clasificacion", "")).upper()
+                    
                     categorias_protegidas = {
                         "TPV", "EFECTIVO", "BMRCASH", "FINANCIAMIENTO", 
                         "PAGO_FINANCIAMIENTO", "COMISION_CR", "COMISION_DB", 
                         "COMISION_AMEX", "COMISION_TPV_MIXTA", "MORATORIOS", "IVA" 
                     }
                     
-                    # Solo sobrescribimos si era GENERAL o un traspaso previo
-                    if cat_previa not in categorias_protegidas:
+                    # Verificamos si la categoría fue una predicción de la IA
+                    fue_hecho_por_ia = "IA" in razon_previa
+                    
+                    # Sobrescribimos si: 
+                    # 1) Era GENERAL.
+                    # 2) O la categoría anterior fue inventada por la IA (la certeza matemática gana).
+                    if cat_previa not in categorias_protegidas or fue_hecho_por_ia:
                         tx.categoria = "TRASPASO_ABONO" if es_abono else "TRASPASO_CARGO"
+                        tx.razon_clasificacion = "Cruce Global: Identificado como traspaso propio (sobreescribe IA)."
 
                 # 5. Sumatorias
                 cat_actual = str(getattr(tx, "categoria", "GENERAL")).upper().strip()
@@ -531,9 +568,11 @@ class ProcessingService:
         conteo_validos = len([r for r in resultados_fase_2 if r is not None])
         logger.info(f"PRE-REPORTE: Se enviarán {conteo_validos} documentos a generar reporte.")
         
+        # ==========================================================
         # --- ETAPA 6: GENERACIÓN DE REPORTES ---
+        # ==========================================================
         self.passport.actualizar(job_id, fase=4, nombre_fase="Generando Reportes", descripcion="Escribiendo Excel y JSON...")
-        self._generar_y_guardar_reportes(resultados_fase_2, job_id)
+        self._generar_y_guardar_reportes(resultados_fase_2, job_id, documentos_omitidos_lote)
 
         # --- LIMPIEZA FINAL ---
         self.file_manager.limpiar_temporales(todas_las_rutas_temporales) # <-- Usamos la variable de la Etapa 0
@@ -547,17 +586,19 @@ class ProcessingService:
         logger.error(f"Error en tarea asíncrona: {e}")
         return e
 
-    def _manejar_ocr_omitidos(self, docs_escaneados, resultados_finales, es_mayor):
+    def _manejar_ocr_omitidos(self, docs_escaneados, resultados_finales, es_mayor, omitidos_lote: list):
         if not docs_escaneados: return
-        msg = "OCR omitido por seguridad o límites."
-        if len(docs_escaneados) > 15: msg = "Límite de documentos escaneados excedido (>15)."
-        elif not es_mayor: msg = "Monto total insuficiente para procesar OCR (<250k)."
+        msg = "OCR omitido por seguridad o reglas de negocio."
+        if len(docs_escaneados) > 15: msg = "Límite de documentos escaneados excedido (>15). Operación cancelada para evitar sobrecarga."
+        elif not es_mayor: msg = "El monto global del lote es insuficiente para detonar procesamiento OCR (<250k)."
         
         for doc in docs_escaneados:
             filename = doc.get("filename", "Desconocido")
+            
+            # 1. Guardar en el pipeline principal (Estatus Parcial)
             resultados_finales[doc["index"]] = AnalisisTPV.ResultadoExtraccion(
                 nombre_documento=filename,
-                estatus_documento="fallido",
+                estatus_documento="parcial", # <--- CAMBIO A PARCIAL
                 hash_documento=doc.get("hash_documento"),
                 AnalisisIA=doc["ia_data"],
                 DetalleTransacciones=AnalisisTPV.ErrorRespuesta(
@@ -565,6 +606,12 @@ class ProcessingService:
                     detalle_error=msg
                 )
             )
+            
+            # 2. Agregar a la lista para el Pasaporte y el JSON Final
+            omitidos_lote.append({
+                "nombre_archivo": filename,
+                "razon": msg
+            })
 
     def _manejar_timeout_ocr(self, tareas_ocr, docs_escaneados, resultados_finales):
         for index, _ in tareas_ocr:
@@ -713,7 +760,10 @@ class ProcessingService:
                 
         return acumulados
 
-    def _generar_y_guardar_reportes(self, resultados_acumulados, job_id):
+    def _generar_y_guardar_reportes(self, resultados_acumulados, job_id, documentos_omitidos_raw=None):
+        if documentos_omitidos_raw is None:
+            documentos_omitidos_raw = []
+
         # 1. Filtro estricto
         resultados_validos = [r for r in resultados_acumulados if r is not None]
         
@@ -732,11 +782,21 @@ class ProcessingService:
         es_mayor = total_dep > 250000
         
         # 3. Construir Objeto Maestro
+        # Convertimos los diccionarios a los modelos Pydantic esperados
+        lista_omitidos_modelo = [
+            AnalisisTPV.DocumentoOmitido(
+                nombre_documento=omitido["nombre_archivo"],
+                razon=omitido["razon"]
+            )
+            for omitido in documentos_omitidos_raw
+        ]
+        
         respuesta_final = AnalisisTPV.ResultadoTotal(
             total_depositos=total_dep,
             es_mayor_a_250=es_mayor,
             resultados_generales=resultados_generales,
-            resultados_individuales=resultados_validos
+            resultados_individuales=resultados_validos,
+            documentos_omitidos=lista_omitidos_modelo # <--- INYECTAMOS AL OBJETO MAESTRO
         )
 
         # --- SERIALIZACIÓN SEGURA ---
@@ -765,19 +825,21 @@ class ProcessingService:
         """
         Procesa UN documento completo de forma asíncrona delegando todo al Motor Clasificador.
         """
-        # --- LOGS MOMENTANEOS ---
-        nombre_doc = "Desconocido"
-        if resultado_doc and hasattr(resultado_doc, 'AnalisisIA') and resultado_doc.AnalisisIA:
-            nombre_doc = resultado_doc.AnalisisIA.nombre_archivo_virtual
-            
-        if not resultado_doc:
-            logger.warning(f"[TRACKING OCR - 4] Se recibió un resultado_doc nulo en clasificación.")
-            return
 
-        if isinstance(resultado_doc.DetalleTransacciones, AnalisisTPV.ErrorRespuesta): 
-            logger.warning(f"[TRACKING OCR - 4] {nombre_doc} descartado por ErrorRespuesta: {resultado_doc.DetalleTransacciones.detalle_error}")
-            return
-        # ----------------------
+        # ESTOS LOGS SE DECOMENTAN PARA DEBUG DE OCR, PERO NO SON NECESARIOS EN PRODUCCIÓN
+        # # --- LOGS MOMENTANEOS ---
+        # nombre_doc = "Desconocido"
+        # if resultado_doc and hasattr(resultado_doc, 'AnalisisIA') and resultado_doc.AnalisisIA:
+        #     nombre_doc = resultado_doc.AnalisisIA.nombre_archivo_virtual
+            
+        # if not resultado_doc:
+        #     logger.warning(f"[TRACKING OCR - 4] Se recibió un resultado_doc nulo en clasificación.")
+        #     return
+
+        # if isinstance(resultado_doc.DetalleTransacciones, AnalisisTPV.ErrorRespuesta): 
+        #     logger.warning(f"[TRACKING OCR - 4] {nombre_doc} descartado por ErrorRespuesta: {resultado_doc.DetalleTransacciones.detalle_error}")
+        #     return
+        # # ----------------------
 
         if isinstance(resultado_doc.DetalleTransacciones, dict):
             raw_dict = resultado_doc.DetalleTransacciones
@@ -804,11 +866,13 @@ class ProcessingService:
             resultado_doc.DetalleTransacciones = AnalisisTPV.ResultadoTPV(transacciones=tx_objs)
 
         transacciones = resultado_doc.DetalleTransacciones.transacciones
-        # --- LOGS MOMENTANEOS ---
-        if not transacciones:
-            logger.warning(f"[TRACKING OCR - 4] {nombre_doc} descartado: 0 transacciones para clasificar.")
-            return
-        # ----------------------
+
+        # ESTOS LOGS SE DECOMENTAN PARA DEBUG DE OCR, PERO NO SON NECESARIOS EN PRODUCCIÓN
+        # # --- LOGS MOMENTANEOS ---
+        # if not transacciones:
+        #     logger.warning(f"[TRACKING OCR - 4] {nombre_doc} descartado: 0 transacciones para clasificar.")
+        #     return
+        # # ----------------------
 
         if isinstance(resultado_doc.AnalisisIA, dict):
             resultado_doc.AnalisisIA = AnalisisTPV.ResultadoAnalisisIA(**resultado_doc.AnalisisIA)

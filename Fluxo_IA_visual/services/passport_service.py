@@ -76,7 +76,8 @@ class PassportService:
                     sumar_paginas_digitales: int = 0,
                     sumar_transacciones: int = 0,
                     terminado: bool = False,
-                    error: str = None):
+                    error: str = None,
+                    documentos_omitidos: list = None):
         
         path = self._get_path(job_id)
         if not os.path.exists(path):
@@ -104,6 +105,11 @@ class PassportService:
         if nombre_fase: passport.detalle.nombre_fase = nombre_fase
         if descripcion: passport.detalle.descripcion = descripcion
         
+        #  Asignar documentos omitidos si se envían
+        if documentos_omitidos is not None:
+            from ..models.passport import DocumentoOmitido # Importación local para evitar dependencias circulares
+            passport.documentos_omitidos = [DocumentoOmitido(**doc) for doc in documentos_omitidos]
+
         if error:
             passport.estado = "ERROR"
             passport.detalle.descripcion = f"Error: {error}"

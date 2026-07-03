@@ -7,6 +7,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 # ----- Clases para respuestas de Análisis TPV (Fluxo) -----
 class AnalisisTPV:
     """Namespace para todos los modelos relacionados con el analisis de cuenta TPV."""
+
+    # Submodelo para el reporte final
+    class DocumentoOmitido(BaseModel):
+        nombre_documento: str = Field(description="Nombre del documento omitido parcialmente.")
+        razon: str = Field(description="Motivo de la omisión (ej. límite de archivos OCR superado).")
+    
     class ErrorRespuesta(BaseModel):
         """Error específico para el procesamiento de TPV."""
         nombre_documento: str = Field(default="Desconocido")
@@ -110,10 +116,11 @@ class AnalisisTPV:
 
         # --- CAMPOS DE ESTATUS ---
         nombre_documento: Optional[str] = Field(None, description="Nombre original del archivo procesado.", examples=["lote_01_banco.pdf"])
+        # MODIFICACIÓN: Se agrega "parcial" como posible estatus_documento para reflejar omisiones por reglas de negocio.
         estatus_documento: str = Field(
             "exitoso", 
-            description="Estado final del procesamiento. Puede ser 'exitoso' o 'fallido'. Un estado fallido implica que se generó un ErrorRespuesta en los detalles.",
-            examples=["exitoso"]
+            description="Estado final del procesamiento. Puede ser 'exitoso', 'fallido' o 'parcial'. Un estado fallido implica un ErrorRespuesta, un estado parcial indica omisión por regla de negocio.",
+            examples=["exitoso", "parcial"]
         )
         hash_documento: Optional[str] = Field(None, description="Hash SHA-256 del archivo físico")
         AnalisisIA: Optional["AnalisisTPV.ResultadoAnalisisIA"] = Field(None, description="Resultados extraídos de la carátula y métricas globales calculadas.")
@@ -133,4 +140,8 @@ class AnalisisTPV:
         total_depositos: Optional[float] = None # Representa lógica interna
         es_mayor_a_250: Optional[bool] = None # Representa logica interna
         resultados_generales: List["AnalisisTPV.ResultadoAnalisisIA"] # -> Representa únicamente la caratula del estado de cuenta
-        resultados_individuales: List["AnalisisTPV.ResultadoExtraccion"] # - > Representa el analisis completo (caratula + tpv)
+        resultados_individuales: List["AnalisisTPV.ResultadoExtraccion"] # - > Representa el analisis completo (caratula + tpv)        
+        documentos_omitidos: List["AnalisisTPV.DocumentoOmitido"] = Field(
+            default_factory=list, 
+            description="Lista de archivos que no completaron el análisis profundo por reglas de negocio."
+        ) # Exponemos explícitamente los omitidos en el JSON maestro

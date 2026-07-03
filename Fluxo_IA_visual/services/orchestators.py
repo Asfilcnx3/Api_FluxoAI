@@ -26,18 +26,21 @@ from ..models.responses_motor_estados import RespuestasMotorEstados
 from ..models.responses_analisisTPV import AnalisisTPV
 from ..models.responses_csf import CSF
 
-from ..core.textract_engine import extraer_documento_completo, extraer_saldo_inicial_poc
-from ..core.extractor_determinista import ExtractorDeterministaOCR
-
 from fastapi import UploadFile
 from ..core.nomiflash_engine import NomiFlashEngine
 from ..models.responses_nomiflash import NomiFlash
+from ..core.ocr_textract import MotorTextractOCR
+from ..core.config import settings
+from ..utils.helpers_texto_fluxo import ALIAS_A_BANCO_MAP
 
 from typing import Dict, Any, Tuple, Optional, Union, List
 from fastapi import UploadFile
 import logging
 import fitz
 import time
+import concurrent.futures
+import re
+from pdf2image import convert_from_path
 
 logger = logging.getLogger(__name__)
 
@@ -202,80 +205,129 @@ def procesar_ocr_worker_sync(
     
     # --- CLASE ADAPTADORA INTERNA ---
     class TransaccionAdapterOCR:
-        """Adapta la salida del POC a la estructura que requiere el clasificador."""
+        """Adapta la salida del Motor Textract a la estructura que requiere el clasificador de negocio."""
         def __init__(self, data_dict):
             self.fecha = data_dict.get("fecha", "")
             self.descripcion = data_dict.get("descripcion", "")
-            
-            # El clasificador de negocio espera 'monto', pero la POC entrega 'importe'
             self.monto = float(data_dict.get("importe", 0.0))
             
             raw_tipo = data_dict.get("tipo", "INDEFINIDO")
             self.tipo = str(raw_tipo).upper() if raw_tipo else "INDEFINIDO"
             
-            self.metodo_match = "TEXTRACT_DETERMINISTA" 
+            self.metodo_match = "TEXTRACT_ESTRUCTURADO_V2" 
             self.coords_box = None
             self.id_interno = "OCR_TX"
             self.score_confianza = 0.95 
 
     try:
-        logger.info(f"[TextractWorker] Iniciando POC Determinista para: {filename}")
+        # 1. MAPEO EXACTO DEL BANCO
+        banco_raw = str(ia_data.get("banco", "ESTANDAR")).lower().strip()
+        # Pasamos por tu diccionario de alias y normalizamos para el motor (ej. "SANTANDER")
+        banco_motor = ALIAS_A_BANCO_MAP.get(banco_raw, banco_raw).upper()
         
-        # 1. Extracción concurrente con AWS Textract
-        filas_estructuradas, textos_crudos = extraer_documento_completo(file_path)
+        logger.info(f"[TextractWorker] Iniciando Motor Textract V2 para: {filename} | Banco Mapeado: {banco_motor}")
         
-        if not filas_estructuradas:
-            raise ValueError("Textract no devolvió información útil o falló la conversión del PDF.")
+        # 2. CONVERSIÓN DE PDF A IMÁGENES
+        kwargs_poppler = {"dpi": 300}
+        if hasattr(settings, 'POPPLER_PATH') and settings.POPPLER_PATH:
+            kwargs_poppler["poppler_path"] = settings.POPPLER_PATH
             
-        # 2. Buscar el saldo inicial (Arranque)
-        saldo_arranque = extraer_saldo_inicial_poc(textos_crudos)
+        imagenes_pil = convert_from_path(file_path, **kwargs_poppler)
+        total_paginas = len(imagenes_pil)
         
-        # 2.5 Capturamos el banco de la metadata de IA para usarlo en las reglas deterministas (si está disponible)
-        banco_origen = ia_data.get("banco", "GENERICO").upper()
-        logger.info(f"[TextractWorker] Banco detectado para bifurcación: {banco_origen}")
+        # 3. INSTANCIAR MOTOR EN MODO PRODUCCIÓN (Sin caché en disco, sin logs innecesarios)
+        motor = MotorTextractOCR(debug_flags=[], banco=banco_motor, cache_dir=None)
         
-        # 3. Procesamiento y reglas deterministas (Inyectamos el banco)
-        extractor = ExtractorDeterministaOCR(banco=banco_origen)
-        transacciones_brutas = extractor.procesar_transacciones(filas_estructuradas, saldo_arranque)
-        transacciones_limpias = extractor.deduplicar_transacciones(transacciones_brutas)
-        
-        logger.info(f"[TextractWorker] Transacciones extraídas y deduplicadas: {len(transacciones_limpias)}")
-        
-        # 4. Adaptación al formato del clasificador de negocio
+        resultados_por_pagina = []
+        textos_crudos_totales = []
+        filas_estructuradas_totales = []
+
+        # Función objetivo para los hilos (Llamada a AWS + Stitching)
+        def procesar_pagina_hilo(num_pag, img):
+            aws_res = motor.fetch_aws_data(img, doc_id=filename, page_num=num_pag)
+            filas = motor.pass_1_parse_and_stitch(aws_res)
+            return num_pag, filas
+
+        # 4. EJECUCIÓN CONCURRENTE (I/O Bound - AWS API)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+            futuros = {
+                executor.submit(procesar_pagina_hilo, i + 1, img): i + 1 
+                for i, img in enumerate(imagenes_pil)
+            }
+            
+            for futuro in concurrent.futures.as_completed(futuros):
+                try:
+                    num_pag, filas = futuro.result()
+                    resultados_por_pagina.append((num_pag, filas))
+                except Exception as exc:
+                    logger.error(f"[TextractWorker] Error en página {futuros[futuro]}: {exc}")
+
+        # Ordenar resultados para no perder la secuencia matemática temporal
+        resultados_por_pagina.sort(key=lambda x: x[0])
+        for _, filas in resultados_por_pagina:
+            filas_estructuradas_totales.extend(filas)
+            for f in filas:
+                textos_crudos_totales.append(f["texto_unido"])
+                
+        # 5. RESCATE DE SALDO INICIAL
+        # Prioridad A: La IA ya lo leyó de la carátula
+        saldo_arranque = 0.0
+        try:
+            saldo_anterior_str = str(ia_data.get("saldo_anterior", "0")).replace("$", "").replace(",", "")
+            saldo_arranque = float(saldo_anterior_str)
+        except ValueError:
+            pass
+            
+        # Prioridad B: Heurística OCR de respaldo
+        if saldo_arranque == 0.0:
+            rx_saldo = re.compile(r'SALDO\s+INICIAL.*?(?P<monto>\d{1,3}(?:[,\s]\d{3})*\.\d{2})', re.IGNORECASE)
+            for txt in textos_crudos_totales:
+                match = rx_saldo.search(txt)
+                if match:
+                    saldo_arranque = float(match.group("monto").replace(',', '').replace(' ', ''))
+                    break
+
+        logger.info(f"[TextractWorker] Saldo Inicial inyectado al pipeline: ${saldo_arranque}")
+
+        # 6. PASADAS ANALÍTICAS (CPU Bound)
+        carriles_globales = motor.pass_2_detect_lanes(filas_estructuradas_totales)
+        txs_brutas = motor.pass_3_extract_transactions(filas_estructuradas_totales, carriles_globales, saldo_arranque)
+        transacciones_limpias = motor.pass_4_deduplicate(txs_brutas)
+
+        logger.info(f"[TextractWorker] {filename} -> Transacciones extraídas: {len(transacciones_limpias)}")
+
+        # 7. ADAPTACIÓN Y REGLAS DE NEGOCIO
         transacciones_objetos = [TransaccionAdapterOCR(tx) for tx in transacciones_limpias]
         
-        # 5. Clasificación de negocio (tu función existente)
-        # Aquí pasamos (1, 999) como dummy, ya que Textract analizó el documento completo
-        rango_paginas_dummy = (1, 999) 
+        # Ignoramos la página 1 simulando que el OCR procesó todo el bloque
+        rango_paginas_real = (1, total_paginas)
         resultado_dict = clasificar_transacciones_extraidas(
             ia_data_cuenta=ia_data, 
             transacciones_objetos=transacciones_objetos, 
             filename=filename, 
-            rango_paginas=rango_paginas_dummy
+            rango_paginas=rango_paginas_real
         )
         
-        # 6. Inyección de Metadata técnica (Para no romper el modelo Pydantic)
+        # 8. INYECCIÓN DE METADATA TÉCNICA
         resultado_dict["metadata_tecnica"] = [{
             "pagina": 1,
             "tiempo_ms": 0,
             "calidad_score": 1.0,
-            "metodo_predominante": "TEXTRACT_DETERMINISTA",
+            "metodo_predominante": "TEXTRACT_ESTRUCTURADO_V2",
             "bloques": len(transacciones_limpias),
             "transacciones": len(transacciones_limpias),
-            "alertas": "Procesado con motor OCR Determinista AWS"
+            "alertas": f"Procesado con Motor Textract V2 ({banco_motor})"
         }]
         
-        # 7. Creación del objeto final
+        # 9. CREACIÓN DEL OBJETO FINAL (Pydantic)
         obj_res = crear_objeto_resultado(resultado_dict) 
-        
-        # 8. Restauramos campos de trazabilidad
         obj_res.file_path_origen = file_path
         obj_res.es_digital = False
         
         return obj_res
         
     except Exception as e:
-        logger.error(f"Error Worker OCR Textract ({filename}): {e}", exc_info=True)
+        logger.error(f"Error Crítico Worker OCR Textract ({filename}): {e}", exc_info=True)
         return e
 
 def procesar_digital_worker_sync(

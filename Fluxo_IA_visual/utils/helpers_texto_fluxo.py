@@ -292,7 +292,7 @@ CONFIGURACION_BANCOS = {
         "depositos_pattern": [r"total abonos:\s*([\d,]+\.\d{2})"]
     },
     "azteca": {
-        "alias": ["banco azteca"],
+        "alias": ["app de banco azteca"],
         "rfc_pattern": [r"rfc:\s+([a-zA-ZÑ&]{3,4}\d{6}[a-zA-Z0-9]{2,3})"],
         "comisiones_pattern": [r"comisiones[\s\S]*?\$\s*([\d,]+\.\d{2})"],
         "depositos_pattern": [r"dep[oó]sitos[\s\S]*?\$\s*([\d,]+\.\d{2})"]
