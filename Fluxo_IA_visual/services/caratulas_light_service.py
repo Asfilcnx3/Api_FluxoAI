@@ -70,8 +70,17 @@ class CaratulasLightService:
         palabras_veto_nombre = ["csf", "nomi", "factura", "recibo"]
         
         if any(veto in texto_limpio for veto in palabras_veto_texto) or any(veto in nombre_limpio for veto in palabras_veto_nombre):
-            logger.info(f"[Gatekeeper] VETO APLICADO a: {nombre_archivo}")
-            return {"viable": False, "razon": "Documento vetado (Detectado como CSF, Nómina o Factura)."}
+
+            # Necesitamos una validación extra si es del banco kapital, por la abreviatura de CFDI
+            if "cfdi" in texto_limpio and "kptl mexico bank" in texto_limpio:
+                # No aplicamos veto, ya que es un estado de cuenta legítimo con CFDI.
+                logger.info(f"[Gatekeeper] Excepción Kapital: {nombre_archivo} contiene 'cfdi' pero es un estado de cuenta.")
+                pass
+            
+            # Si no es el caso especial de Kapital, aplicamos veto
+            else:
+                logger.info(f"[Gatekeeper] VETO APLICADO a: {nombre_archivo}")
+                return {"viable": False, "razon": "Documento vetado (Detectado como CSF, Nómina o Factura)."}
 
         # ==========================================================
         # 2. SISTEMA DE PUNTOS

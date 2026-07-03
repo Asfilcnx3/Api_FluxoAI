@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     POPPLER_PATH: Optional[str] = None 
     
     # File Upload Settings
-    MAX_FILE_SIZE_MB: int = 10
+    MAX_FILE_SIZE_MB: int = 20 # Límite aumentado al doble para permitir archivos más grandes, especialmente PDFs con imágenes de alta resolución.
     UPLOAD_DIR: str = "uploads"
     ALLOWED_EXTENSION: List[str] = [".pdf"]
     

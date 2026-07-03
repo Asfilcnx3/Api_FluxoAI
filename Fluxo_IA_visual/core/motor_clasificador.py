@@ -136,18 +136,29 @@ class MotorClasificador:
             desc_raw = str(getattr(tx, "descripcion", "")).lower()
             desc_norm = unicodedata.normalize('NFKD', desc_raw).encode('ASCII', 'ignore').decode('utf-8')
             desc_plana = re.sub(r'\s+', ' ', desc_norm).strip()
+            es_abono = tipo_lower in ["abono", "deposito", "depósito", "credito", "crédito"]
 
             # FILTRO ANTI-BASURA OCR
             if tipo_lower == "importe":
                 tx.categoria = "BASURA_OCR"
                 tx.razon_clasificacion = "Descarte automático: Identificado como Basura OCR / CFDI."
                 resueltas_por_python.append((idx_real, tx))
-                # USAR EL ENMASCARADO AQUÍ
                 desc_segura = self._enmascarar_pii(desc_plana[:40])
                 self._log_debug(1, f"Tx {idx_real} descartada (Basura OCR) -> {desc_segura}...")
                 continue
-            
-            es_abono = tipo_lower in ["abono", "deposito", "depósito", "credito", "crédito"]
+                
+            # ====================================================================
+            # DEFENSA ABSOLUTA DE TRASPASOS LOCALES (Antes de la IA)
+            # ====================================================================
+            if nombre_cliente and self._es_transaccion_propia(desc_plana, nombre_cliente):
+                tx.categoria = "TRASPASO_ABONO" if es_abono else "TRASPASO_CARGO"
+                tx.razon_clasificacion = "Resolución heurística: Traspaso a cuenta propia (Match de Cliente local)."
+                resueltas_por_python.append((idx_real, tx))
+                
+                desc_segura = self._enmascarar_pii(desc_plana[:40])
+                self._log_debug(2, f"Tx {idx_real} blindada como {tx.categoria} por cruce local -> {desc_segura}...")
+                continue # Saltamos la extracción de tags y la IA, ya está resuelta.
+            # ====================================================================
 
             # FASE 1: MULTI-ETIQUETADO (Scoring)
             tags_encontrados = {} # Formato: {CategoriaTag.TPV: 80, CategoriaTag.FINANCIAMIENTO: 50}
@@ -400,18 +411,15 @@ class MotorClasificador:
     # ==========================================
     def _limpiar_nombre_empresa(self, nombre: str) -> str:
         """Elimina sufijos legales, caracteres especiales y normaliza (ñ->n, acentos) para cruces limpios."""
-
         if not nombre or nombre.lower() in ["n/a", "desc.", "desconocido", ""]:
             return ""
             
         nombre_lower = nombre.lower()
         
         # 1. NORMALIZACIÓN: Quita acentos, diéresis y convierte 'ñ' en 'n'
-        # NFKD separa los caracteres de sus modificadores (ej. 'ñ' -> 'n' + '~')
-        # encode('ASCII', 'ignore') tira los modificadores porque no son ASCII
         nombre_norm = unicodedata.normalize('NFKD', nombre_lower).encode('ASCII', 'ignore').decode('utf-8')
         
-        # Lista de sufijos legales a eliminar (ya sin acentos gracias al paso anterior)
+        # Lista de sufijos legales a eliminar
         sufijos = [
             r"\bs\.a\. de c\.v\.\b", r"\bsa de cv\b", r"\bs\.a\.\b", r"\bs a\b",
             r"\bs\.a\.p\.i\. de c\.v\.\b", r"\bsapi de cv\b", r"\bsapi\b",
@@ -423,44 +431,69 @@ class MotorClasificador:
         for sufijo in sufijos:
             nombre_limpio = re.sub(sufijo, "", nombre_limpio)
             
-        # 2. Quitar puntuación extra y dejar solo un espacio entre palabras
-        nombre_limpio = re.sub(r"[^\w\s]", "", nombre_limpio)
+        # CAMBIO CLAVE: En lugar de eliminar símbolos, los cambiamos por ESPACIOS.
+        nombre_limpio = re.sub(r"[^\w\s]", " ", nombre_limpio)
         nombre_limpio = re.sub(r"\s+", " ", nombre_limpio).strip()
         
         return nombre_limpio
 
     def _es_transaccion_propia(self, descripcion: str, nombre_cliente_caratula: str) -> bool:
-        """Valida si el nombre del cliente aparece en la descripción usando coincidencia exacta y heurística."""
+        """Valida si el nombre del cliente aparece en la descripción usando búsqueda de tokens sin importar el orden."""
         nombre_limpio = self._limpiar_nombre_empresa(nombre_cliente_caratula)
         
         if len(nombre_limpio) < 4:
             return False
             
+        # 1. Limpiamos la descripción del banco
         desc_lower = descripcion.lower()
         desc_norm = unicodedata.normalize('NFKD', desc_lower).encode('ASCII', 'ignore').decode('utf-8')
-        desc_limpia = re.sub(r"[^\w\s]", "", desc_norm)
         
-        # 1. Coincidencia Exacta (Vía rápida)
-        if nombre_limpio in desc_limpia:
-            return True
-            
-        # 2. Heurística de Texto (Fuzzy Matching) para OCR ruidoso
-        palabras_desc = desc_limpia.split()
-        largo_nombre = len(nombre_limpio.split())
+        # Transformamos caracteres como '*' o '-' en espacios para evitar fusiones accidentales
+        desc_limpia_espacios = re.sub(r"[^\w\s]", " ", desc_norm)
+        desc_limpia_espacios = re.sub(r"\s+", " ", desc_limpia_espacios).strip()
         
-        if largo_nombre == 0 or len(palabras_desc) < largo_nombre:
+        # Creamos una versión 100% sin espacios para buscar dentro de bloques fusionados ("judithruizleyva")
+        desc_fusionada = desc_limpia_espacios.replace(" ", "")
+        
+        # 2. Convertimos el nombre del cliente en una Matriz (Bolsa de tokens)
+        # Filtramos palabras de 2 letras o menos (ej. "de", "la") para evitar falsos positivos
+        tokens_nombre = [palabra for palabra in nombre_limpio.split() if len(palabra) > 2]
+        
+        if not tokens_nombre:
             return False
+            
+        tokens_encontrados = 0
+        palabras_en_descripcion = desc_limpia_espacios.split()
 
-        # Ventana deslizante para comparar fragmentos
-        for i in range(len(palabras_desc) - largo_nombre + 1):
-            # Tomamos un bloque de palabras del mismo tamaño que el nombre del cliente
-            fragmento = " ".join(palabras_desc[i:i+largo_nombre])
+        # 3. Buscamos pieza por pieza (Independencia del orden)
+        for token in tokens_nombre:
+            match_encontrado = False
             
-            # Calculamos el ratio de similitud (0.0 a 1.0)
-            similitud = difflib.SequenceMatcher(None, nombre_limpio, fragmento).ratio()
+            # Intento A: Existe exactamente la palabra en la descripción (Muy rápido)
+            if re.search(rf"\b{token}\b", desc_limpia_espacios):
+                match_encontrado = True
             
-            # Si se parece en un 85% o más, lo damos por bueno
-            if similitud >= 0.85:
-                return True
+            # Intento B: Si el banco fusionó todo, buscamos el token como subcadena ("sandra" en "sandrajudith")
+            elif token in desc_fusionada:
+                match_encontrado = True
                 
-        return False
+            # Intento C: Difflib (Fuzzy Matching) para arreglar pequeños errores de OCR (ej. "RUIZ" vs "RUI2")
+            else:
+                for palabra_desc in palabras_en_descripcion:
+                    if difflib.SequenceMatcher(None, token, palabra_desc).ratio() >= 0.85:
+                        match_encontrado = True
+                        break
+            
+            if match_encontrado:
+                tokens_encontrados += 1
+
+        # 4. Cálculo final de Score (Matemáticas de coincidencia)
+        # Ratio = Palabras encontradas / Total de palabras del nombre
+        ratio_coincidencia = tokens_encontrados / len(tokens_nombre)
+        
+        # Umbral dinámico: 
+        # Si tiene 3 o más nombres/apellidos, exigimos encontrar ~65% (ej. 2 de 3, o 3 de 4)
+        # Si tiene 1 o 2 nombres, exigimos encontrarlos casi todos para no confundir homónimos.
+        umbral = 0.65 if len(tokens_nombre) >= 3 else 0.99
+        
+        return ratio_coincidencia >= umbral

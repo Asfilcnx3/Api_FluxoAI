@@ -1,4 +1,5 @@
 # models/passport.py
+
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -15,6 +16,10 @@ class MetricasTecnicas(BaseModel):
     tiempo_transcurrido_seg: float = 0.0
     tiempo_estimado_total_seg: float = 0.0 # fórmula dinámica
 
+class DocumentoOmitido(BaseModel):
+    nombre_archivo: str
+    razon: str
+
 class PassportData(BaseModel):
     job_id: str
     estado: str = "EN_COLA" # EN_COLA, PROCESANDO, TERMINADO, ERROR
@@ -30,3 +35,6 @@ class PassportData(BaseModel):
     eta_estimado: str # Hora estimada de finalización (HH:MM:SS)
     
     logs_recientes: List[str] = [] # Últimos 5 eventos para el usuario "geek"
+    
+    # Lista visible de omitidos para el frontend en tiempo real
+    documentos_omitidos: List[DocumentoOmitido] = []
